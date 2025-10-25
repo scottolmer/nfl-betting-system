@@ -1,0 +1,5 @@
+timestamp,type,game,bookmaker,team_or_player,prop_type,previous_line,current_line,movement,movement_abs
+2025-10-21T17:58:56.321159,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Tua Tagovailoa,Pass Yds,195.5,200.5,5.0,5.0
+2025-10-21T17:58:56.321188,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Tua Tagovailoa,Pass Yds,195.5,200.5,5.0,5.0
+2025-10-21T17:58:56.321198,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,215.5,210.5,-5.0,5.0
+2025-10-21T17:58:56.321205,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,215.5,210.5,-5.0,5.0

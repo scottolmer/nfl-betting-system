@@ -1,0 +1,100 @@
+============================================================
+🎯 ACTIONABLE PARLAY RECOMMENDATIONS
+============================================================
+
+
+============================================================
+📊 2-LEG PARLAYS
+============================================================
+
+**PARLAY 21** - MODERATE RISK
+Combined Confidence: 83 | EV: +24.8%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: cj stroud (Houston Texans)
+         Rush Att OVER 3.5
+         vs San Francisco 49ers | Confidence: 85
+  Leg 2: cj stroud (Houston Texans)
+         Rush Yds OVER 16.5
+         vs San Francisco 49ers | Confidence: 72
+
+  Rationale:
+    • ✅ Same-game stack: Houston Texans vs San Francisco 49ers
+    • Correlation bonus: +5 confidence
+    • Both props 72+ confidence
+
+
+**PARLAY 22** - LOW RISK
+Combined Confidence: 77 | EV: +20.2%
+Recommended Bet: 2.0 units ($20 if $10/unit)
+
+  Leg 1: justin herbert (Los Angeles Chargers)
+         Rush Att OVER 3.5
+         vs Minnesota Vikings | Confidence: 85
+  Leg 2: dallas goedert (Philadelphia Eagles)
+         Receptions OVER 4.5
+         vs New York Giants | Confidence: 70
+
+  Rationale:
+    • ✅ Uncorrelated plays from 2 games
+    • Games: Los Angeles Chargers vs Minnesota Vikings, Philadelphia Eagles vs New York Giants
+    • Reduces variance risk
+
+
+============================================================
+📊 3-LEG PARLAYS
+============================================================
+
+**PARLAY 31** - HIGH RISK
+Combined Confidence: 71 | EV: +15.8%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: josh allen (Carolina Panthers)
+         Rush Att OVER 7.5
+         vs Buffalo Bills | Confidence: 68
+  Leg 2: josh allen (Carolina Panthers)
+         Rush Att OVER 6.5
+         vs Buffalo Bills | Confidence: 68
+  Leg 3: josh allen (Carolina Panthers)
+         Rush Yds OVER 31.5
+         vs Buffalo Bills | Confidence: 64
+
+  Rationale:
+    • ✅ 3-leg same-game stack: Carolina Panthers vs Buffalo Bills
+    • Maximum correlation bonus: +5
+    • High risk, high reward
+
+
+============================================================
+📊 4-LEG PARLAYS
+============================================================
+
+**PARLAY 41** - LOW RISK
+Combined Confidence: 72 | EV: +16.5%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: justin herbert (Los Angeles Chargers)
+         Rush Att OVER 3.5
+         vs Minnesota Vikings | Confidence: 85
+  Leg 2: dallas goedert (Philadelphia Eagles)
+         Receptions OVER 4.5
+         vs New York Giants | Confidence: 70
+  Leg 3: dk metcalf (Pittsburgh Steelers)
+         Receptions OVER 4.5
+         vs Green Bay Packers | Confidence: 68
+  Leg 4: de'von achane (Atlanta Falcons)
+         Rush Att OVER 13.5
+         vs Miami Dolphins | Confidence: 68
+
+  Rationale:
+    • ✅ 4 uncorrelated plays (all different games)
+    • Maximum variance reduction
+    • Conservative 4-leg strategy
+
+============================================================
+💡 BETTING TIPS
+============================================================
+• Start with 2-leg parlays for higher hit rate
+• Same-game parlays have correlation bonus but higher variance
+• Uncorrelated parlays (different games) are safer
+• Never bet more than you can afford to lose!

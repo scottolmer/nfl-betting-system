@@ -1,0 +1,233 @@
+============================================================
+🎯 ACTIONABLE PARLAY RECOMMENDATIONS
+============================================================
+
+
+============================================================
+📊 2-LEG PARLAYS
+============================================================
+
+**PARLAY 21** - MODERATE RISK
+Combined Confidence: 77 | EV: +54.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: dak prescott (DAL)
+         player_pass_attempts OVER 35.5
+         vs DEN | Confidence: 73
+  Leg 2: aaron rodgers (PIT)
+         player_pass_attempts OVER 32.5
+         vs GB | Confidence: 73
+
+  Rationale:
+    • ✅ Diversified QB across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 22** - MODERATE RISK
+Combined Confidence: 77 | EV: +54.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: jordan love (GB)
+         player_pass_attempts OVER 31.5
+         vs PIT | Confidence: 73
+  Leg 2: joe flacco (CIN)
+         Pass TDs OVER 1.5
+         vs NYJ | Confidence: 73
+
+  Rationale:
+    • ✅ Diversified QB across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 23** - MODERATE RISK
+Combined Confidence: 77 | EV: +54.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: dak prescott (DAL)
+         Pass Completions OVER 23.5
+         vs DEN | Confidence: 73
+  Leg 2: aaron rodgers (PIT)
+         Pass Completions OVER 22.5
+         vs GB | Confidence: 73
+
+  Rationale:
+    • ✅ Diversified QB across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 3-LEG PARLAYS
+============================================================
+
+**PARLAY 31** - MODERATE RISK
+Combined Confidence: 76 | EV: +52.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: jordan love (GB)
+         Pass Completions OVER 20.5
+         vs PIT | Confidence: 73
+  Leg 2: joe flacco (CIN)
+         Pass Yds OVER 244.5
+         vs NYJ | Confidence: 73
+  Leg 3: ladd mcconkey (LAC)
+         Rec Yds OVER 56.5
+         vs MIN | Confidence: 72
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 32** - MODERATE RISK
+Combined Confidence: 76 | EV: +52.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: dak prescott (DAL)
+         Pass TDs OVER 1.5
+         vs DEN | Confidence: 73
+  Leg 2: aaron rodgers (PIT)
+         Pass TDs OVER 1.5
+         vs GB | Confidence: 73
+  Leg 3: ladd mcconkey (LAC)
+         Receptions OVER 5.5
+         vs MIN | Confidence: 72
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 33** - MODERATE RISK
+Combined Confidence: 76 | EV: +52.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: jordan love (GB)
+         Pass TDs OVER 1.5
+         vs PIT | Confidence: 73
+  Leg 2: joe flacco (CIN)
+         Pass Yds OVER 243.5
+         vs NYJ | Confidence: 73
+  Leg 3: ladd mcconkey (LAC)
+         Rec Yds OVER 58.5
+         vs MIN | Confidence: 72
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 4-LEG PARLAYS
+============================================================
+
+**PARLAY 41** - MODERATE RISK
+Combined Confidence: 72 | EV: +44.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: dak prescott (DAL)
+         Pass Yds OVER 254.5
+         vs DEN | Confidence: 73
+  Leg 2: aaron rodgers (PIT)
+         Pass Yds OVER 222.5
+         vs GB | Confidence: 73
+  Leg 3: ladd mcconkey (LAC)
+         Rec Yds OVER 55.5
+         vs MIN | Confidence: 72
+  Leg 4: keenan allen (LAC)
+         Receptions OVER 5.5
+         vs MIN | Confidence: 71
+
+  Rationale:
+    • ✅ QB/WR stack (4 legs)
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 42** - MODERATE RISK
+Combined Confidence: 72 | EV: +44.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: jordan love (GB)
+         Pass Yds OVER 240.5
+         vs PIT | Confidence: 73
+  Leg 2: joe flacco (CIN)
+         Pass Yds OVER 245.5
+         vs NYJ | Confidence: 73
+  Leg 3: ladd mcconkey (LAC)
+         Rec Yds OVER 57.5
+         vs MIN | Confidence: 72
+  Leg 4: tee higgins (CIN)
+         Rec Yds OVER 54.5
+         vs NYJ | Confidence: 71
+
+  Rationale:
+    • ✅ QB/WR stack (4 legs)
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 43** - MODERATE RISK
+Combined Confidence: 75 | EV: +50.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: dak prescott (DAL)
+         Pass Yds OVER 251.5
+         vs DEN | Confidence: 73
+  Leg 2: aaron rodgers (PIT)
+         Pass Yds OVER 218.5
+         vs GB | Confidence: 73
+  Leg 3: tee higgins (CIN)
+         Receptions OVER 4.5
+         vs NYJ | Confidence: 71
+  Leg 4: keenan allen (LAC)
+         Rec Yds OVER 51.5
+         vs MIN | Confidence: 70
+
+  Rationale:
+    • ✅ Diversified QB/WR across 4 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 5-LEG PARLAYS
+============================================================
+
+**PARLAY 51** - MODERATE RISK
+Combined Confidence: 71 | EV: +42.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: jordan love (GB)
+         Pass Yds OVER 238.5
+         vs PIT | Confidence: 73
+  Leg 2: joe flacco (CIN)
+         player_pass_attempts OVER 34.5
+         vs NYJ | Confidence: 73
+  Leg 3: tee higgins (CIN)
+         Rec Yds OVER 53.5
+         vs NYJ | Confidence: 71
+  Leg 4: keenan allen (LAC)
+         Rec Yds OVER 50.5
+         vs MIN | Confidence: 70
+  Leg 5: wan'dale robinson (NYG)
+         Rush+Rec Yds OVER 50.5
+         vs PHI | Confidence: 69
+
+  Rationale:
+    • ✅ QB/RB/WR stack (5 legs)
+    • ✅ DVOA strongly favors OVER
+    • ✅ Elite volume supports OVER
+
+============================================================
+💡 BETTING TIPS
+============================================================
+• 2-leg parlays have highest hit rate but lower payout
+• 3-leg and 4-leg balance risk/reward
+• 5-leg is high risk/high reward - consider reducing units
+• Same-game parlays have correlation bonus but higher variance
+• Uncorrelated parlays (different games) are safer
+• Position diversity reduces correlation risk
+• Never bet more than you can afford to lose!
+
+============================================================
+📊 SUMMARY
+============================================================
+Total Parlays: 10/10
+Total Units: 15.0
+At $10/unit: $150
+============================================================

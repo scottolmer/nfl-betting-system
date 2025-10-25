@@ -1,0 +1,14 @@
+# Minimal requirements for Slack bot
+flask==3.0.0
+slack-sdk==3.26.0
+python-dotenv==1.0.1
+requests==2.32.3
+
+# For Claude API
+anthropic==0.39.0
+
+# For GitHub integration (if needed)
+PyGithub==2.5.0
+
+# For data handling (lightweight)
+pandas==2.2.3

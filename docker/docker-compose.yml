@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Slack Bot - Handles interactive Slack commands
+  slack-bot:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: nfl-slack-bot
+    command: python scripts/slack_bot/app.py
+    ports:
+      - "3000:3000"
+    environment:
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
+      - SLACK_WEBHOOK=${SLACK_WEBHOOK}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
+      - PORT=3000
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ../data:/app/data
+      - ../results:/app/results
+      - ../prompts:/app/prompts
+      - ../logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - bot-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Line Monitor - Checks betting lines every hour
+  line-monitor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: nfl-line-monitor
+    command: python scripts/line_monitoring/monitor_main.py
+    environment:
+      - BETTING_API_KEY=${BETTING_API_KEY}
+      - BETTING_API_URL=${BETTING_API_URL}
+      - SLACK_WEBHOOK=${SLACK_WEBHOOK}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ../data:/app/data
+      - ../results:/app/results
+      - ../logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - bot-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  bot-network:
+    driver: bridge
