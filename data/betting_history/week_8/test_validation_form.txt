@@ -1,0 +1,446 @@
+================================================================================
+🏈 NFL BETTING VALIDATION FORM - POST-GAME RESULTS
+================================================================================
+
+PREDICTION DETAILS
+--------------------------------------------------------------------------------
+Week: 8
+Generated: 2025-10-25 09:51:01
+Total Parlays: 10
+
+
+INSTRUCTIONS FOR VALIDATION
+--------------------------------------------------------------------------------
+1. After all games in Week 8 have concluded, fill in the 'ACTUAL' column
+2. Enter 'HIT' if the prop went over the line, 'MISS' if it went under
+3. The system will automatically calculate if each leg won/lost
+4. Mark entire parlay as 'WON' only if ALL legs hit
+
+
+================================================================================
+📊 2-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 21 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE  | Confidence: 74 | Units: 1.0
+│ Expected Value: +5.2% | Potential Payout: $4.0
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/2: Tyreek Hill (WR) - MIA
+│   Bet Type: RECEPTIONS OVER 7.5 (vs NYJ)
+│   Confidence: 74%
+│
+│   PREDICTION: RECEPTIONS OVER 7.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/2: Jaylen Waddle (WR) - MIA
+│   Bet Type: RECEPTION YARDS OVER 95.5 (vs NYJ)
+│   Confidence: 74%
+│
+│   PREDICTION: RECEPTION YARDS OVER 95.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 22 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE  | Confidence: 74 | Units: 1.0
+│ Expected Value: +5.2% | Potential Payout: $4.0
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/2: Justin Jefferson (WR) - MIN
+│   Bet Type: RECEPTION YARDS OVER 98.5 (vs DET)
+│   Confidence: 74%
+│
+│   PREDICTION: RECEPTION YARDS OVER 98.5
+│   ACTUAL RESULT: MISS
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/2: CeeDee Lamb (WR) - DAL
+│   Bet Type: RECEPTIONS OVER 8.5 (vs PHI)
+│   Confidence: 74%
+│
+│   PREDICTION: RECEPTIONS OVER 8.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 23 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE  | Confidence: 74 | Units: 1.0
+│ Expected Value: +5.2% | Potential Payout: $4.0
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/2: Travis Kelce (TE) - KC
+│   Bet Type: RECEPTIONS OVER 6.5 (vs LV)
+│   Confidence: 74%
+│
+│   PREDICTION: RECEPTIONS OVER 6.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/2: Mark Andrews (TE) - BAL
+│   Bet Type: RECEPTION YARDS OVER 72.5 (vs BUF)
+│   Confidence: 74%
+│
+│   PREDICTION: RECEPTION YARDS OVER 72.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 3-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 31 ─────────────────────────────────────────────────────┐
+│ Risk Level: HIGH  | Confidence: 73 | Units: 0.8
+│ Expected Value: +4.1% | Potential Payout: $6.4
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/3: Derrick Henry (RB) - TEN
+│   Bet Type: RUSH YARDS OVER 87.5 (vs IND)
+│   Confidence: 73%
+│
+│   PREDICTION: RUSH YARDS OVER 87.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/3: Josh Jacobs (RB) - LV
+│   Bet Type: RUSH YARDS OVER 78.5 (vs KC)
+│   Confidence: 73%
+│
+│   PREDICTION: RUSH YARDS OVER 78.5
+│   ACTUAL RESULT: MISS
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/3: A.J. Brown (WR) - PHI
+│   Bet Type: RECEPTION YARDS OVER 87.5 (vs DAL)
+│   Confidence: 71%
+│
+│   PREDICTION: RECEPTION YARDS OVER 87.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 32 ─────────────────────────────────────────────────────┐
+│ Risk Level: HIGH  | Confidence: 68 | Units: 0.8
+│ Expected Value: +3.8% | Potential Payout: $6.4
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/3: Tony Pollard (RB) - DAL
+│   Bet Type: RUSH YARDS OVER 72.5 (vs PHI)
+│   Confidence: 68%
+│
+│   PREDICTION: RUSH YARDS OVER 72.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/3: Stefon Diggs (WR) - BUF
+│   Bet Type: RECEPTION YARDS OVER 91.5 (vs BAL)
+│   Confidence: 68%
+│
+│   PREDICTION: RECEPTION YARDS OVER 91.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/3: Kyle Pitts (TE) - ATL
+│   Bet Type: RECEPTIONS OVER 5.5 (vs NO)
+│   Confidence: 67%
+│
+│   PREDICTION: RECEPTIONS OVER 5.5
+│   ACTUAL RESULT: MISS
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 33 ─────────────────────────────────────────────────────┐
+│ Risk Level: HIGH  | Confidence: 68 | Units: 0.8
+│ Expected Value: +3.8% | Potential Payout: $6.4
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/3: Patrick Mahomes (QB) - KC
+│   Bet Type: PASS YARDS OVER 287.5 (vs LV)
+│   Confidence: 68%
+│
+│   PREDICTION: PASS YARDS OVER 287.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/3: Amon-Ra St. Brown (WR) - DET
+│   Bet Type: RECEPTIONS OVER 7.5 (vs MIN)
+│   Confidence: 68%
+│
+│   PREDICTION: RECEPTIONS OVER 7.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/3: DeAndre Washington (RB) - SEA
+│   Bet Type: RECEPTION YARDS OVER 34.5 (vs SF)
+│   Confidence: 66%
+│
+│   PREDICTION: RECEPTION YARDS OVER 34.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 4-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 41 ─────────────────────────────────────────────────────┐
+│ Risk Level: HIGH  | Confidence: 71 | Units: 0.7
+│ Expected Value: +3.2% | Potential Payout: $11.2
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/4: Lamar Jackson (QB) - BAL
+│   Bet Type: PASS YARDS OVER 276.5 (vs BUF)
+│   Confidence: 71%
+│
+│   PREDICTION: PASS YARDS OVER 276.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/4: Saquon Barkley (RB) - PHI
+│   Bet Type: RUSH YARDS OVER 98.5 (vs DAL)
+│   Confidence: 70%
+│
+│   PREDICTION: RUSH YARDS OVER 98.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/4: Puka Nacua (WR) - LAR
+│   Bet Type: RECEPTION YARDS OVER 76.5 (vs TB)
+│   Confidence: 70%
+│
+│   PREDICTION: RECEPTION YARDS OVER 76.5
+│   ACTUAL RESULT: MISS
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/4: George Kittle (TE) - SF
+│   Bet Type: RECEPTIONS OVER 4.5 (vs SEA)
+│   Confidence: 69%
+│
+│   PREDICTION: RECEPTIONS OVER 4.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 42 ─────────────────────────────────────────────────────┐
+│ Risk Level: HIGH  | Confidence: 66 | Units: 0.7
+│ Expected Value: +2.9% | Potential Payout: $11.2
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/4: Josh Allen (QB) - BUF
+│   Bet Type: PASS YARDS OVER 298.5 (vs BAL)
+│   Confidence: 66%
+│
+│   PREDICTION: PASS YARDS OVER 298.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/4: David Montgomery (RB) - CHI
+│   Bet Type: RUSH YARDS OVER 68.5 (vs GB)
+│   Confidence: 65%
+│
+│   PREDICTION: RUSH YARDS OVER 68.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/4: Michael Pittman Jr. (WR) - IND
+│   Bet Type: RECEPTION YARDS OVER 71.5 (vs TEN)
+│   Confidence: 65%
+│
+│   PREDICTION: RECEPTION YARDS OVER 71.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/4: Darren Waller (TE) - NYG
+│   Bet Type: RECEPTIONS OVER 3.5 (vs WAS)
+│   Confidence: 64%
+│
+│   PREDICTION: RECEPTIONS OVER 3.5
+│   ACTUAL RESULT: MISS
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 43 ─────────────────────────────────────────────────────┐
+│ Risk Level: HIGH  | Confidence: 66 | Units: 0.7
+│ Expected Value: +2.9% | Potential Payout: $11.2
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/4: Jalen Hurts (QB) - PHI
+│   Bet Type: PASS YARDS OVER 295.5 (vs DAL)
+│   Confidence: 66%
+│
+│   PREDICTION: PASS YARDS OVER 295.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/4: Christian McCaffrey (RB) - SF
+│   Bet Type: RUSH YARDS OVER 92.5 (vs SEA)
+│   Confidence: 66%
+│
+│   PREDICTION: RUSH YARDS OVER 92.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/4: Brandon Aiyuk (WR) - SF
+│   Bet Type: RECEPTION YARDS OVER 65.5 (vs SEA)
+│   Confidence: 65%
+│
+│   PREDICTION: RECEPTION YARDS OVER 65.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/4: Dallas Goedert (TE) - PHI
+│   Bet Type: RECEPTIONS OVER 5.5 (vs DAL)
+│   Confidence: 64%
+│
+│   PREDICTION: RECEPTIONS OVER 5.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 5-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 51 ─────────────────────────────────────────────────────┐
+│ Risk Level: VERY HIGH  | Confidence: 66 | Units: 0.5
+│ Expected Value: +2.3% | Potential Payout: $16.0
+├─────────────────────────────────────────────────────────────────┤
+│ Leg 1/5: Tee Higgins (WR) - CIN
+│   Bet Type: RECEPTION YARDS OVER 81.5 (vs BAL)
+│   Confidence: 66%
+│
+│   PREDICTION: RECEPTION YARDS OVER 81.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/5: Ken Walker III (RB) - SEA
+│   Bet Type: RUSH YARDS OVER 68.5 (vs SF)
+│   Confidence: 65%
+│
+│   PREDICTION: RUSH YARDS OVER 68.5
+│   ACTUAL RESULT: MISS
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/5: Cooper Kupp (WR) - LAR
+│   Bet Type: RECEPTIONS OVER 6.5 (vs TB)
+│   Confidence: 65%
+│
+│   PREDICTION: RECEPTIONS OVER 6.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/5: Evan Engram (TE) - JAX
+│   Bet Type: RECEPTION YARDS OVER 51.5 (vs NYJ)
+│   Confidence: 64%
+│
+│   PREDICTION: RECEPTION YARDS OVER 51.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 5/5: Darius Slayton (WR) - NYG
+│   Bet Type: RECEPTION YARDS OVER 58.5 (vs WAS)
+│   Confidence: 62%
+│
+│   PREDICTION: RECEPTION YARDS OVER 58.5
+│   ACTUAL RESULT: HIT
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 VALIDATION SUMMARY
+================================================================================
+
+OVERALL RESULTS
+--------------------------------------------------------------------------------
+Total Recommended Units: 6.1
+At $10/unit: $61
+At $25/unit: $152
+
+RESULTS TO FILL IN:
+--------------------------------------------------------------------------------
+Total Parlays Placed: _____ / 10
+Parlays Won: _____
+Parlays Lost: _____
+Win Rate: ____% (Parlays Won / Parlays Placed)
+
+Total Units Wagered: _____ (should equal 6.1)
+Total Units Won: _____
+Total Units Lost: _____
+Net Profit/Loss: _____ units
+ROI: ____% (Net Profit / Units Wagered * 100)
+
+
+================================================================================
+📈 CALIBRATION NOTES
+================================================================================
+Use this section to track system performance and identify improvements:
+
+Which parlays performed better? (2-leg, 3-leg, 4-leg, 5-leg)
+________________________________________________________________________________
+
+Which positions/players underperformed?
+________________________________________________________________________________
+
+Any external factors that affected results? (injuries, weather, etc.)
+________________________________________________________________________________
+
+Confidence estimates accuracy (were high-confidence props more reliable?)
+________________________________________________________________________________
+
+Overall system assessment for Week 8:
+________________________________________________________________________________
+
+================================================================================

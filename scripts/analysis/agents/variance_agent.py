@@ -10,7 +10,7 @@ class VarianceAgent(BaseAgent):
     """Evaluates prop type reliability"""
     
     def __init__(self):
-        super().__init__(weight=0.8)
+        super().__init__(weight=1.5)
     
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []
@@ -19,7 +19,21 @@ class VarianceAgent(BaseAgent):
         stat_type = prop.stat_type
         position = prop.position
         
-        if position in ['WR', 'TE']:
+        if position == 'QB':
+            if 'Pass Yds' in stat_type:
+                score += 12
+                rationale.append("✓✓ Pass yards: high reliability")
+            elif 'Pass Attempts' in stat_type:
+                score += 10
+                rationale.append("✓✓ Pass attempts: high reliability")
+            elif 'Pass Completions' in stat_type:
+                score += 8
+                rationale.append("✓ Pass completions: good reliability")
+            elif 'TD' in stat_type:
+                score -= 8
+                rationale.append("⚠️ Passing TD: moderate variance")
+        
+        elif position in ['WR', 'TE']:
             if 'Rec Yds' in stat_type:
                 score += 5
                 rationale.append("✓ Receiving yards: moderate reliability")

@@ -4,7 +4,7 @@ sys.path.insert(0, '.')
 from scripts.analysis.data_loader import NFLDataLoader
 from scripts.analysis.stats_aggregator_FIXED import aggregate_historical_stats
 from scripts.analysis.orchestrator import PropAnalyzer
-from scripts.run_analysis_FIXED import transform_betting_lines_to_props
+
 
 print("Loading data...")
 loader = NFLDataLoader('data')
@@ -24,7 +24,7 @@ for player in test_players:
         print(f"    {context['usage'][player]}")
         break
 
-context['props'] = transform_betting_lines_to_props(context['betting_lines'], 8)
+
 
 print("\nAnalyzing prop...")
 analyzer = PropAnalyzer()

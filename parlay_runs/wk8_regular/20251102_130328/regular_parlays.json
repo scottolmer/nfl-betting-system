@@ -1,0 +1,365 @@
+{
+  "timestamp": "20251102_130328",
+  "week": 8,
+  "total_props_analyzed": 553,
+  "parlays": [
+    {
+      "type": "2-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "devonta smith",
+          "team": "PHI",
+          "opponent": "NYG",
+          "stat_type": "Receptions",
+          "line": 5.5,
+          "position": "WR",
+          "confidence": 75
+        },
+        {
+          "player_name": "ja'marr chase",
+          "team": "CIN",
+          "opponent": "NYJ",
+          "stat_type": "Receptions",
+          "line": 7.5,
+          "position": "WR",
+          "confidence": 75
+        }
+      ]
+    },
+    {
+      "type": "2-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 203.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "wan'dale robinson",
+          "team": "NYG",
+          "opponent": "PHI",
+          "stat_type": "Receptions",
+          "line": 5.5,
+          "position": "WR",
+          "confidence": 75
+        }
+      ]
+    },
+    {
+      "type": "2-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "tucker kraft",
+          "team": "GB",
+          "opponent": "PIT",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "position": "WR",
+          "confidence": 75
+        },
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 204.5,
+          "position": "QB",
+          "confidence": 75
+        }
+      ]
+    },
+    {
+      "type": "3-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "wan'dale robinson",
+          "team": "NYG",
+          "opponent": "PHI",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "position": "WR",
+          "confidence": 75
+        },
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 200.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "zay flowers",
+          "team": "BAL",
+          "opponent": "CHI",
+          "stat_type": "Receptions",
+          "line": 5.5,
+          "position": "WR",
+          "confidence": 74
+        }
+      ]
+    },
+    {
+      "type": "3-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 205.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "daniel jones",
+          "team": "IND",
+          "opponent": "TEN",
+          "stat_type": "Pass Yds",
+          "line": 240.5,
+          "position": "QB",
+          "confidence": 74
+        },
+        {
+          "player_name": "malik washington",
+          "team": "MIA",
+          "opponent": "ATL",
+          "stat_type": "Receptions",
+          "line": 3.5,
+          "position": "WR",
+          "confidence": 74
+        }
+      ]
+    },
+    {
+      "type": "3-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 206.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "zay flowers",
+          "team": "BAL",
+          "opponent": "CHI",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "daniel jones",
+          "team": "IND",
+          "opponent": "TEN",
+          "stat_type": "Pass Yds",
+          "line": 229.5,
+          "position": "QB",
+          "confidence": 74
+        }
+      ]
+    },
+    {
+      "type": "4-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 207.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "devonta smith",
+          "team": "PHI",
+          "opponent": "NYG",
+          "stat_type": "Rec Yds",
+          "line": 72.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "ja'marr chase",
+          "team": "CIN",
+          "opponent": "NYJ",
+          "stat_type": "Rec Yds",
+          "line": 87.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "daniel jones",
+          "team": "IND",
+          "opponent": "TEN",
+          "stat_type": "Pass Yds",
+          "line": 235.5,
+          "position": "QB",
+          "confidence": 74
+        }
+      ]
+    },
+    {
+      "type": "4-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "malik washington",
+          "team": "MIA",
+          "opponent": "ATL",
+          "stat_type": "Receptions",
+          "line": 2.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "tucker kraft",
+          "team": "GB",
+          "opponent": "PIT",
+          "stat_type": "Rec Yds",
+          "line": 52.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "daniel jones",
+          "team": "IND",
+          "opponent": "TEN",
+          "stat_type": "Pass Yds",
+          "line": 237.5,
+          "position": "QB",
+          "confidence": 74
+        },
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Completions",
+          "line": 21.5,
+          "position": "QB",
+          "confidence": 74
+        }
+      ]
+    },
+    {
+      "type": "4-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "devonta smith",
+          "team": "PHI",
+          "opponent": "NYG",
+          "stat_type": "Rec Yds",
+          "line": 76.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "ja'marr chase",
+          "team": "CIN",
+          "opponent": "NYJ",
+          "stat_type": "Rec Yds",
+          "line": 86.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "cj stroud",
+          "team": "HOU",
+          "opponent": "SF",
+          "stat_type": "Pass Completions",
+          "line": 20.5,
+          "position": "QB",
+          "confidence": 74
+        },
+        {
+          "player_name": "tyrod taylor",
+          "team": "NYJ",
+          "opponent": "CIN",
+          "stat_type": "Pass Yds",
+          "line": 173.5,
+          "position": "QB",
+          "confidence": 73
+        }
+      ]
+    },
+    {
+      "type": "5-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "wan'dale robinson",
+          "team": "NYG",
+          "opponent": "PHI",
+          "stat_type": "Rec Yds",
+          "line": 50.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "tucker kraft",
+          "team": "GB",
+          "opponent": "PIT",
+          "stat_type": "Rec Yds",
+          "line": 53.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "tyrod taylor",
+          "team": "NYJ",
+          "opponent": "CIN",
+          "stat_type": "Pass Yds",
+          "line": 176.5,
+          "position": "QB",
+          "confidence": 73
+        },
+        {
+          "player_name": "daniel jones",
+          "team": "IND",
+          "opponent": "TEN",
+          "stat_type": "Pass Completions",
+          "line": 21.5,
+          "position": "QB",
+          "confidence": 73
+        },
+        {
+          "player_name": "devonta smith",
+          "team": "PHI",
+          "opponent": "NYG",
+          "stat_type": "Rush+Rec Yds",
+          "line": 76.5,
+          "position": "RB",
+          "confidence": 71
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,694 @@
+#!/usr/bin/env python
+"""NFL Betting Prop Analyzer - CLI with optimized parlay generation"""
+
+import sys
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
+
+project_root = Path.cwd()
+sys.path.insert(0, str(project_root))
+
+from scripts.api.claude_query_handler import ClaudeQueryHandler
+from scripts.analysis.orchestrator import PropAnalyzer
+from scripts.analysis.data_loader import NFLDataLoader
+from scripts.analysis.parlay_builder import ParlayBuilder
+from scripts.analysis.parlay_optimizer import ParlayOptimizer
+from scripts.analysis.dependency_analyzer import DependencyAnalyzer
+from scripts.analysis.performance_tracker import PerformanceTracker
+from scripts.analysis.kelly_optimizer import KellyOptimizer, format_kelly_report
+from scripts.analysis.position_size_optimizer import PositionSizeOptimizer
+from scripts.analysis.odds_integration import OddsIntegrator, integrate_odds_with_analysis
+from scripts.utils.parlay_gui import show_parlays_gui
+import logging
+
+logging.basicConfig(level=logging.WARNING)
+
+class BettingAnalyzerCLI:
+    def __init__(self):
+        self.handler = ClaudeQueryHandler()
+        self.analyzer = PropAnalyzer()
+        self.loader = NFLDataLoader(data_dir=str(project_root / "data"))
+        self.parlay_builder = ParlayBuilder()
+        self.tracker = PerformanceTracker(db_path=str(project_root / "bets.db"))
+        self.odds_integrator = OddsIntegrator(data_dir=str(project_root / "data"))
+        self.week = 9
+        self.last_parlays = []
+        self.last_parlay_ids = []  # Store parlay IDs for reference
+        self.bankroll = 1000
+    
+    def print_header(self):
+        print("\n" + "="*70)
+        print("🏈 NFL BETTING SYSTEM - COMPLETE ANALYSIS")
+        print("="*70)
+        print("\nCommands:")
+        print("  pull-lines               - Refresh DraftKings betting lines")
+        print("  analyze <query>          - Analyze prop (e.g., 'Love 250 pass yards')")
+        print("  parlays [conf]           - Generate standard parlays (default: 58)")
+        print("  opt-parlays [quality]    - Generate optimized low-correlation parlays")
+        print("  top-props [count]        - Show top N props by confidence (default: 20)")
+        print("  week <number>            - Change week (1-18)")
+        print("\n  💰 BANKROLL & SIZING:")
+        print("  bankroll <amount>        - Set betting bankroll (e.g., 'bankroll 5000')")
+        print("  kelly [bankroll]         - Calculate Kelly sizing for last parlays")
+        print("\n  🏥 INJURY DIAGNOSTICS:")
+        print("  injury-diagnostic [player] - Show injury system status (or specific player)")
+        print("\n  📊 TRACKING COMMANDS:")
+        print("  log-parlay <index>       - Mark parlay N as one you're betting on")
+        print("  log-result <id> <hits>   - Log results (e.g., 'log-result parlay_001 2/3')")
+        print("  calibrate [week]         - Show calibration report (all weeks or specific)")
+        print("  recent [limit]           - Show recent logged parlays (default: 10)")
+        print("  summary <week>           - Show week summary stats")
+        print("\n  help                     - Show this message")
+        print("  exit/quit                - Exit")
+        print("="*70 + "\n")
+    
+    def print_command_syntax(self):
+        """Print command syntax reminder"""
+        print("\n" + "="*70)
+        print("📋 COMMAND SYNTAX REFERENCE")
+        print("="*70)
+        print("  analyze <query>        | Example: analyze Mahomes 250 pass yards NYG")
+        print("  top-props [count]      | Example: top-props 20 (default: 20)")
+        print("  parlays [confidence]   | Example: parlays 65 (default: 65)")
+        print("  opt-parlays [quality]  | Example: opt-parlays 75 (default: 65)")
+        print("  week <number>          | Example: week 10")
+        print("  bankroll <amount>      | Example: bankroll 5000")
+        print("  kelly [bankroll]       | Example: kelly 3000 (uses stored if not provided)")
+        print("  log-parlay <index>     | Example: log-parlay 0 (mark parlay as bet)")
+        print("  log-result <id> <hits> | Example: log-result parlay_001 3/3")
+        print("  calibrate [week]       | Example: calibrate 9 (or calibrate for all)")
+        print("="*70 + "\n")
+    
+    def pull_lines(self):
+        """Refresh DraftKings betting lines"""
+        print(f"\n📡 Refreshing DraftKings betting lines for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        enriched_props, odds_source = integrate_odds_with_analysis(
+            context.get('props', []),
+            week=self.week,
+            data_dir=str(project_root / "data")
+        )
+        print(f"✅ Loaded {len(enriched_props)} DraftKings lines ({odds_source})\n")
+    
+    def analyze_prop(self, query):
+        """Analyze a betting prop"""
+        if not query:
+            print("❌ Please provide a query\n")
+            return
+        
+        print(f"\n🔄 Analyzing: {query}")
+        print("Optional - Enter weather (temp/wind/conditions) or press Enter to skip:")
+        weather_input = input("Weather: ").strip()
+        
+        weather = None
+        if weather_input:
+            weather = {'conditions': weather_input}
+        
+        print()
+        response = self.handler.query(query, week=self.week, weather=weather)
+        print(response)
+    
+    def show_top_props(self, count_str="20"):
+        """Show top props by confidence score - includes OVER and UNDER"""
+        try:
+            count = int(count_str)
+        except ValueError:
+            count = 20
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        print(f"📊 Analyzing props (OVER + UNDER)...")
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        
+        all_analyses.sort(key=lambda x: x.final_confidence, reverse=True)
+        top_props = all_analyses[:count]
+        
+        over_count = sum(1 for p in top_props if getattr(p.prop, 'bet_type', 'OVER') == 'OVER')
+        under_count = sum(1 for p in top_props if getattr(p.prop, 'bet_type', 'OVER') == 'UNDER')
+        
+        print(f"\n🔥 TOP {len(top_props)} PROPS BY CONFIDENCE - WEEK {self.week}")
+        print(f"   ({over_count} OVER | {under_count} UNDER)")
+        print("="*70)
+        print("")
+        
+        for i, analysis in enumerate(top_props, 1):
+            prop = analysis.prop
+            conf = analysis.final_confidence
+            
+            if conf >= 80:
+                emoji = "🔥"
+            elif conf >= 75:
+                emoji = "⭐"
+            elif conf >= 70:
+                emoji = "✅"
+            elif conf >= 65:
+                emoji = "📊"
+            else:
+                emoji = "📈"
+            
+            bet_type = getattr(prop, 'bet_type', 'OVER')
+            print(f"{emoji} {i:2d}. {prop.player_name:20s} ({prop.team:3s}) vs {prop.opponent:3s}")
+            print(f"     {prop.stat_type:15s} {bet_type} {prop.line:6.1f} | Confidence: {conf:5.1f}%")
+            print()
+        
+        print("="*70)
+        print(f"\n💡 Use any of these players to build your parlay!")
+        print(f"   Example: analyze Mahomes 250 pass yards\n")
+    
+    def generate_parlays(self, min_conf_str="58"):
+        """Generate standard parlay combinations"""
+        try:
+            min_conf = int(min_conf_str)
+        except ValueError:
+            min_conf = 58
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        props_list = context.get('props', [])
+        betting_source = context.get('betting_lines_source', 'UNKNOWN')
+        print(f"📊 Analyzing {len(props_list)} props...")
+        all_analyses = []
+        confidence_distribution = {'0-20': 0, '20-40': 0, '40-50': 0, '50-60': 0, '60-70': 0, '70-80': 0, '80+': 0}
+        
+        for i, prop in enumerate(props_list, 1):
+            if i % 100 == 0:
+                print(f"   Progress: {i}/{len(props_list)}")
+            
+            try:
+                analysis = self.analyzer.analyze_prop(prop, context)
+                if analysis:
+                    all_analyses.append(analysis)
+                    conf = analysis.final_confidence
+                    if conf >= 80: confidence_distribution['80+'] += 1
+                    elif conf >= 70: confidence_distribution['70-80'] += 1
+                    elif conf >= 60: confidence_distribution['60-70'] += 1
+                    elif conf >= 50: confidence_distribution['50-60'] += 1
+                    elif conf >= 40: confidence_distribution['40-50'] += 1
+                    elif conf >= 20: confidence_distribution['20-40'] += 1
+                    else: confidence_distribution['0-20'] += 1
+            except Exception:
+                pass
+        
+        print(f"✅ Analyzed {len(all_analyses)} props")
+        print(f"📊 Confidence Distribution:")
+        for range_label, count in confidence_distribution.items():
+            pct = (count / len(props_list) * 100) if props_list else 0
+            print(f"   {range_label}: {count} props ({pct:.1f}%)")
+        
+        parlays = self.parlay_builder.build_parlays(all_analyses, min_confidence=min_conf)
+        output = self.parlay_builder.format_parlays_for_betting(parlays, betting_source=betting_source)
+        print(output)
+        
+        self.last_parlays = parlays
+        print(f"\n💡 Tip: Use 'log-parlay 0' to log the first parlay, 'log-parlay 1' for second, etc.")
+        print(f"💰 Tip: Use 'kelly' to calculate optimal sizing\n")
+        
+        try:
+            print("\n📊 Opening parlay display window...")
+            show_parlays_gui(parlays, optimized=False, week=self.week)
+        except Exception as e:
+            print(f"⚠️ GUI not available: {e}")
+            print("✓ Parlays displayed in terminal above\n")
+    
+    def generate_optimized_parlays(self, quality_str=None):
+        """Generate optimized low-correlation parlays with dependency analysis"""
+        api_key = os.environ.get('ANTHROPIC_API_KEY')
+        if not api_key:
+            print("❌ ERROR: ANTHROPIC_API_KEY not set in .env\n")
+            return
+        
+        quality_threshold = None
+        if quality_str:
+            try:
+                quality_threshold = int(quality_str)
+            except ValueError:
+                quality_threshold = 65
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        props_list = context.get('props', [])
+        print(f"📊 Analyzing {len(props_list)} props...")
+        
+        all_analyses = []
+        for i, prop in enumerate(props_list, 1):
+            if i % 100 == 0:
+                print(f"   Progress: {i}/{len(props_list)}")
+            try:
+                analysis = self.analyzer.analyze_prop(prop, context)
+                if analysis and analysis.final_confidence >= 50:
+                    all_analyses.append(analysis)
+            except Exception:
+                pass
+        
+        print(f"✅ Analyzed {len(all_analyses)} high-confidence props")
+        
+        print("\n" + "="*70)
+        print("🔄 REBUILDING PARLAYS - LOW CORRELATION OPTIMIZATION")
+        print("="*70)
+        
+        optimizer = ParlayOptimizer(api_key=api_key)
+        optimized_parlays = optimizer.rebuild_parlays_low_correlation(
+            all_analyses,
+            target_parlays=10,
+            min_confidence=50,
+            max_player_exposure=0.30
+        )
+        
+        print("\n🔍 Validating dependencies...\n")
+        dep_analyzer = DependencyAnalyzer(api_key=api_key)
+        
+        best = []
+        for ptype in ['2-leg', '3-leg', '4-leg', '5-leg']:
+            for parlay in optimized_parlays.get(ptype, []):
+                analysis = dep_analyzer.analyze_parlay_dependencies(parlay)
+                rec = analysis.get('recommendation')
+                adj_conf = analysis.get('adjusted_confidence')
+                
+                if quality_threshold and adj_conf < quality_threshold:
+                    continue
+                
+                if rec != "AVOID":
+                    best.append({
+                        'parlay': parlay,
+                        'adjusted_confidence': adj_conf,
+                        'recommendation': rec,
+                        'adjustment': analysis.get('correlation_adjustment', {}).get('adjustment_value', 0)
+                    })
+        
+        best.sort(key=lambda x: x['adjusted_confidence'], reverse=True)
+        
+        output = optimizer.format_best_parlays(best)
+        print(output)
+        
+        if quality_threshold:
+            print(f"\n📊 Quality filtered to {quality_threshold}%+ confidence")
+        
+        # Calculate exposure-adjusted position sizing
+        print("\n" + "="*70)
+        print("💰 CALCULATING EXPOSURE-ADJUSTED POSITION SIZING")
+        print("="*70)
+        position_optimizer = PositionSizeOptimizer(bankroll=self.bankroll, base_kelly_fraction=0.5)
+        sized_parlays = position_optimizer.calculate_exposure_adjusted_sizing(
+            best, 
+            total_allocation=0.10
+        )
+        sizing_report = position_optimizer.format_sizing_report(sized_parlays)
+        print(sizing_report)
+        
+        # AUTO-LOG: Automatically log all generated parlays and store IDs
+        print("\n" + "="*70)
+        print("📝 AUTO-LOGGING PARLAYS")
+        print("="*70 + "\n")
+        
+        parlay_ids = []
+        for i, parlay_item in enumerate(sized_parlays):
+            confidence = parlay_item.get('adjusted_confidence', parlay_item.get('confidence', 70))
+            
+            if isinstance(parlay_item, dict) and 'parlay' in parlay_item:
+                parlay_obj = parlay_item['parlay']
+            else:
+                parlay_obj = parlay_item
+            
+            parlay_data = {
+                'confidence': confidence,
+                'odds': -110,
+                'agent_scores': {},
+                'legs': []
+            }
+            
+            if hasattr(parlay_obj, 'legs'):
+                for leg in parlay_obj.legs:
+                    if hasattr(leg, 'prop'):
+                        prop = leg.prop
+                        parlay_data['legs'].append({
+                            'player': prop.player_name,
+                            'team': prop.team,
+                            'prop_type': prop.stat_type,
+                            'bet_type': getattr(prop, 'bet_type', 'OVER'),
+                            'line': prop.line,
+                            'agent_scores': {}
+                        })
+            
+            if parlay_data['legs']:
+                parlay_id = self.tracker.log_parlay(parlay_data, self.week, "generated")
+                if parlay_id:
+                    parlay_ids.append(parlay_id)
+                    print(f"✅ Parlay {i+1} logged! ID: {parlay_id}")
+            else:
+                parlay_ids.append(None)
+        
+        self.last_parlays = sized_parlays
+        self.last_parlay_ids = parlay_ids
+        
+        print(f"\n" + "="*70)
+        print("💾 PARLAY REFERENCE IDs (copy these to track results)")
+        print("="*70)
+        for i, pid in enumerate(parlay_ids):
+            if pid:
+                print(f"Parlay {i+1}: {pid}")
+        print("="*70)
+        
+        print(f"\n💡 Tip: Copy the IDs above to track results later")
+        print(f"💡 Tip: Use 'log-result <ID> X/Y' to record if you bet on it\n")
+        
+        try:
+            print("\n📊 Opening optimized parlay display window...")
+            gui_parlays = {}
+            for item in best:
+                parlay = item['parlay']
+                ptype = f"{len(parlay.legs)}-leg"
+                if ptype not in gui_parlays:
+                    gui_parlays[ptype] = []
+                gui_parlays[ptype].append(parlay)
+            show_parlays_gui(gui_parlays, optimized=True, week=self.week)
+        except Exception as e:
+            print(f"⚠️ GUI not available: {e}")
+            print("✓ Parlays displayed in terminal above\n")
+    
+    def change_week(self, week_str):
+        """Change the NFL week"""
+        try:
+            week = int(week_str)
+            if 1 <= week <= 18:
+                self.week = week
+                print(f"✅ Week set to {week}\n")
+            else:
+                print("❌ Week must be between 1-18\n")
+        except ValueError:
+            print("❌ Invalid week number\n")
+    
+    def log_parlay_command(self, index_str):
+        """Mark a parlay as one you're betting on (for tracking purposes)"""
+        try:
+            index = int(index_str)
+            if index < 0 or index >= len(self.last_parlay_ids):
+                print(f"❌ Parlay index {index} not found. Generated {len(self.last_parlay_ids)} parlays.\n")
+                return
+            
+            parlay_id = self.last_parlay_ids[index]
+            if not parlay_id:
+                print(f"❌ Parlay {index+1} has no ID.\n")
+                return
+            
+            print(f"\n✅ Parlay {index+1} marked as bet")
+            print(f"   ID: {parlay_id}")
+            print(f"   After games complete, log results with:")
+            print(f"   log-result {parlay_id} X/Y (e.g., 2/3 if 2 legs hit)\n")
+        
+        except Exception as e:
+            import traceback
+            print(f"❌ Error: {e}\n")
+            traceback.print_exc()
+    
+    def log_results_command(self, arg_str):
+        """Log results for a parlay"""
+        try:
+            parts = arg_str.split()
+            if len(parts) < 2:
+                print("❌ Usage: log-result <parlay_id> <hits>/<total>\n")
+                print("   Example: log-result parlay_1730000000 3/3\n")
+                return
+            
+            parlay_id = parts[0]
+            hits_str = parts[1]
+            
+            if '/' not in hits_str:
+                print("❌ Format results as 'hits/total' (e.g., 2/3)\n")
+                return
+            
+            hits, total = map(int, hits_str.split('/'))
+            
+            leg_results = {}
+            for i in range(total):
+                leg_results[f'leg_{i}'] = i < hits
+            
+            self.tracker.log_results(parlay_id, leg_results)
+            print(f"✅ Results logged!\n")
+        
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
+    
+    def calibrate_command(self, week_str=""):
+        """Show calibration report"""
+        try:
+            week = None
+            if week_str:
+                week = int(week_str)
+            
+            self.tracker.calibration_report(week=week)
+        except ValueError:
+            print("❌ Invalid week number\n")
+    
+    def recent_command(self, limit_str="10"):
+        """Show recent parlays"""
+        try:
+            limit = int(limit_str)
+            self.tracker.list_recent_parlays(limit=limit)
+        except ValueError:
+            print("❌ Invalid limit\n")
+    
+    def summary_command(self, week_str):
+        """Show week summary"""
+        try:
+            week = int(week_str)
+            self.tracker.week_summary(week=week)
+        except ValueError:
+            print("❌ Invalid week number\n")
+    
+    def injury_diagnostic_command(self, player_name=""):
+        """Show injury system diagnostic - optionally for a specific player"""
+        print("\n" + "="*80)
+        print("INJURY AGENT DIAGNOSTIC - COMPLETE SYSTEM CHECK")
+        print("="*80 + "\n")
+        
+        # STEP 1: Check Injury Data Loading
+        print("STEP 1: Injury Data Loading")
+        print("-" * 80)
+        
+        context = self.loader.load_all_data(week=self.week)
+        injury_text = context.get('injuries')
+        
+        if not injury_text:
+            print("❌ CRITICAL: No injury data loaded!")
+            print("   File might not exist: wk" + str(self.week) + "-injury-report.csv\n")
+            return
+        
+        lines = injury_text.split('\n')
+        print(f"✅ Injury data loaded: {len(lines)} lines")
+        
+        # Look for specific player or just show summary
+        if player_name:
+            player_in_injuries = any(player_name.lower() in line.lower() for line in lines)
+            if player_in_injuries:
+                print(f"✅ {player_name} found in injury data")
+                for line in lines:
+                    if player_name.lower() in line.lower():
+                        print(f"   → {line}")
+            else:
+                print(f"⚠️  {player_name} NOT found in injury data")
+        else:
+            # Show injury data summary
+            statuses = {}
+            for line in lines[1:]:  # Skip header
+                if line.strip():
+                    parts = line.split(',')
+                    if len(parts) >= 5:
+                        status = parts[4].strip().lower()
+                        statuses[status] = statuses.get(status, 0) + 1
+            
+            print("Injury Status Breakdown:")
+            for status, count in sorted(statuses.items(), key=lambda x: x[1], reverse=True):
+                print(f"   {status:15} : {count:3d} players")
+        
+        print()
+        
+        # STEP 2: Test Injury Agent
+        print("STEP 2: Injury Agent Configuration")
+        print("-" * 80)
+        
+        injury_agent = self.analyzer.agents.get('Injury')
+        if injury_agent:
+            print(f"✅ Injury Agent found with weight: {injury_agent.weight}")
+            if injury_agent.weight >= 3.0:
+                print(f"✅ Weight is high ({injury_agent.weight}) - injuries take priority")
+            else:
+                print(f"⚠️  Weight is low ({injury_agent.weight}) - may not override other signals")
+        else:
+            print("❌ CRITICAL: Injury agent not in orchestrator!")
+        
+        print()
+        
+        # STEP 3: Analyze specific player if provided
+        if player_name:
+            print(f"STEP 3: {player_name} Analysis")
+            print("-" * 80)
+            
+            player_props = [p for p in context.get('props', []) if player_name.lower() in p.get('player_name', '').lower()]
+            
+            if not player_props:
+                print(f"❌ No props found for {player_name} this week")
+            else:
+                print(f"Found {len(player_props)} prop(s) for {player_name}\n")
+                
+                for i, prop_data in enumerate(player_props):
+                    print(f"Analyzing: {prop_data.get('stat_type')} O{prop_data.get('line')}")
+                    print("-" * 80)
+                    
+                    analysis = self.analyzer.analyze_prop(prop_data, context)
+                    
+                    print(f"Final Confidence: {analysis.final_confidence}%")
+                    print(f"Recommendation: {analysis.recommendation}\n")
+                    
+                    # Check Injury Agent specifically
+                    injury_result = analysis.agent_breakdown.get('Injury', {})
+                    injury_score = injury_result.get('raw_score', 'N/A')
+                    injury_weight = injury_result.get('weight', 'N/A')
+                    injury_rationale = injury_result.get('rationale', [])
+                    
+                    print("Injury Agent Breakdown:")
+                    print(f"  Score: {injury_score}")
+                    print(f"  Weight: {injury_weight}")
+                    print(f"  Rationale: {injury_rationale if injury_rationale else 'None'}")
+                    
+                    if injury_score < 50 and injury_rationale:
+                        print("  ✅ Injury penalty IS being applied!")
+                    elif injury_score == 50:
+                        print("  ⚠️  No injury penalty (player not in injury report or healthy)")
+                    
+                    print("\nAll Agent Scores:")
+                    print("-" * 80)
+                    
+                    total_contribution = 0
+                    for agent_name, result in analysis.agent_breakdown.items():
+                        score = result.get('raw_score', 50)
+                        weight = result.get('weight', 0)
+                        contribution = (score - 50) * weight
+                        total_contribution += contribution
+                        
+                        status = "↑" if contribution > 0 else ("↓" if contribution < 0 else "→")
+                        print(f"  {status} {agent_name:15} Score: {score:3.0f} × Weight: {weight:4.2f} = {contribution:+6.2f}")
+                    
+                    print("-" * 80)
+                    print(f"  Total Contribution: {total_contribution:+.2f} (final conf: {analysis.final_confidence}%)")
+                    print()
+        
+        print()
+        print("="*80)
+        print()
+
+    def kelly_sizing_command(self, arg_str=""):
+        """Calculate optimal Kelly sizing for last generated parlays"""
+        if not self.last_parlays:
+            print("❌ No parlays generated yet. Run 'parlays' or 'opt-parlays' first.\n")
+            return
+        
+        if arg_str:
+            try:
+                self.bankroll = float(arg_str)
+            except ValueError:
+                print(f"❌ Invalid bankroll amount. Using default: ${self.bankroll}\n")
+        
+        kelly_parlays = []
+        for i, parlay in enumerate(self.last_parlays):
+            if isinstance(parlay, dict):
+                confidence = parlay.get('adjusted_confidence', parlay.get('confidence', 70))
+            else:
+                confidence = 70
+            
+            kelly_parlays.append({
+                'name': f"Parlay {i+1}",
+                'confidence': confidence,
+                'odds': -110,
+                'legs': []
+            })
+        
+        print("\n🎲 Calculating optimal Kelly allocation...")
+        print(f"   Bankroll: ${self.bankroll:,.2f}")
+        print(f"   Parlays: {len(kelly_parlays)}\n")
+        
+        optimizer = KellyOptimizer(bankroll=self.bankroll, kelly_fraction=0.5)
+        result = optimizer.compare_strategies(kelly_parlays)
+        
+        output = format_kelly_report(result)
+        print(output)
+    
+    def set_bankroll_command(self, amount_str):
+        """Set betting bankroll"""
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                print("❌ Bankroll must be positive\n")
+                return
+            self.bankroll = amount
+            print(f"✅ Bankroll set to ${amount:,.2f}\n")
+        except ValueError:
+            print("❌ Invalid amount\n")
+    
+    def run(self):
+        """Main CLI loop"""
+        self.print_header()
+        
+        while True:
+            try:
+                user_input = input("📊 Enter command: ").strip()
+                
+                if not user_input:
+                    continue
+                
+                parts = user_input.split(None, 1)
+                command = parts[0].lower()
+                arg = parts[1] if len(parts) > 1 else ""
+                
+                if command == 'pull-lines':
+                    self.pull_lines()
+                elif command == 'analyze':
+                    self.analyze_prop(arg)
+                elif command == 'top-props':
+                    self.show_top_props(arg)
+                elif command == 'parlays':
+                    self.generate_parlays(arg)
+                elif command == 'opt-parlays':
+                    self.generate_optimized_parlays(arg)
+                elif command == 'week':
+                    self.change_week(arg)
+                elif command == 'bankroll':
+                    self.set_bankroll_command(arg)
+                elif command == 'kelly':
+                    self.kelly_sizing_command(arg)
+                elif command == 'log-parlay':
+                    self.log_parlay_command(arg)
+                elif command == 'log-result':
+                    self.log_results_command(arg)
+                elif command == 'calibrate':
+                    self.calibrate_command(arg)
+                elif command == 'recent':
+                    self.recent_command(arg)
+                elif command == 'summary':
+                    self.summary_command(arg)
+                elif command == 'injury-diagnostic':
+                    self.injury_diagnostic_command(arg)
+                elif command == 'help':
+                    self.print_header()
+                elif command in ['exit', 'quit']:
+                    print("👋 Goodbye!\n")
+                    break
+                else:
+                    print("❌ Unknown command. Type 'help' for options\n")
+                
+                if command not in ['help', 'exit', 'quit']:
+                    self.print_command_syntax()
+            
+            except KeyboardInterrupt:
+                print("\n👋 Goodbye!\n")
+                break
+            except Exception as e:
+                print(f"❌ Error: {e}\n")
+
+if __name__ == "__main__":
+    cli = BettingAnalyzerCLI()
+    cli.run()

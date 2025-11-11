@@ -27,6 +27,7 @@ class PlayerProp:
     week: int = 7
 
     direction: Literal['OVER', 'UNDER', 'AVOID'] = 'OVER'
+    bet_type: Literal['OVER', 'UNDER'] = 'OVER'
     confidence: int = 0
     agent_scores: dict = field(default_factory=dict)
     rationale_points: List[str] = field(default_factory=list)

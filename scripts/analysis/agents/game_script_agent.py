@@ -34,6 +34,13 @@ class GameScriptAgent(BaseAgent):
             score += 12
             rationale.append(f"High-scoring game ({game_total} total)")
         
+        elif game_total >= 44:
+            score += 5
+            rationale.append(f"Moderate-scoring game ({game_total} total)")
+            if prop.position in ['WR', 'TE', 'QB']:
+                score += 3
+                rationale.append("Pass-friendly environment expected")
+        
         elif game_total <= 40:
             score -= 12
             rationale.append(f"⚠️ Low total ({game_total}) limits opportunities")

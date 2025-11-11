@@ -1,3 +1,0 @@
-Date,Week,Parlay_ID,Num_Legs,Leg_1_Player,Leg_1_Position,Leg_1_Stat,Leg_1_Line,Leg_2_Player,Leg_2_Position,Leg_2_Stat,Leg_2_Line,Leg_3_Player,Leg_3_Position,Leg_3_Stat,Leg_3_Line,Leg_4_Player,Leg_4_Position,Leg_4_Stat,Leg_4_Line,Leg_5_Player,Leg_5_Position,Leg_5_Stat,Leg_5_Line,System_Confidence,Parlay_Type,Same_Game,Units_Bet,Odds,Status,Result_Notes
-2025-10-24,8,P21,2,Dak Prescott,QB,Pass Yds,254.5,Justin Jefferson,WR,Rec Yds,79.5,,,,,,,,,,,,78,2-leg,Yes,1.5,-110,PENDING,
-2025-10-24,8,P22,2,Josh Jacobs,RB,Rush Yds,75.0,Travis Kelce,TE,Receptions,5.5,,,,,,,,,,,,74,2-leg,No,1.5,-110,PENDING,

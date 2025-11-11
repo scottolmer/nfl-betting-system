@@ -16,33 +16,40 @@ class TrendAgent(BaseAgent):
         rationale = []
         score = 50
         
-        recent_perf = context.get('recent_performance', {})
-        player_games = recent_perf.get(prop.player_name, [])
+        trends = context.get('trends', {})
+        player_name = prop.player_name.lower()
+        player_trend = trends.get(player_name, {})
         
-        if not player_games or len(player_games) < 2:
-            rationale.append("⚠️ Insufficient recent data")
+        if not player_trend:
+            rationale.append("⚠️ Insufficient trend data")
             return (50, "AVOID", rationale)
         
-        line = prop.line
+        # Determine which trend metric based on position
+        trend_key = None
+        if prop.position == 'QB':
+            trend_key = 'snap_share_pct_trend'
+        elif prop.position in ['WR', 'TE']:
+            trend_key = 'target_share_pct_trend' if 'Rec' in prop.stat_type else 'rec_yds_trend'
+        elif prop.position == 'RB':
+            trend_key = 'snap_share_pct_trend' if 'Rush' in prop.stat_type else 'rec_yds_trend'
         
-        last_3 = player_games[-3:] if len(player_games) >= 3 else player_games
-        hits_over = sum(1 for game in last_3 if game > line)
-        last_3_avg = sum(last_3) / len(last_3)
+        trend_direction = player_trend.get(trend_key, 'stable') if trend_key else 'stable'
         
-        if len(last_3) >= 3 and hits_over == 3:
-            score += 25
-            rationale.append(f"🔥 HOT STREAK: 3/3 over (avg {last_3_avg:.1f} vs {line})")
-        elif hits_over >= 2:
+        if trend_direction == 'increasing':
             score += 15
-            rationale.append(f"Trending up: {hits_over}/3 over line (avg {last_3_avg:.1f})")
-        
-        elif hits_over == 0 and len(last_3) >= 3:
-            score -= 25
-            rationale.append(f"⚠️ COLD: 0/3 over line (avg {last_3_avg:.1f})")
+            rationale.append(f"💶 Usage trending UP")
+        elif trend_direction == 'decreasing':
+            score -= 15
+            rationale.append(f"💹 Usage trending DOWN")
+        else:
+            score += 5  # Stable is slightly positive
+            rationale.append(f"⚖️ Stable, consistent trend")
         
         direction = "OVER" if score >= 50 else "UNDER"
         
         if score >= 65:
-            rationale.insert(0, f"✅ Strong recent form supports {direction}")
+            rationale.insert(0, f"✅ Strong trend supports {direction}")
+        elif score <= 35:
+            rationale.insert(0, f"⚠️ Negative trend indicates {direction}")
         
         return (score, direction, rationale)

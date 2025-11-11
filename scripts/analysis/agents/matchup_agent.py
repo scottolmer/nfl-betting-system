@@ -34,6 +34,29 @@ class MatchupAgent(BaseAgent):
             rationale.append(f"⚠️ Position-specific defensive data unavailable for {prop.opponent}")
             return (50, "AVOID", rationale)
         
+        # Handle QB separately
+        if prop.position == 'QB':
+            def_dvoa = context.get('dvoa_defensive', {}).get(prop.opponent, {})
+            pass_def_dvoa = def_dvoa.get('pass_defense_dvoa', 0)
+            
+            if pass_def_dvoa >= 20:
+                score += 25
+                rationale.append(f"🔥 Weak pass defense: {prop.opponent} allows +{pass_def_dvoa:.1f}% DVOA")
+            elif pass_def_dvoa >= 5:
+                score += 15
+                rationale.append(f"🎯 Favorable pass matchup: +{pass_def_dvoa:.1f}% DVOA")
+            elif pass_def_dvoa >= -10:
+                rationale.append(f"⚖️ Neutral pass matchup: {pass_def_dvoa:.1f}% DVOA")
+            elif pass_def_dvoa >= -25:
+                score -= 12
+                rationale.append(f"⚠️ Strong pass defense: {pass_def_dvoa:.1f}% DVOA")
+            else:
+                score -= 20
+                rationale.append(f"🛡️ Elite pass defense: {pass_def_dvoa:.1f}% DVOA")
+            
+            direction = "OVER" if score >= 50 else "UNDER"
+            return (score, direction, rationale)
+        
         wr_role = self._classify_wr_role(prop.player_name, prop.position, context)
         
         if wr_role in ['WR1', 'WR2', 'WR3']:

@@ -23,6 +23,20 @@ def normalize_name(name):
     name = re.sub(r'\s+', ' ', name)
     return name.lower()
 
+def normalize_team_abbr(abbr):
+    """Normalize team abbreviations to handle variations"""
+    if not abbr: return abbr
+    abbr = str(abbr).strip().upper()
+    # Handle common variations
+    team_map = {
+        'JAX': 'JAC',  # Jacksonville
+        'ARZ': 'ARI',  # Arizona
+        'BLT': 'BAL',  # Baltimore (DVOA uses BLT)
+        'CLV': 'CLE',  # Cleveland (DVOA uses CLV)
+        'HST': 'HOU',  # Houston (DVOA uses HST)
+    }
+    return team_map.get(abbr, abbr)
+
 # ====================================================================
 #  ROSTER LOADING FUNCTION
 # ====================================================================
@@ -46,7 +60,7 @@ def _load_roster_data(data_dir: Path) -> Dict[str, str]:
             team_abbr = row.get('Team')
             if player_name_raw and team_abbr and not pd.isna(player_name_raw) and not pd.isna(team_abbr):
                 normalized_player = normalize_name(player_name_raw)
-                player_to_team_map[normalized_player] = str(team_abbr).strip().upper() # Store normalized name -> UPPERCASE Abbr
+                player_to_team_map[normalized_player] = normalize_team_abbr(team_abbr) # Normalize team abbr
 
         logger.info(f"✓ Loaded roster data for {len(player_to_team_map)} players from {roster_file.name}")
     except Exception as e:
@@ -92,10 +106,10 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
     def get_abbr(team_name):
          if not team_name or pd.isna(team_name): return ''
          team_name_str = str(team_name).strip()
-         if is_abbr(team_name_str): return 'JAC' if team_name_str == 'JAX' else team_name_str
+         if is_abbr(team_name_str): return normalize_team_abbr(team_name_str)
          abbr = TEAM_FULL_NAME_TO_ABBR.get(team_name_str)
-         if abbr: return abbr
-         return team_name_str # Return original if no mapping found (might be abbr already)
+         if abbr: return normalize_team_abbr(abbr)
+         return normalize_team_abbr(team_name_str)
 
     props = []
     if betting_lines_df is None: logger.warning("Betting lines DF is None."); return props
@@ -158,12 +172,13 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
             away_team_abbr = get_abbr(row.get('away_team'))
             if not home_team_abbr or not away_team_abbr: continue
 
-            # --- *** Use Roster Lookup *** ---
+            # --- *** Use Roster Lookup with Better Fallback *** ---
             player_team_abbr = player_roster_map.get(player_name_norm)
             opponent_abbr = None
             is_home = None
 
             if player_team_abbr:
+                # Player found in roster - check if team matches game
                 if player_team_abbr == home_team_abbr:
                     opponent_abbr = away_team_abbr
                     is_home = True
@@ -171,14 +186,17 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
                     opponent_abbr = home_team_abbr
                     is_home = False
                 else:
-                    logger.warning(f"Roster team '{player_team_abbr}' for {player_name_norm} doesn't match game: {home_team_abbr} vs {away_team_abbr}. Skipping prop.")
-                    continue # Skip this prop
+                    # Team mismatch - this shouldn't happen if roster/game data match
+                    # Log as debug, not warning, since it's expected in edge cases
+                    logger.debug(f"Roster team '{player_team_abbr}' for {player_name_norm} doesn't match game teams ({home_team_abbr}/{away_team_abbr}). Skipping.")
+                    continue
             else:
                 # Player not found in roster file
-                # logger.warning(f"Player '{player_name_norm}' not found in roster file. Cannot assign team. Skipping prop.")
+                # This is an ERROR that needs attention - missing players means props get skipped
+                logger.warning(f"Player '{player_name_norm}' NOT IN ROSTER - cannot assign team/opponent. Skipping prop.")
                 skipped_roster_lookup += 1
-                continue # Skip this prop
-            # --- *** End Roster Lookup *** ---
+                continue
+            # --- *** End Roster Lookup with Better Fallback *** ---
 
             position = infer_position(stat_type)
 
@@ -186,7 +204,8 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
                 prop = {
                     'player_name': player_name_norm, 'team': player_team_abbr, 'opponent': opponent_abbr,
                     'position': position, 'stat_type': stat_type, 'line': line,
-                    'game_total': row.get('game_total'), 'spread': row.get('spread'),
+                    'game_total': 44.5,  # Default reasonable NFL game total
+                    'spread': 0.0,  # Default neutral (ideally from separate moneyline data)
                     'is_home': is_home, 'week': week,
                 }
                 props.append(prop)
@@ -210,7 +229,7 @@ def transform_dvoa_offensive(dvoa_df):
          try:
             team_abbr = str(row.iloc[1]).strip();
             if team_abbr == 'Tm': continue
-            if team_abbr == 'JAX': team_abbr = 'JAC'
+            team_abbr = normalize_team_abbr(team_abbr)  # Normalize
             if not team_abbr or pd.isna(team_abbr): continue
             result[team_abbr] = {
                 'offense_dvoa': float(str(row.get('DVOA', 0)).replace('%','')),
@@ -230,7 +249,7 @@ def transform_dvoa_defensive(dvoa_df):
          try:
             team_abbr = str(row.iloc[1]).strip();
             if team_abbr == 'Tm': continue
-            if team_abbr == 'JAX': team_abbr = 'JAC'
+            team_abbr = normalize_team_abbr(team_abbr)  # Normalize
             if not team_abbr or pd.isna(team_abbr): continue
             result[team_abbr] = {
                 'defense_dvoa': float(str(row.get('DVOA', 0)).replace('%','')),
@@ -256,7 +275,7 @@ def transform_def_vs_receiver(def_vs_wr_df):
          try:
             team_abbr = str(row.iloc[1]).strip();
             if team_abbr == 'Tm': continue
-            if team_abbr == 'JAX': team_abbr = 'JAC'
+            team_abbr = normalize_team_abbr(team_abbr)  # Normalize
             if not team_abbr or pd.isna(team_abbr): continue
             def clean_dvoa(val):
                  val_str = str(val).strip()
@@ -296,43 +315,71 @@ class NFLDataLoader:
             'week': week,
             'dvoa_off_raw': None, 'dvoa_def_raw': None, 'def_vs_wr_raw': None,
             'betting_lines_raw': None, 'injuries': None,
-            'player_roster_map': self.player_roster_map # Pass roster map
+            'player_roster_map': self.player_roster_map, # Pass roster map
+            'loaded_files': ['Roster: NFL_roster - Sheet1.csv'] if self.player_roster_map else []  # Track loaded files for UI display
         }
 
         # --- Load RAW DataFrames ---
         # (Loading logic remains same as previous correct version)
-        try: # DVOA Off
-            fpath = next(self.data_dir.glob(f"wk{week}_offensive_DVOA.csv"),
-                       next(self.data_dir.glob(f"DVOA_Off_wk_{week}.csv"),
-                       next(self.data_dir.glob(f"wk{week-1}_offensive_DVOA.csv"), None)))
-            if fpath and fpath.exists(): context['dvoa_off_raw'] = pd.read_csv(fpath, header=1); logger.info(f"✓ DVOA Off: {fpath.name}")
-            else: logger.warning(f"⚠ DVOA Offensive wk{week} missing.")
+        try: # DVOA Off - Fall back through recent weeks if current week missing
+            fpath = None
+            for try_week in [week, week-1, week-2, week-3]:
+                if try_week < 1: break
+                fpath = next(self.data_dir.glob(f"wk{try_week}_offensive_DVOA.csv"),
+                           next(self.data_dir.glob(f"wk{try_week}_offensive_dvoa.csv"),
+                           next(self.data_dir.glob(f"wk{try_week}_dvoa_offensive.csv"),
+                           next(self.data_dir.glob(f"DVOA_Off_wk_{try_week}.csv"), None))))
+                if fpath and fpath.exists(): break
+            if fpath and fpath.exists(): 
+                context['dvoa_off_raw'] = pd.read_csv(fpath, header=1)
+                context['loaded_files'].append(f"DVOA Offensive: {fpath.name}")
+                logger.info(f"✓ DVOA Off: {fpath.name} (using week {try_week} data)")
+            else: logger.warning(f"⚠ DVOA Offensive: no data found for weeks {week} through {max(1,week-3)}")
         except Exception as e: logger.error(f"Error DVOA Off: {e}")
 
-        try: # DVOA Def
-            fpath = next(self.data_dir.glob(f"wk{week}_defensive_DVOA.csv"),
-                       next(self.data_dir.glob(f"w{week}_defensive_DVOA.csv"),
-                       next(self.data_dir.glob(f"DVOA_Def_wk_{week}.csv"),
-                       next(self.data_dir.glob(f"w7_defensive_DVOA.csv"),
-                       next(self.data_dir.glob(f"wk{week-1}_defensive_DVOA.csv"), None)))))
-            if fpath and fpath.exists(): context['dvoa_def_raw'] = pd.read_csv(fpath, header=1); logger.info(f"✓ DVOA Def: {fpath.name}")
-            else: logger.warning(f"⚠ DVOA Defensive wk{week} missing.")
+        try: # DVOA Def - Fall back through recent weeks if current week missing
+            fpath = None
+            for try_week in [week, week-1, week-2, week-3]:
+                if try_week < 1: break
+                fpath = next(self.data_dir.glob(f"wk{try_week}_defensive_DVOA.csv"),
+                           next(self.data_dir.glob(f"wk{try_week}_dvoa_defensive.csv"),
+                           next(self.data_dir.glob(f"w{try_week}_defensive_DVOA.csv"),
+                           next(self.data_dir.glob(f"DVOA_Def_wk_{try_week}.csv"), None))))
+                if fpath and fpath.exists(): break
+            if fpath and fpath.exists(): 
+                context['dvoa_def_raw'] = pd.read_csv(fpath, header=1)
+                context['loaded_files'].append(f"DVOA Defensive: {fpath.name}")
+                logger.info(f"✓ DVOA Def: {fpath.name} (using week {try_week} data)")
+            else: logger.warning(f"⚠ DVOA Defensive: no data found for weeks {week} through {max(1,week-3)}")
         except Exception as e: logger.error(f"Error DVOA Def: {e}")
 
-        try: # Def vs WR
-            fpath = next(self.data_dir.glob(f"wk{week}_def_v_wr_DVOA.csv"),
-                       next(self.data_dir.glob(f"Def_vs_WR_wk_{week}.csv"),
-                       next(self.data_dir.glob(f"wk{week-1}_def_v_wr_DVOA.csv"), None)))
-            if fpath and fpath.exists(): context['def_vs_wr_raw'] = pd.read_csv(fpath, header=1); logger.info(f"✓ Def vs WR: {fpath.name}")
-            else: logger.warning(f"⚠ Def vs WR wk{week} missing.")
+        try: # Def vs WR - Fall back through recent weeks if current week missing
+            fpath = None
+            for try_week in [week, week-1, week-2, week-3]:
+                if try_week < 1: break
+                fpath = next(self.data_dir.glob(f"wk{try_week}_def_v_wr_DVOA.csv"),
+                           next(self.data_dir.glob(f"wk{try_week}_dvoa_defensive_vs_receiver.csv"),
+                           next(self.data_dir.glob(f"Def_vs_WR_wk_{try_week}.csv"), None)))
+                if fpath and fpath.exists(): break
+            if fpath and fpath.exists(): 
+                context['def_vs_wr_raw'] = pd.read_csv(fpath, header=1)
+                context['loaded_files'].append(f"Def vs WR: {fpath.name}")
+                logger.info(f"✓ Def vs WR: {fpath.name} (using week {try_week} data)")
+            else: logger.warning(f"⚠ Def vs WR: no data found for weeks {week} through {max(1,week-3)}")
         except Exception as e: logger.error(f"Error Def vs WR: {e}")
 
         try: # Betting Lines
              fpath = next(self.data_dir.glob(f"wk{week}_betting_lines_draftkings.csv"),
                        next(self.data_dir.glob(f"wk{week}_betting_lines_TRANSFORMED.csv"),
                        next(self.data_dir.glob(f"betting_lines_wk_{week}_live.csv"), None)))
-             if fpath and fpath.exists(): context['betting_lines_raw'] = pd.read_csv(fpath); logger.info(f"✓ Betting Lines: {fpath.name} ({len(context['betting_lines_raw'])} rows)")
-             else: logger.warning(f"⚠ Betting lines wk{week} missing.")
+             if fpath and fpath.exists():
+                context['betting_lines_raw'] = pd.read_csv(fpath)
+                context['betting_lines_source'] = f"CSV ({fpath.name})"
+                context['loaded_files'].append(f"Betting Lines: {fpath.name}")
+                logger.info(f"✓ Betting Lines: {fpath.name} ({len(context['betting_lines_raw'])} rows)")
+             else:
+                context['betting_lines_source'] = "NO DATA"
+                logger.warning(f"⚠ Betting lines wk{week} missing.")
         except Exception as e: logger.error(f"Error Betting Lines: {e}")
 
         try: # Injury Report
@@ -346,6 +393,7 @@ class NFLDataLoader:
             if fpath:
                 logger.info(f"Found injury report file: {fpath.name}")
                 with open(fpath, 'r', encoding='utf-8') as f: context['injuries'] = f.read()
+                context['loaded_files'].append(f"Injury Report: {fpath.name}")
                 logger.info(f"✓ Loaded injury report content")
             else: logger.info(f"ℹ No injury report file found (tried patterns like wk{week}-injury-report.csv, ...).")
         except Exception as e: logger.warning(f"Injury report loading error: {e}")
@@ -358,10 +406,44 @@ class NFLDataLoader:
              for st in ['receiving_base','receiving_usage','rushing_base','rushing_usage','passing_base','receiving_alignment']:
                  try:
                      fpath = self.data_dir / f"wk{hist_week}_{st}.csv"
-                     if fpath.exists(): context['historical_stats'][week_key][st] = pd.read_csv(fpath, skiprows=1); has_data = True
+                     if fpath.exists(): 
+                         context['historical_stats'][week_key][st] = pd.read_csv(fpath, skiprows=1)
+                         context['loaded_files'].append(f"Historical Stats: {fpath.name}")
+                         has_data = True
                  except Exception as e: logger.debug(f"Hist stats wk{hist_week} {st}: {e}")
              if has_data: loaded_hist_weeks +=1
         logger.info(f"✓ Loaded historical stats for {loaded_hist_weeks} weeks")
+
+        # --- Load Current Week Usage Data (Falls back to previous weeks) ---
+        try:
+            usage_file = None
+            # Look backwards for usage data (week 10 uses week 9 data)
+            for try_week in [week-1, week-2, week-3]:
+                if try_week < 1: break
+                usage_file = self.data_dir / f"wk{try_week}_receiving_usage.csv"
+                if usage_file.exists(): break
+            
+            if usage_file and usage_file.exists():
+                usage_df = pd.read_csv(usage_file, skiprows=1)
+                usage_dict = {}
+                for _, row in usage_df.iterrows():
+                    player = normalize_name(row.get('Player', ''))
+                    if player:
+                        usage_dict[player] = {
+                            'snap_share_pct': float(str(row.get('Snap Share %', 0)).replace('%', '')) if '%' in str(row.get('Snap Share %', '')) else 0,
+                            'target_share_pct': float(str(row.get('Target Share %', 0)).replace('%', '')) if '%' in str(row.get('Target Share %', '')) else 0,
+                            'targets': float(row.get('Tgt', 0)) if pd.notna(row.get('Tgt')) else 0,
+                            'receptions': float(row.get('Rec', 0)) if pd.notna(row.get('Rec')) else 0,
+                        }
+                context['usage'] = usage_dict
+                context['loaded_files'].append(f"Recent Usage Data: {usage_file.name}")
+                logger.info(f"✓ Loaded usage data: {usage_file.name} ({len(usage_dict)} players)")
+            else:
+                logger.info(f"ℹ No usage data found for recent weeks")
+                context['usage'] = {}
+        except Exception as e:
+            logger.error(f"Error loading usage data: {e}")
+            context['usage'] = {}
 
         # --- Aggregate Historical Stats ---
         try:
@@ -371,7 +453,7 @@ class NFLDataLoader:
             spec.loader.exec_module(stats_agg)
             context = stats_agg.aggregate_historical_stats(context); logger.info("✓ Aggregated historical stats.")
         except Exception as e:
-            logger.error(f"FAIL Aggregation: {e}"); context['usage']={}; context['trends']={}; context['alignment']={}
+            logger.error(f"FAIL Aggregation: {e}"); context['trends']={}; context['alignment']={}
 
         # ====================================================================
         #  TRANSFORM DATA FOR AGENTS (Now uses roster map)

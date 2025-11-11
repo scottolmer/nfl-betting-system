@@ -1,0 +1,163 @@
+{
+  "parlays": [
+    {
+      "parlay_id": "TRAD_W9_25ee1e2c_v1",
+      "week": 9,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "25ee1e2c",
+      "version": 1,
+      "generated_timestamp": "2025-11-03T17:21:02.218522",
+      "data_source": "live_api",
+      "props": [
+        {
+          "player": "Patrick Mahomes",
+          "team": "KC",
+          "opponent": "LV",
+          "stat_type": "passing_yards",
+          "line": 250.5,
+          "direction": "OVER",
+          "confidence": 78.2,
+          "agent_scores": {
+            "dvoa": 78,
+            "matchup": 82,
+            "volume": 75
+          }
+        },
+        {
+          "player": "Travis Kelce",
+          "team": "KC",
+          "opponent": "LV",
+          "stat_type": "receiving_yards",
+          "line": 60.5,
+          "direction": "OVER",
+          "confidence": 76.5,
+          "agent_scores": {
+            "dvoa": 72,
+            "matchup": 80,
+            "volume": 78
+          }
+        }
+      ],
+      "raw_confidence": 77.4,
+      "effective_confidence": 77.4,
+      "correlations": [],
+      "payout_odds": 450,
+      "kelly_bet_size": 150.0,
+      "bet_on": true,
+      "actual_bet_amount": 150.0,
+      "bet_timestamp": "2025-11-03T17:21:02.222447",
+      "result": "won",
+      "result_entered_timestamp": "2025-11-03T17:21:02.225422",
+      "actual_payout": 825.0,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "ENHA_W9_25ee1e2c_v1",
+      "week": 9,
+      "year": 2024,
+      "parlay_type": "enhanced",
+      "content_hash": "25ee1e2c",
+      "version": 1,
+      "generated_timestamp": "2025-11-03T17:21:02.220198",
+      "data_source": "live_api",
+      "props": [
+        {
+          "player": "Patrick Mahomes",
+          "team": "KC",
+          "opponent": "LV",
+          "stat_type": "passing_yards",
+          "line": 250.5,
+          "direction": "OVER",
+          "confidence": 78.2,
+          "agent_scores": {
+            "dvoa": 78,
+            "matchup": 82,
+            "volume": 75
+          }
+        },
+        {
+          "player": "Travis Kelce",
+          "team": "KC",
+          "opponent": "LV",
+          "stat_type": "receiving_yards",
+          "line": 60.5,
+          "direction": "OVER",
+          "confidence": 76.5,
+          "agent_scores": {
+            "dvoa": 72,
+            "matchup": 80,
+            "volume": 78
+          }
+        }
+      ],
+      "raw_confidence": 77.4,
+      "effective_confidence": 58.3,
+      "correlations": [
+        {
+          "prop1": "Mahomes passing_yards",
+          "prop2": "Kelce receiving_yards",
+          "correlation": 0.45,
+          "impact": "Reduces confidence by 19.1 points"
+        }
+      ],
+      "payout_odds": 450,
+      "kelly_bet_size": 65.0,
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": "won",
+      "result_entered_timestamp": "2025-11-03T17:21:02.226618",
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W9_ae1c0753_v1",
+      "week": 9,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "ae1c0753",
+      "version": 1,
+      "generated_timestamp": "2025-11-03T17:21:02.223805",
+      "data_source": "unknown",
+      "props": [
+        {
+          "player": "Josh Allen",
+          "team": "BUF",
+          "opponent": "MIA",
+          "stat_type": "passing_yards",
+          "line": 275.5,
+          "direction": "OVER",
+          "confidence": 72.1,
+          "agent_scores": {
+            "dvoa": 70,
+            "matchup": 75,
+            "volume": 72
+          }
+        }
+      ],
+      "raw_confidence": 72.1,
+      "effective_confidence": 72.1,
+      "correlations": [],
+      "payout_odds": 200,
+      "kelly_bet_size": 100.0,
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": "lost",
+      "result_entered_timestamp": "2025-11-03T17:21:02.228244",
+      "actual_payout": 0,
+      "prop_results": []
+    }
+  ],
+  "metadata": {
+    "created": "2025-11-03T17:21:02.217654",
+    "last_updated": "2025-11-03T17:21:02.228259",
+    "weeks_tracked": [
+      9
+    ],
+    "total_parlays_generated": 3,
+    "total_parlays_bet": 1,
+    "total_results_entered": 3
+  }
+}

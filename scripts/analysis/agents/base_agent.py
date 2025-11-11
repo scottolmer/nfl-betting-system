@@ -35,14 +35,14 @@ class AgentConfig:
     """Configuration for agent weights"""
     
     WEIGHTS = {
-        'DVOAAgent': 3.5,        # Boosted from 2.0
-        'MatchupAgent': 3.0,      # Boosted from 1.8
-        'VolumeAgent': 2.5,       # Boosted from 1.2
-        'InjuryAgent': 2.0,       # Boosted from 1.5
-        'GameScriptAgent': 1.8,   # Boosted from 1.3
-        'TrendAgent': 1.5,        # Boosted from 1.0
-        'VarianceAgent': 1.2,     # Boosted from 0.8
-        'WeatherAgent': 0.8,      # Boosted from 0.5
+        'DVOAAgent': 4.0,        # Increased from 2.0 - DVOA is most reliable
+        'MatchupAgent': 1.5,      # Reduced from 1.8 - conflicts with DVOA often
+        'VolumeAgent': 2.5,       # Unchanged
+        'GameScriptAgent': 2.2,   # Increased from 1.3
+        'TrendAgent': 1.8,        # Increased from 1.0
+        'VarianceAgent': 1.2,     # Unchanged
+        'InjuryAgent': 3.0,       # CRITICAL: Injuries override other signals (high weight!)
+        'WeatherAgent': 1.3,      # Minor impact - only extreme conditions matter
     }
     
     THRESHOLDS = {

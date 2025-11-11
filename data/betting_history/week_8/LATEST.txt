@@ -1,0 +1,4 @@
+LATEST BETTING CARD: 2025-10-28_18-51-53
+Folder: C:\Users\scott\Desktop\nfl-betting-systemv2\data\betting_history\week_8\2025-10-28_18-51-53
+Betting Card: C:\Users\scott\Desktop\nfl-betting-systemv2\data\betting_history\week_8\2025-10-28_18-51-53\betting_card.txt
+Validation Form: C:\Users\scott\Desktop\nfl-betting-systemv2\data\betting_history\week_8\2025-10-28_18-51-53\validation_form.txt

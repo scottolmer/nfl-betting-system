@@ -1,36 +1,30 @@
 """
-Parlay Builder - Builds up to 10 optimal parlays (3x 2/3/4 leg + 1x 5 leg) WITH POSITION DIVERSITY
-Fixed to prevent QB-only bias by enforcing position diversity constraints
-Enhanced to generate more parlays for better testing/calibration
+Parlay Builder - Builds up to 10 optimal parlays (3x 2/3/4 leg + 1x 5 leg) WITH PLAYER DIVERSITY
+FIXED: Maintains recently_used_players throughout all parlays to force exploration of full player pool
 """
 
 from typing import List, Dict, Set, Tuple, Optional
 from .models import PropAnalysis, Parlay
 import logging
 import itertools
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
-# Helper function to create a unique, hashable ID for a prop analysis
 def get_prop_analysis_id(analysis: PropAnalysis) -> Tuple:
     prop = analysis.prop
     return (prop.player_name, prop.stat_type, prop.line, prop.team, prop.opponent)
 
 class ParlayBuilder:
-    """Builds optimal parlay combinations with position diversity"""
+    """Builds optimal parlay combinations with player diversity"""
 
     def build_parlays(self, all_analyses: List[PropAnalysis],
                       min_confidence: int = 58) -> Dict[str, List[Parlay]]:
-        """Main function to build up to 10 parlays with position diversity
+        """Main function to build up to 10 parlays with player diversity
         
-        Distribution:
-        - 3x 2-leg parlays
-        - 3x 3-leg parlays
-        - 3x 4-leg parlays
-        - 1x 5-leg parlay
+        Each player can appear in up to 3 different parlays
         """
 
-        # Filter for props that meet the minimum betting confidence, sorted best first
         eligible_props = sorted(
             [prop for prop in all_analyses if prop.final_confidence >= min_confidence],
             key=lambda x: x.final_confidence,
@@ -38,11 +32,13 @@ class ParlayBuilder:
         )
 
         print(f"\n🎯 Building parlays from {len(eligible_props)} props (confidence {min_confidence}+)")
-        print(f"   ✅ Enforcing position diversity to prevent QB-only bias...")
+        print(f"   ✅ Prioritizing PLAYER diversity...")
+        print(f"   ✅ Each player can appear in up to 3 parlays...")
         print(f"   📊 Target: 10 parlays (3x 2-leg, 3x 3-leg, 3x 4-leg, 1x 5-leg)\n")
 
-        # Set to track used prop IDs to prevent reuse across all parlays
         used_prop_ids: Set[Tuple] = set()
+        player_usage_count: Dict[str, int] = defaultdict(int)
+        all_used_players: Set[str] = set()  # All players used across ALL parlays
 
         parlays = {
             '2-leg': [],
@@ -51,21 +47,17 @@ class ParlayBuilder:
             '5-leg': [],
         }
 
-        # --- Build Three 2-LEG PARLAYS ---
         print("  📊 Building up to three 2-leg parlays...")
-        parlays['2-leg'] = self.build_n_leg_parlays(2, 3, eligible_props, used_prop_ids)
+        parlays['2-leg'] = self.build_n_leg_parlays(2, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        # --- Build Three 3-LEG PARLAYS ---
         print("\n  📊 Building up to three 3-leg parlays...")
-        parlays['3-leg'] = self.build_n_leg_parlays(3, 3, eligible_props, used_prop_ids)
+        parlays['3-leg'] = self.build_n_leg_parlays(3, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        # --- Build Three 4-LEG PARLAYS ---
         print("\n  📊 Building up to three 4-leg parlays...")
-        parlays['4-leg'] = self.build_n_leg_parlays(4, 3, eligible_props, used_prop_ids)
+        parlays['4-leg'] = self.build_n_leg_parlays(4, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        # --- Build One 5-LEG PARLAY ---
         print("\n  📊 Building up to one 5-leg parlay...")
-        parlays['5-leg'] = self.build_n_leg_parlays(5, 1, eligible_props, used_prop_ids)
+        parlays['5-leg'] = self.build_n_leg_parlays(5, 1, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
         total_2 = len(parlays['2-leg'])
         total_3 = len(parlays['3-leg'])
@@ -77,74 +69,56 @@ class ParlayBuilder:
 
         print(f"\n✅ Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg parlays")
         print(f"   📊 Total parlays: {total_all}/10")
+        print(f"   📊 Unique players used: {len(player_usage_count)}")
 
         return parlays
 
     def build_n_leg_parlays(self, num_legs: int, max_parlays: int,
                             eligible_props: List[PropAnalysis],
-                            used_prop_ids: Set[Tuple]) -> List[Parlay]:
-        """ Tries to build 'max_parlays' parlays with 'num_legs' each, enforcing POSITION DIVERSITY. """
+                            used_prop_ids: Set[Tuple],
+                            player_usage_count: Dict[str, int],
+                            all_used_players: Set[str],
+                            max_player_uses: int = 3) -> List[Parlay]:
+        """ Builds parlays prioritizing player diversity """
         built_parlays = []
         
-        # Iterate to build up to max_parlays
         for i in range(max_parlays):
+            # Sort props: deprioritize all previously-used players, then by confidence
+            def prop_sort_key(prop):
+                player_name = prop.prop.player_name
+                # Players already used get deprioritized (priority 1)
+                # New players get priority (priority 0)
+                already_used = 1 if player_name in all_used_players else 0
+                confidence = -prop.final_confidence  # Negative for descending sort
+                return (already_used, confidence)
+            
+            sorted_props = sorted(eligible_props, key=prop_sort_key)
+            
             current_legs = []
             players_in_current_parlay: Set[str] = set()
-            positions_in_current_parlay: List[str] = []
             
-            # Iterate through eligible props to find legs
-            for prop_analysis in eligible_props:
+            for prop_analysis in sorted_props:
                 prop_id = get_prop_analysis_id(prop_analysis)
                 player_name = prop_analysis.prop.player_name
-                position = prop_analysis.prop.position
                 
-                # Check if prop already used globally or player used in this specific parlay
-                if prop_id not in used_prop_ids and player_name not in players_in_current_parlay:
-                    # =============== POSITION DIVERSITY CONSTRAINTS ===============
-                    # These constraints prevent QB-only or same-position-heavy parlays
+                if (prop_id not in used_prop_ids and 
+                    player_usage_count[player_name] < max_player_uses and 
+                    player_name not in players_in_current_parlay):
                     
-                    position_counts = {}
-                    for pos in positions_in_current_parlay:
-                        position_counts[pos] = position_counts.get(pos, 0) + 1
+                    current_legs.append(prop_analysis)
+                    players_in_current_parlay.add(player_name)
                     
-                    same_pos_count = position_counts.get(position, 0)
-                    unique_positions = len(set(positions_in_current_parlay))
-                    
-                    # Enforce diversity constraints based on parlay leg count
-                    can_add = True
-                    if num_legs >= 5:
-                        # For 5-leg: No more than 2 of same position (maximum diversity)
-                        if same_pos_count >= 2:
-                            can_add = False
-                    elif num_legs == 4:
-                        # For 4-leg: No more than 2 of same position (enforce variety)
-                        if same_pos_count >= 2:
-                            can_add = False
-                    elif num_legs == 3:
-                        # For 3-leg: No more than 2 of same position
-                        if same_pos_count >= 2:
-                            can_add = False
-                    elif num_legs == 2:
-                        # For 2-leg: Prefer different positions, but allow same if necessary
-                        # Always allow first leg, encourage second to be different
-                        pass  # Always try to add
-                    
-                    if can_add:
-                        current_legs.append(prop_analysis)
-                        players_in_current_parlay.add(player_name)
-                        positions_in_current_parlay.append(position)
-                        
-                        # If we have enough legs, stop looking for this parlay
-                        if len(current_legs) == num_legs:
-                            break
+                    if len(current_legs) == num_legs:
+                        break
             
-            # If we successfully found enough unique legs
             if len(current_legs) == num_legs:
-                # Mark these props as used globally
+                # Mark props and players as used
                 for leg in current_legs:
                     used_prop_ids.add(get_prop_analysis_id(leg))
+                    player_name = leg.prop.player_name
+                    player_usage_count[player_name] += 1
+                    all_used_players.add(player_name)  # Add to all-time used set (never cleared)
                 
-                # Determine risk and rationale
                 unique_positions = set(leg.prop.position for leg in current_legs)
                 is_same_game = len(set(f"{leg.prop.team}-{leg.prop.opponent}" for leg in current_legs)) == 1
                 position_str = "/".join(sorted(unique_positions))
@@ -158,12 +132,11 @@ class ParlayBuilder:
                         risk = "MODERATE"
                     elif num_legs <= 4:
                         risk = "HIGH"
-                    else:  # 5-leg
+                    else:
                         risk = "VERY HIGH"
                     rationale = f"✅ Same-game {position_str} ({current_legs[0].prop.team} vs {current_legs[0].prop.opponent})"
                     bonus = 5 if num_legs <= 2 else (4 if num_legs == 3 else (3 if num_legs == 4 else 2))
                 else:
-                    # Bonus for game diversity
                     num_games = len(set(f"{leg.prop.team}-{leg.prop.opponent}" for leg in current_legs))
                     if num_games == num_legs:
                         rationale = f"✅ Diversified {position_str} across {num_games} games"
@@ -177,20 +150,18 @@ class ParlayBuilder:
                     correlation_bonus=bonus
                 )
                 built_parlays.append(parlay)
-                print(f"    ✅ Built {num_legs}-leg parlay #{i+1} (Conf: {parlay.combined_confidence}, Positions: {position_str})")
-
+                print(f"    ✅ Built {num_legs}-leg parlay #{i+1} (Conf: {parlay.combined_confidence}, Positions: {position_str}, Players now: {len(player_usage_count)})")
             else:
-                # Could not find enough unique props for this parlay
-                print(f"    ⚠️ Could not find enough unique props for {num_legs}-leg parlay #{i+1}")
-                break
+                print(f"    ⚠️  Could not find enough unique props for {num_legs}-leg parlay #{i+1}")
 
         return built_parlays
 
 
-    def format_parlays_for_betting(self, parlays: Dict[str, List[Parlay]]) -> str:
+    def format_parlays_for_betting(self, parlays: Dict[str, List[Parlay]], betting_source: str = "UNKNOWN") -> str:
         """Format the final parlays into a string card"""
         
         output = ["="*60, "🎯 ACTIONABLE PARLAY RECOMMENDATIONS", "="*60, ""]
+        output.append(f"📊 Betting Lines Source: {betting_source}\n")
         total_units = 0
         parlay_counter = {'2': 0, '3': 0, '4': 0, '5': 0}
 
@@ -222,14 +193,12 @@ class ParlayBuilder:
             top_reasons = set()
             for leg in parlay.legs:
                 if leg.rationale:
-                     # Add only the first rationale point if available
                      top_reasons.add(leg.rationale[0].strip())
             
-            for reason in list(top_reasons)[:3]: # Show top 3 unique reasons
+            for reason in list(top_reasons)[:3]:
                 parlay_lines.append(f"    • {reason}")
             return parlay_lines
 
-        # --- Format Each Leg Count ---
         for leg_count, leg_str in [(2, '2'), (3, '3'), (4, '4'), (5, '5')]:
             parlay_list = parlays.get(f'{leg_count}-leg', [])
             if not parlay_list:
@@ -242,7 +211,6 @@ class ParlayBuilder:
             for parlay in parlay_list:
                 output.extend(format_single_parlay(parlay, leg_str))
 
-        # --- TIPS ---
         output.append("\n" + "="*60)
         output.append("💡 BETTING TIPS")
         output.append("="*60)
@@ -254,7 +222,6 @@ class ParlayBuilder:
         output.append("• Position diversity reduces correlation risk")
         output.append("• Never bet more than you can afford to lose!")
         
-        # Total summary
         output.append("\n" + "="*60)
         output.append("📊 SUMMARY")
         output.append("="*60)

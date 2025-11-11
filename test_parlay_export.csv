@@ -1,0 +1,4 @@
+parlay_id,week,year,parlay_type,version,raw_confidence,effective_confidence,kelly_bet_size,bet_on,actual_bet_amount,result,actual_payout,num_props,payout_odds,data_source
+TRAD_W9_25ee1e2c_v1,9,2024,traditional,1,77.4,77.4,150.0,True,150.0,won,825.0,2,450,live_api
+ENHA_W9_25ee1e2c_v1,9,2024,enhanced,1,77.4,58.3,65.0,False,,won,,2,450,live_api
+TRAD_W9_ae1c0753_v1,9,2024,traditional,1,72.1,72.1,100.0,False,,lost,0,1,200,unknown

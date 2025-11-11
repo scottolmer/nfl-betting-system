@@ -3,3 +3,61 @@ timestamp,type,game,bookmaker,team_or_player,prop_type,previous_line,current_lin
 2025-10-21T17:58:56.321188,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Tua Tagovailoa,Pass Yds,195.5,200.5,5.0,5.0
 2025-10-21T17:58:56.321198,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,215.5,210.5,-5.0,5.0
 2025-10-21T17:58:56.321205,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,215.5,210.5,-5.0,5.0
+2025-10-25T08:02:56.408568,spread,Washington Commanders @ Kansas City Chiefs,betus,Kansas City Chiefs,,-10.5,-13.0,-2.5,2.5
+2025-10-25T08:02:56.408582,spread,Washington Commanders @ Kansas City Chiefs,betus,Washington Commanders,,10.5,13.0,2.5,2.5
+2025-10-25T08:02:56.408591,spread,Washington Commanders @ Kansas City Chiefs,williamhill_us,Kansas City Chiefs,,-10.5,-12.5,-2.0,2.0
+2025-10-25T08:02:56.408594,spread,Washington Commanders @ Kansas City Chiefs,williamhill_us,Washington Commanders,,10.5,12.5,2.0,2.0
+2025-10-25T08:02:56.408608,spread,Washington Commanders @ Kansas City Chiefs,mybookieag,Kansas City Chiefs,,-10.5,-12.5,-2.0,2.0
+2025-10-25T08:02:56.408610,spread,Washington Commanders @ Kansas City Chiefs,mybookieag,Washington Commanders,,10.5,12.5,2.0,2.0
+2025-10-25T08:02:56.408618,spread,Washington Commanders @ Kansas City Chiefs,lowvig,Kansas City Chiefs,,-10.5,-12.5,-2.0,2.0
+2025-10-25T08:02:56.408621,spread,Washington Commanders @ Kansas City Chiefs,lowvig,Washington Commanders,,10.5,12.5,2.0,2.0
+2025-10-25T08:02:56.408628,spread,Washington Commanders @ Kansas City Chiefs,betonlineag,Kansas City Chiefs,,-10.5,-12.5,-2.0,2.0
+2025-10-25T08:02:56.408630,spread,Washington Commanders @ Kansas City Chiefs,betonlineag,Washington Commanders,,10.5,12.5,2.0,2.0
+2025-10-25T08:02:56.408644,spread,Washington Commanders @ Kansas City Chiefs,betmgm,Kansas City Chiefs,,-10.5,-12.5,-2.0,2.0
+2025-10-25T08:02:56.408652,spread,Washington Commanders @ Kansas City Chiefs,betmgm,Washington Commanders,,10.5,12.5,2.0,2.0
+2025-10-25T08:02:56.408660,spread,Washington Commanders @ Kansas City Chiefs,bovada,Kansas City Chiefs,,-10.0,-12.0,-2.0,2.0
+2025-10-25T08:02:56.408663,spread,Washington Commanders @ Kansas City Chiefs,bovada,Washington Commanders,,10.0,12.0,2.0,2.0
+2025-10-25T08:02:56.408670,spread,Washington Commanders @ Kansas City Chiefs,fanatics,Kansas City Chiefs,,-10.5,-12.5,-2.0,2.0
+2025-10-25T08:02:56.408673,spread,Washington Commanders @ Kansas City Chiefs,fanatics,Washington Commanders,,10.5,12.5,2.0,2.0
+2025-10-25T08:03:04.520193,player_prop,Miami Dolphins @ Atlanta Falcons,draftkings,Tua Tagovailoa,Pass Yds,203.5,193.5,-10.0,10.0
+2025-10-25T08:03:04.520210,player_prop,Miami Dolphins @ Atlanta Falcons,draftkings,Tua Tagovailoa,Pass Yds,203.5,193.5,-10.0,10.0
+2025-10-25T08:03:04.520286,player_prop,Miami Dolphins @ Atlanta Falcons,draftkings,Bijan Robinson,Rushes,18.5,16.5,-2.0,2.0
+2025-10-25T08:03:04.520292,player_prop,Miami Dolphins @ Atlanta Falcons,draftkings,Bijan Robinson,Rushes,18.5,16.5,-2.0,2.0
+2025-10-25T08:03:04.520322,player_prop,Miami Dolphins @ Atlanta Falcons,williamhill_us,Tua Tagovailoa,Pass Yds,200.5,195.5,-5.0,5.0
+2025-10-25T08:03:04.520327,player_prop,Miami Dolphins @ Atlanta Falcons,williamhill_us,Tua Tagovailoa,Pass Yds,200.5,195.5,-5.0,5.0
+2025-10-25T08:03:04.520474,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,210.5,220.5,10.0,10.0
+2025-10-25T08:03:04.520482,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,210.5,220.5,10.0,10.0
+2025-10-25T08:03:04.520486,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Tua Tagovailoa,Pass Yds,200.5,190.5,-10.0,10.0
+2025-10-25T08:03:04.520491,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Tua Tagovailoa,Pass Yds,200.5,190.5,-10.0,10.0
+2025-10-25T08:03:04.520507,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Kyle Pitts,Rec Yds,45.5,40.5,-5.0,5.0
+2025-10-25T08:03:04.520513,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Kyle Pitts,Rec Yds,45.5,40.5,-5.0,5.0
+2025-10-25T08:03:04.520535,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Bijan Robinson,Rush Yds,85.5,90.5,5.0,5.0
+2025-10-25T08:03:04.520539,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Bijan Robinson,Rush Yds,85.5,90.5,5.0,5.0
+2025-10-25T08:03:04.520633,player_prop,New York Giants @ Philadelphia Eagles,fanatics,Jaxson Dart,Pass Yds,195.5,200.5,5.0,5.0
+2025-10-25T08:03:04.520641,player_prop,New York Giants @ Philadelphia Eagles,fanatics,Jaxson Dart,Pass Yds,195.5,200.5,5.0,5.0
+2025-10-25T08:03:04.520735,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanduel,DK Metcalf,Rec Yds,60.5,54.5,-6.0,6.0
+2025-10-25T08:03:04.520742,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanduel,DK Metcalf,Rec Yds,60.5,54.5,-6.0,6.0
+2025-10-25T08:03:04.520814,player_prop,Green Bay Packers @ Pittsburgh Steelers,betrivers,Jordan Love,Pass Yds,242.5,235.5,-7.0,7.0
+2025-10-25T08:03:04.520817,player_prop,Green Bay Packers @ Pittsburgh Steelers,betrivers,Jordan Love,Pass Yds,242.5,235.5,-7.0,7.0
+2025-10-25T08:03:04.520841,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,Aaron Rodgers,Pass Yds,215.5,220.5,5.0,5.0
+2025-10-25T08:03:04.520844,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,Aaron Rodgers,Pass Yds,215.5,220.5,5.0,5.0
+2025-10-25T08:03:04.520847,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,Jordan Love,Pass Yds,240.5,235.5,-5.0,5.0
+2025-10-25T08:03:04.520850,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,Jordan Love,Pass Yds,240.5,235.5,-5.0,5.0
+2025-10-25T08:03:04.520858,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,DK Metcalf,Rec Yds,60.5,55.5,-5.0,5.0
+2025-10-25T08:03:04.520861,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,DK Metcalf,Rec Yds,60.5,55.5,-5.0,5.0
+2025-10-25T08:03:04.520877,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,Jonnu Smith,Rec Yds,30.5,25.5,-5.0,5.0
+2025-10-25T08:03:04.520881,player_prop,Green Bay Packers @ Pittsburgh Steelers,fanatics,Jonnu Smith,Rec Yds,30.5,25.5,-5.0,5.0
+2025-10-25T08:19:31.088526,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,220.5,215.5,-5.0,5.0
+2025-10-25T08:19:31.088538,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Michael Penix Jr.,Pass Yds,220.5,215.5,-5.0,5.0
+2025-10-25T08:19:31.088542,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Tua Tagovailoa,Pass Yds,190.5,195.5,5.0,5.0
+2025-10-25T08:19:31.088546,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Tua Tagovailoa,Pass Yds,190.5,195.5,5.0,5.0
+2025-10-25T08:19:31.088604,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Bijan Robinson,Rush Yds,90.5,85.5,-5.0,5.0
+2025-10-25T08:19:31.088607,player_prop,Miami Dolphins @ Atlanta Falcons,fanatics,Bijan Robinson,Rush Yds,90.5,85.5,-5.0,5.0
+2025-10-25T08:19:31.093899,player_prop,New York Giants @ Philadelphia Eagles,fanatics,Jaxson Dart,Rush Yds,35.5,40.5,5.0,5.0
+2025-10-25T08:19:31.093921,player_prop,New York Giants @ Philadelphia Eagles,fanatics,Jaxson Dart,Rush Yds,35.5,40.5,5.0,5.0
+2025-10-25T08:19:31.093930,player_prop,New York Giants @ Philadelphia Eagles,fanatics,Saquon Barkley,Rush Yds,80.5,85.5,5.0,5.0
+2025-10-25T08:19:31.093935,player_prop,New York Giants @ Philadelphia Eagles,fanatics,Saquon Barkley,Rush Yds,80.5,85.5,5.0,5.0
+2025-10-25T08:19:31.095696,player_prop,Dallas Cowboys @ Denver Broncos,fanatics,Dak Prescott,Pass Yds,250.5,255.5,5.0,5.0
+2025-10-25T08:19:31.095716,player_prop,Dallas Cowboys @ Denver Broncos,fanatics,Dak Prescott,Pass Yds,250.5,255.5,5.0,5.0
+2025-10-25T08:19:31.095848,player_prop,Dallas Cowboys @ Denver Broncos,fanatics,Jaydon Blue,Rush Yds,10.5,15.5,5.0,5.0
+2025-10-25T08:19:31.095855,player_prop,Dallas Cowboys @ Denver Broncos,fanatics,Jaydon Blue,Rush Yds,10.5,15.5,5.0,5.0

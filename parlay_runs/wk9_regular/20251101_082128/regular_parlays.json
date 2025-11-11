@@ -1,0 +1,365 @@
+{
+  "timestamp": "20251101_082128",
+  "week": 9,
+  "total_props_analyzed": 340,
+  "parlays": [
+    {
+      "type": "2-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "jaxson dart",
+          "team": "NYG",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 209.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "ja'marr chase",
+          "team": "CIN",
+          "opponent": "CHI",
+          "stat_type": "Receptions",
+          "line": 8.5,
+          "position": "WR",
+          "confidence": 75
+        }
+      ]
+    },
+    {
+      "type": "2-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "jaxson dart",
+          "team": "NYG",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 210.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "mack hollins",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Receptions",
+          "line": 2.5,
+          "position": "WR",
+          "confidence": 74
+        }
+      ]
+    },
+    {
+      "type": "2-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "jaxson dart",
+          "team": "NYG",
+          "opponent": "SF",
+          "stat_type": "Pass Yds",
+          "line": 215.5,
+          "position": "QB",
+          "confidence": 75
+        },
+        {
+          "player_name": "ja'marr chase",
+          "team": "CIN",
+          "opponent": "CHI",
+          "stat_type": "Rec Yds",
+          "line": 93.5,
+          "position": "WR",
+          "confidence": 74
+        }
+      ]
+    },
+    {
+      "type": "3-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "ja'marr chase",
+          "team": "CIN",
+          "opponent": "CHI",
+          "stat_type": "Rec Yds",
+          "line": 90.5,
+          "position": "WR",
+          "confidence": 74
+        },
+        {
+          "player_name": "jaxson dart",
+          "team": "NYG",
+          "opponent": "SF",
+          "stat_type": "Pass Completions",
+          "line": 19.5,
+          "position": "QB",
+          "confidence": 74
+        },
+        {
+          "player_name": "ladd mcconkey",
+          "team": "LAC",
+          "opponent": "TEN",
+          "stat_type": "Receptions",
+          "line": 5.5,
+          "position": "WR",
+          "confidence": 73
+        }
+      ]
+    },
+    {
+      "type": "3-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "jauan jennings",
+          "team": "SF",
+          "opponent": "NYG",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "position": "WR",
+          "confidence": 73
+        },
+        {
+          "player_name": "stefon diggs",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "position": "WR",
+          "confidence": 73
+        },
+        {
+          "player_name": "drake maye",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Pass Yds",
+          "line": 236.5,
+          "position": "QB",
+          "confidence": 72
+        }
+      ]
+    },
+    {
+      "type": "3-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "mack hollins",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Rec Yds",
+          "line": 20.5,
+          "position": "WR",
+          "confidence": 73
+        },
+        {
+          "player_name": "tucker kraft",
+          "team": "GB",
+          "opponent": "CAR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "position": "WR",
+          "confidence": 72
+        },
+        {
+          "player_name": "jaxson dart",
+          "team": "NYG",
+          "opponent": "SF",
+          "stat_type": "player_pass_attempts",
+          "line": 31.5,
+          "position": "QB",
+          "confidence": 72
+        }
+      ]
+    },
+    {
+      "type": "4-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "ladd mcconkey",
+          "team": "LAC",
+          "opponent": "TEN",
+          "stat_type": "Rec Yds",
+          "line": 60.5,
+          "position": "WR",
+          "confidence": 72
+        },
+        {
+          "player_name": "jauan jennings",
+          "team": "SF",
+          "opponent": "NYG",
+          "stat_type": "Rec Yds",
+          "line": 50.5,
+          "position": "WR",
+          "confidence": 72
+        },
+        {
+          "player_name": "drake maye",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Pass Yds",
+          "line": 233.5,
+          "position": "QB",
+          "confidence": 72
+        },
+        {
+          "player_name": "jaxson dart",
+          "team": "NYG",
+          "opponent": "SF",
+          "stat_type": "player_pass_attempts",
+          "line": 30.5,
+          "position": "QB",
+          "confidence": 72
+        }
+      ]
+    },
+    {
+      "type": "4-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "ladd mcconkey",
+          "team": "LAC",
+          "opponent": "TEN",
+          "stat_type": "Rec Yds",
+          "line": 61.5,
+          "position": "WR",
+          "confidence": 72
+        },
+        {
+          "player_name": "jauan jennings",
+          "team": "SF",
+          "opponent": "NYG",
+          "stat_type": "Rec Yds",
+          "line": 49.5,
+          "position": "WR",
+          "confidence": 72
+        },
+        {
+          "player_name": "drake maye",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Pass Yds",
+          "line": 230.5,
+          "position": "QB",
+          "confidence": 72
+        },
+        {
+          "player_name": "daniel jones",
+          "team": "IND",
+          "opponent": "PIT",
+          "stat_type": "Pass Yds",
+          "line": 250.5,
+          "position": "QB",
+          "confidence": 71
+        }
+      ]
+    },
+    {
+      "type": "4-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "stefon diggs",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Rec Yds",
+          "line": 48.5,
+          "position": "WR",
+          "confidence": 72
+        },
+        {
+          "player_name": "drake maye",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Pass Yds",
+          "line": 231.5,
+          "position": "QB",
+          "confidence": 72
+        },
+        {
+          "player_name": "alec pierce",
+          "team": "IND",
+          "opponent": "PIT",
+          "stat_type": "Rec Yds",
+          "line": 41.5,
+          "position": "WR",
+          "confidence": 71
+        },
+        {
+          "player_name": "jordan love",
+          "team": "GB",
+          "opponent": "CAR",
+          "stat_type": "Pass Yds",
+          "line": 235.5,
+          "position": "QB",
+          "confidence": 71
+        }
+      ]
+    },
+    {
+      "type": "5-leg",
+      "recommended_units": 1.5,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "stefon diggs",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Rec Yds",
+          "line": 47.5,
+          "position": "WR",
+          "confidence": 72
+        },
+        {
+          "player_name": "drake maye",
+          "team": "NE",
+          "opponent": "ATL",
+          "stat_type": "Pass Yds",
+          "line": 227.5,
+          "position": "QB",
+          "confidence": 72
+        },
+        {
+          "player_name": "alec pierce",
+          "team": "IND",
+          "opponent": "PIT",
+          "stat_type": "Rec Yds",
+          "line": 42.5,
+          "position": "WR",
+          "confidence": 71
+        },
+        {
+          "player_name": "daniel jones",
+          "team": "IND",
+          "opponent": "PIT",
+          "stat_type": "Pass Yds",
+          "line": 251.5,
+          "position": "QB",
+          "confidence": 71
+        },
+        {
+          "player_name": "ja'marr chase",
+          "team": "CIN",
+          "opponent": "CHI",
+          "stat_type": "Rush+Rec Yds",
+          "line": 94.5,
+          "position": "RB",
+          "confidence": 71
+        }
+      ]
+    }
+  ]
+}

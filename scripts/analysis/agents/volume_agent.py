@@ -1,5 +1,6 @@
 """
-Volume Agent - Usage pattern analysis (FIXED IMPORTS)
+Volume Agent - Usage pattern analysis
+UPDATED: QB-friendly volume scoring
 """
 
 from typing import Dict, List, Tuple
@@ -40,35 +41,71 @@ class VolumeAgent(BaseAgent):
             rationale.append("⚠️ Limited usage data")
             return (50, "AVOID", rationale)
         
-        if prop.position in ['WR', 'TE']:
+        if prop.position == 'QB':
+            # QB: Check snap share (primary starter indicator)
+            snap_share = player_usage.get('snap_share_pct', 0)
+            
+            if snap_share >= 90:
+                score += 15
+                rationale.append(f"💪 Elite starter: {snap_share:.1f}% snaps")
+            elif snap_share >= 75:
+                score += 10
+                rationale.append(f"Strong starter: {snap_share:.1f}% snaps")
+            elif snap_share >= 50:
+                score += 5
+                rationale.append(f"Regular starter: {snap_share:.1f}% snaps")
+            elif snap_share < 30:
+                score -= 15
+                rationale.append(f"⚠️ Limited role: {snap_share:.1f}% snaps")
+            
+            # Check for pass attempts if available
+            pass_attempts = player_usage.get('pass_attempts', 0)
+            if pass_attempts > 0:
+                if pass_attempts >= 40:
+                    score += 8
+                    rationale.append(f"High volume: {pass_attempts:.0f} attempts")
+                elif pass_attempts < 15:
+                    score -= 8
+                    rationale.append(f"Low volume: {pass_attempts:.0f} attempts")
+        
+        elif prop.position in ['WR', 'TE']:
+            # WR/TE: Target share is crucial metric
             target_share = player_usage.get('target_share_pct', 0)
             
             if target_share >= 28:
-                score += 25
-                rationale.append(f"🎯 ELITE VOLUME: {target_share:.1f}% target share")
+                score += 22
+                rationale.append(f"🎯 ELITE VOLUME: {target_share:.1f}% targets")
             elif target_share >= 22:
-                score += 18
+                score += 15
                 rationale.append(f"🎯 High volume: {target_share:.1f}% targets")
             elif target_share >= 15:
-                score += 10
-                rationale.append(f"Solid volume: {target_share:.1f}% target share")
+                score += 8
+                rationale.append(f"Solid volume: {target_share:.1f}% targets")
             elif target_share < 10:
-                score -= 18
+                score -= 15
                 rationale.append(f"⚠️ LOW VOLUME: Only {target_share:.1f}% targets")
         
         elif prop.position == 'RB':
+            # RB: Check both snap share and rushing attempts for balance
             snap_share = player_usage.get('snap_share_pct', 0)
+            rush_attempts = player_usage.get('rush_attempts', 0)
             
             if snap_share >= 75:
-                score += 25
+                score += 22
                 rationale.append(f"🔒 BELLCOW: {snap_share:.1f}% snaps")
             elif snap_share >= 60:
-                score += 15
+                score += 12
                 rationale.append(f"Lead back: {snap_share:.1f}% snaps")
             elif snap_share < 35:
-                score -= 20
+                score -= 18
                 rationale.append(f"⚠️ LIMITED ROLE: {snap_share:.1f}% snaps")
+            
+            # Check rush attempts for rushing props
+            if 'Rush' in prop.stat_type and rush_attempts >= 15:
+                score += 5
+                rationale.append(f"Good rushing volume: {rush_attempts:.0f} attempts")
         
+        # Trend analysis - same for all positions
         trend = player_usage.get('trend', 'stable')
         if trend == 'increasing':
             score += 10
@@ -80,6 +117,6 @@ class VolumeAgent(BaseAgent):
         direction = "OVER" if score >= 50 else "UNDER"
         
         if score >= 70:
-            rationale.insert(0, f"✅ Elite volume supports {direction}")
+            rationale.insert(0, f"✅ Volume strongly supports {direction}")
         
         return (score, direction, rationale)

@@ -1,5 +1,6 @@
 """
 DVOA Agent - Analyzes team efficiency
+UPDATED: QB-friendly scoring with fair WR/TE competition
 """
 
 from typing import Dict, List, Tuple
@@ -26,70 +27,150 @@ class DVOAAgent(BaseAgent):
             rationale.append("⚠️ DVOA data not available")
             return (50, "AVOID", rationale)
         
-        total_off_dvoa = team_off.get('offense_weighted_dvoa', 
-                                      team_off.get('offense_dvoa', 0))
+        total_off_dvoa = team_off.get('offense_dvoa', 0)
         pass_off_dvoa = team_off.get('passing_dvoa', 0)
         rush_off_dvoa = team_off.get('rushing_dvoa', 0)
         
-        total_def_dvoa = opp_def.get('defense_weighted_dvoa',
-                                     opp_def.get('defense_dvoa', 0))
+        total_def_dvoa = opp_def.get('defense_dvoa', 0)
         pass_def_dvoa = opp_def.get('pass_defense_dvoa', 0)
         rush_def_dvoa = opp_def.get('rush_defense_dvoa', 0)
         
-        if prop.position in ['QB', 'WR', 'TE']:
-            if pass_off_dvoa >= 10:
-                score += 12  # REDUCED from 20 to prevent QB bias
-                rationale.append(f"💪 Elite passing O: {prop.team} +{pass_off_dvoa:.1f}% Pass DVOA")
+        # POSITION-SPECIFIC HANDLING
+        if prop.position == 'QB':
+            # QB: AGGRESSIVE SCORING for 80+ elite matchups
+            if pass_off_dvoa >= 40:
+                score += 30
+                rationale.append(f"🔥🔥 ELITE O: {prop.team} +{pass_off_dvoa:.1f}%")
+            elif pass_off_dvoa >= 20:
+                score += 25
+                rationale.append(f"💪 Elite passing O: {prop.team} +{pass_off_dvoa:.1f}%")
+            elif pass_off_dvoa >= 10:
+                score += 18
+                rationale.append(f"💪 Strong passing O: {prop.team} +{pass_off_dvoa:.1f}%")
             elif pass_off_dvoa >= 5:
-                score += 7  # REDUCED from 12
-                rationale.append(f"Strong passing O: +{pass_off_dvoa:.1f}% Pass DVOA")
+                score += 12
+                rationale.append(f"Good passing O: +{pass_off_dvoa:.1f}%")
             elif pass_off_dvoa >= 0:
-                score += 2  # REDUCED from 5
-                rationale.append(f"Average passing O: +{pass_off_dvoa:.1f}% Pass DVOA")
+                score += 5
+                rationale.append(f"Average passing O: +{pass_off_dvoa:.1f}%")
             elif pass_off_dvoa <= -10:
-                score -= 10
-                rationale.append(f"⚠️ Weak passing O: {pass_off_dvoa:.1f}% Pass DVOA")
+                score -= 15
+                rationale.append(f"⚠️ Weak passing O: {pass_off_dvoa:.1f}%")
             
-            if pass_def_dvoa >= 10:
-                score += 14  # REDUCED from 22
-                rationale.append(f"🎯 WEAK PASS D: {prop.opponent} +{pass_def_dvoa:.1f}%")
+            if pass_def_dvoa >= 20:
+                score += 25
+                rationale.append(f"🎯 ELITE weak D: {prop.opponent} +{pass_def_dvoa:.1f}%")
+            elif pass_def_dvoa >= 10:
+                score += 18
+                rationale.append(f"🎯 Weak pass D: {prop.opponent} +{pass_def_dvoa:.1f}%")
             elif pass_def_dvoa >= 3:
-                score += 9  # REDUCED from 14
+                score += 12
                 rationale.append(f"Favorable pass D: +{pass_def_dvoa:.1f}%")
             elif pass_def_dvoa >= 0:
-                score += 3  # REDUCED from 6
+                score += 6
                 rationale.append(f"Average pass D: +{pass_def_dvoa:.1f}%")
             elif pass_def_dvoa <= -10:
-                score -= 14  # REDUCED from 18
+                score -= 15
                 rationale.append(f"⚠️ ELITE PASS D: {pass_def_dvoa:.1f}%")
             
-            if pass_off_dvoa >= 10 and pass_def_dvoa >= 5:
-                score += 8  # REDUCED from 15
-                rationale.append("🔥 PREMIUM MATCHUP: Elite passing O vs weak pass D")
+            # Stack bonus: Elite O vs weak D
+            if pass_off_dvoa >= 20 and pass_def_dvoa >= 10:
+                score += 15
+                rationale.append("⚡ PREMIUM STACK: Elite O vs weak D")
+            
+            score += 5
+            rationale.append("✅ QB consistency bonus")
+        
+        elif prop.position in ['WR', 'TE']:
+            # WR/TE: AGGRESSIVE SCORING matching QB
+            if pass_off_dvoa >= 40:
+                score += 28
+                rationale.append(f"🔥🔥 ELITE O: {prop.team} +{pass_off_dvoa:.1f}%")
+            elif pass_off_dvoa >= 20:
+                score += 23
+                rationale.append(f"💪 Elite passing O: {prop.team} +{pass_off_dvoa:.1f}%")
+            elif pass_off_dvoa >= 10:
+                score += 16
+                rationale.append(f"💪 Strong passing O: {prop.team} +{pass_off_dvoa:.1f}%")
+            elif pass_off_dvoa >= 5:
+                score += 11
+                rationale.append(f"Good passing O: +{pass_off_dvoa:.1f}%")
+            elif pass_off_dvoa >= 0:
+                score += 4
+                rationale.append(f"Average passing O: +{pass_off_dvoa:.1f}%")
+            elif pass_off_dvoa <= -10:
+                score -= 12
+                rationale.append(f"⚠️ Weak passing O: {pass_off_dvoa:.1f}%")
+            
+            if pass_def_dvoa >= 20:
+                score += 23
+                rationale.append(f"🎯 ELITE weak D: {prop.opponent} +{pass_def_dvoa:.1f}%")
+            elif pass_def_dvoa >= 10:
+                score += 16
+                rationale.append(f"🎯 Weak pass D: {prop.opponent} +{pass_def_dvoa:.1f}%")
+            elif pass_def_dvoa >= 3:
+                score += 11
+                rationale.append(f"Favorable pass D: +{pass_def_dvoa:.1f}%")
+            elif pass_def_dvoa >= 0:
+                score += 5
+                rationale.append(f"Average pass D: +{pass_def_dvoa:.1f}%")
+            elif pass_def_dvoa <= -10:
+                score -= 12
+                rationale.append(f"⚠️ ELITE PASS D: {pass_def_dvoa:.1f}%")
+            
+            # Stack bonus
+            if pass_off_dvoa >= 20 and pass_def_dvoa >= 10:
+                score += 12
+                rationale.append("⚡ PREMIUM STACK: Elite O vs weak D")
+            
+            score += 3
+            rationale.append("✅ Pass-catching consistency bonus")
         
         elif prop.position == 'RB':
             if 'Rush' in prop.stat_type:
-                if rush_off_dvoa >= 10:
-                    score += 12
-                    rationale.append(f"Strong rush O: +{rush_off_dvoa:.1f}% Rush DVOA")
+                if rush_off_dvoa >= 20:
+                    score += 22
+                    rationale.append(f"🔥 Elite rush O: +{rush_off_dvoa:.1f}%")
+                elif rush_off_dvoa >= 10:
+                    score += 16
+                    rationale.append(f"💪 Strong rush O: +{rush_off_dvoa:.1f}%")
                 elif rush_off_dvoa <= -10:
-                    score -= 10
-                    rationale.append(f"⚠️ Weak rush O: {rush_off_dvoa:.1f}% Rush DVOA")
+                    score -= 15
+                    rationale.append(f"⚠️ Weak rush O: {rush_off_dvoa:.1f}%")
                 
-                if rush_def_dvoa >= 10:
-                    score += 15
-                    rationale.append(f"🎯 WEAK RUN D: {prop.opponent} +{rush_def_dvoa:.1f}%")
+                if rush_def_dvoa >= 20:
+                    score += 22
+                    rationale.append(f"🎯 ELITE weak run D: {prop.opponent} +{rush_def_dvoa:.1f}%")
+                elif rush_def_dvoa >= 10:
+                    score += 16
+                    rationale.append(f"🎯 Weak run D: {prop.opponent} +{rush_def_dvoa:.1f}%")
                 elif rush_def_dvoa <= -10:
-                    score -= 12
+                    score -= 15
                     rationale.append(f"⚠️ Elite run D: {rush_def_dvoa:.1f}%")
+                
+                # Stack bonus
+                if rush_off_dvoa >= 20 and rush_def_dvoa >= 10:
+                    score += 12
+                    rationale.append("⚡ PREMIUM STACK: Elite rush O vs weak D")
             
             elif 'Rec' in prop.stat_type:
-                if pass_off_dvoa >= 10:
+                if pass_off_dvoa >= 20:
+                    score += 20
+                    rationale.append(f"Elite receiving O: +{pass_off_dvoa:.1f}%")
+                elif pass_off_dvoa >= 10:
+                    score += 14
+                    rationale.append(f"Strong receiving O: +{pass_off_dvoa:.1f}%")
+                
+                if pass_def_dvoa >= 20:
+                    score += 18
+                    rationale.append(f"Weak pass D: +{pass_def_dvoa:.1f}%")
+                elif pass_def_dvoa >= 10:
+                    score += 12
+                    rationale.append(f"Favorable pass D: +{pass_def_dvoa:.1f}%")
+                
+                if pass_off_dvoa >= 20 and pass_def_dvoa >= 10:
                     score += 10
-                    rationale.append(f"Pass-catching RB benefits: +{pass_off_dvoa:.1f}% Pass DVOA")
-                if pass_def_dvoa >= 10:
-                    score += 8
-                    rationale.append(f"Favorable for RB receiving: +{pass_def_dvoa:.1f}% pass D")
+                    rationale.append("⚡ Premium receiving stack")
         
         direction = "OVER" if score >= 50 else "UNDER"
         

@@ -2,6 +2,7 @@
 Injury Agent - Analyzes player injury status impact
 UPDATED to parse CSV format with headers: Player,Team,Pos,Injury,Status,Est. Return
 Includes explicit logger initialization and BOM handling.
+Injury penalties: OUT=0, DOUBTFUL=20, QUESTIONABLE=0 (50pt), PROBABLE=20 (30pt)
 """
 
 from typing import Dict, List, Tuple
@@ -22,7 +23,7 @@ class InjuryAgent(BaseAgent):
     """Analyzes player injury status from a CSV report"""
 
     def __init__(self):
-        super().__init__(weight=1.5)
+        super().__init__(weight=3.0)  # CRITICAL: High weight ensures injuries override other signals
         # Ensure logger exists, unconditionally initialize if needed
         if not hasattr(self, 'logger') or self.logger is None:
              self.logger = logging.getLogger(self.__class__.__name__)
@@ -81,10 +82,20 @@ class InjuryAgent(BaseAgent):
 
 
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
-        """Analyzes injury status for the prop player"""
+        """Analyzes injury status for the prop player
+        
+        Scoring breakdown:
+        - OUT/IR/etc: 0 (eliminates prop entirely)
+        - DOUBTFUL: 20 (30 point penalty from baseline 50)
+        - QUESTIONABLE: 0 (50 point penalty from baseline 50)
+        - PROBABLE: 20 (30 point penalty from baseline 50)
+        - DAY TO DAY: 25 (25 point penalty)
+        - Not listed/Healthy: 50 (neutral, no penalty)
+        """
         if not hasattr(self, 'logger'): return (50, "AVOID", ["⚠️ Agent Error"]) # Safety check
 
-        rationale = []; score = 50
+        rationale = []
+        score = 50
         injury_text = context.get('injuries')
 
         if not self.injury_data and injury_text:
@@ -95,14 +106,27 @@ class InjuryAgent(BaseAgent):
 
         if status:
             self.logger.debug(f"Injury Status for {player_name_norm}: {status}")
-            if status in ['out', 'ir', 'pup-r', 'pup-nr', 'nfi-r', 'nfi-nr', 'reserve-ret']:
-                score = 0; rationale.append(f"🚨 PLAYER OUT ({status.upper()})")
+            
+            # Status categories with scores and penalties
+            if status in ['out', 'ir', 'pup-r', 'pup-nr', 'nfi-r', 'nfi-nr', 'reserve-ret', 'reserve-sus', 'inactive']:
+                score = 0
+                rationale.append(f"🚨 PLAYER OUT ({status.upper()})")
             elif status == 'doubtful':
-                score = 20; rationale.append(f"⚠️ PLAYER DOUBTFUL")
+                score = 20
+                rationale.append(f"⚠️ PLAYER DOUBTFUL (30pt penalty)")
             elif status == 'questionable':
-                score = 40; rationale.append(f"🟡 PLAYER QUESTIONABLE")
-            else: score = 50 # Healthy/Active
-        else: score = 50 # Assume healthy if not listed
+                score = 0  # 50 point penalty (0 vs baseline 50)
+                rationale.append(f"🟡 PLAYER QUESTIONABLE (50pt penalty)")
+            elif status == 'probable':
+                score = 20  # 30 point penalty (20 vs baseline 50)
+                rationale.append(f"✅ PLAYER PROBABLE (30pt penalty)")
+            elif status == 'day to day':
+                score = 25  # 25 point penalty
+                rationale.append(f"⚠️ PLAYER DAY TO DAY (25pt penalty)")
+            else:
+                score = 50  # Healthy/Active or unknown status
+        else:
+            score = 50  # Assume healthy if not listed
 
         direction = "AVOID" if score < 30 else ("UNDER" if score < 50 else "OVER")
         final_rationale = rationale if score != 50 else []

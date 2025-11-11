@@ -1,0 +1,20 @@
+BETTING CARD METADATA
+Generated: 2025-10-28 18:51:53
+Week: 8
+Total Parlays: 10/10
+
+BREAKDOWN:
+- 2-leg parlays: 3
+- 3-leg parlays: 3
+- 4-leg parlays: 3
+- 5-leg parlays: 1
+
+INVESTMENT:
+- Total units: 12.5
+- At $10/unit: $125
+- At $25/unit: $312
+
+FILES:
+- betting_card.txt: Main betting recommendations
+- validation_form.txt: Post-game result tracking and validation form
+- metadata.txt: This file

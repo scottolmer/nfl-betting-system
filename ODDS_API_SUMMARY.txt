@@ -1,0 +1,248 @@
+# The Odds API - DraftKings Integration Summary
+
+## Your Question: "Does The Odds API support DraftKings-only betting lines?"
+
+### ✅ **YES - FULLY SUPPORTED**
+
+---
+
+## 📊 What Changed
+
+### BEFORE
+```
+Your System
+    ↓
+The Odds API
+    ↓
+Gets props from: DraftKings + FanDuel + BetRivers + PointsBet + more
+    ↓
+Your Analysis (uses all of them mixed together)
+```
+
+### AFTER
+```
+Your System
+    ↓
+The Odds API
+    ↓
+You choose: --bookmaker draftkings (or fanduel, betrivers, etc.)
+    ↓
+Gets props from ONLY that sportsbook
+    ↓
+Your Analysis (uses just DraftKings lines)
+```
+
+---
+
+## 🎯 How to Use It
+
+### **Option A: DraftKings Only (Recommended)**
+```bash
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+```
+✅ Gets fresh DraftKings lines  
+✅ Generates 10 parlays for DraftKings  
+✅ Saves to `betting_lines_wk_8_draftkings.csv`  
+
+### **Option B: Compare Multiple Books**
+```bash
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker fanduel
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker betrivers
+```
+✅ Generate parlays from each sportsbook  
+✅ Compare which has best lines  
+✅ Place bets where odds are most favorable  
+
+### **Option C: All Sportsbooks (Original)**
+```bash
+python scripts/run_analysis_draftkings.py --week 8
+```
+✅ Same as before  
+✅ Gets all available lines mixed together  
+
+---
+
+## 📁 Files Created
+
+| File | Purpose |
+|------|---------|
+| `scripts/api/odds_api_enhanced.py` | Enhanced API client with bookmaker filtering |
+| `scripts/run_analysis_draftkings.py` | Main script with bookmaker support |
+| `DRAFTKINGS_INTEGRATION_SUMMARY.md` | Detailed documentation |
+| `ODDS_API_DRAFTKINGS_GUIDE.md` | Complete how-to guide |
+| `COMMAND_REFERENCE_UPDATED.md` | Updated command reference |
+| `DRAFTKINGS_QUICK_START.md` | Quick reference card |
+
+---
+
+## 🏆 Supported Sportsbooks
+
+```
+✅ draftkings           ← Most props, recommended
+✅ fanduel              ← Second best coverage
+✅ pointsbetau
+✅ betrivers
+✅ mybookie
+✅ betonline
+✅ bovada
+```
+
+---
+
+## 💰 API Cost
+
+```
+Fetch all books:    1 API request → All sportsbooks
+Fetch DraftKings:   1 API request → DraftKings only
+
+Cost is THE SAME ← Filtering happens locally!
+
+Your quota: 500 requests/month
+Weekly use: ~1 request (+ ~30 for monitoring if enabled)
+Plenty of room! ✅
+```
+
+---
+
+## 🚀 Quick Start
+
+### Test It
+```bash
+python scripts/api/odds_api_enhanced.py
+```
+Shows available bookmakers and sample props.
+
+### Use It (Sunday Workflow)
+```bash
+# Get DraftKings lines
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+
+# Review betting card
+cat data/week8_betting_card.txt
+
+# Place 10 parlays on DraftKings
+# Log in tracker
+```
+
+### Compare Books (Optional)
+```bash
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker fanduel
+# Compare: which book has best lines for each parlay?
+```
+
+---
+
+## 🔄 Backward Compatibility
+
+✅ Your old script still works:
+```bash
+python scripts/run_analysis.py --week 8  # Still works!
+```
+
+✅ New script adds bookmaker filtering:
+```bash
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings  # New!
+```
+
+---
+
+## 📊 Example Output
+
+### When you run:
+```bash
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+```
+
+### You get:
+```
+✅ Loaded and transformed data for 1135 props
+✅ Analyzed 664 props with confidence > 50
+✅ Built 3 2-leg, 3 3-leg, 3 4-leg, 1 5-leg parlays
+✅ Saved betting card to: data/week8_betting_card.txt
+
+Source: DRAFTKINGS
+Generated: 2025-10-25 08:57:49
+```
+
+### Saved to:
+```
+data/betting_lines_wk_8_draftkings.csv  ← DraftKings lines only
+data/week8_betting_card.txt              ← 10 optimized parlays
+```
+
+---
+
+## 💡 Use Cases
+
+### Case 1: Only Bet DraftKings
+```bash
+# Every Sunday
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+```
+✅ Parlays optimized for DraftKings  
+✅ Exact lines you'll see when betting  
+
+### Case 2: Find Best Lines
+```bash
+# Run once for each book
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+python scripts/run_analysis_draftkings.py --week 8 --bookmaker fanduel
+```
+✅ Compare betting cards  
+✅ Place bets on book with best odds  
+
+### Case 3: Catch Sharp Money
+Compare line movements across books to spot where sharp money is going.
+
+---
+
+## 🎯 Bottom Line
+
+| Question | Answer |
+|----------|--------|
+| **Supported?** | ✅ Yes - fully supported |
+| **Cost?** | ✅ Same as before |
+| **Easy to use?** | ✅ One flag: `--bookmaker draftkings` |
+| **Backward compatible?** | ✅ Old scripts still work |
+| **Recommended?** | ✅ Yes - use DraftKings if that's where you bet |
+
+---
+
+## 📚 Documentation
+
+- **Quick reference**: `DRAFTKINGS_QUICK_START.md`
+- **How-to guide**: `ODDS_API_DRAFTKINGS_GUIDE.md`
+- **Complete details**: `DRAFTKINGS_INTEGRATION_SUMMARY.md`
+- **All commands**: `COMMAND_REFERENCE_UPDATED.md`
+
+---
+
+## 🎬 Next Steps
+
+1. **Test the integration:**
+   ```bash
+   python scripts/api/odds_api_enhanced.py
+   ```
+
+2. **Try DraftKings lines:**
+   ```bash
+   python scripts/run_analysis_draftkings.py --week 8 --bookmaker draftkings
+   ```
+
+3. **Review your betting card:**
+   ```bash
+   cat data/week8_betting_card.txt
+   ```
+
+4. **Place your 10 parlays on DraftKings**
+
+5. **Log results in tracker:**
+   ```
+   data/PARLAY_BET_TRACKER.csv
+   ```
+
+---
+
+**You're all set! The Odds API integration with DraftKings filtering is ready to use.** 🚀

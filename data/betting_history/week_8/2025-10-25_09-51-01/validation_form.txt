@@ -1,0 +1,445 @@
+================================================================================
+🏈 NFL BETTING VALIDATION FORM - POST-GAME RESULTS
+================================================================================
+
+PREDICTION DETAILS
+--------------------------------------------------------------------------------
+Week: 8
+Generated: 2025-10-25 09:51:01
+Total Parlays: 10
+
+INSTRUCTIONS FOR VALIDATION
+--------------------------------------------------------------------------------
+1. After all games in Week {week} have concluded, fill in the 'ACTUAL' column
+2. Enter 'HIT' if the prop went over the line, 'MISS' if it went under
+3. The system will automatically calculate if each leg won/lost
+4. Mark entire parlay as 'WON' only if ALL legs hit
+
+
+================================================================================
+📊 2-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 21 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 74 | Units: 1.5
+│ Expected Value: +48.0% | Potential Payout: $6
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/2: tee higgins (WR) - CIN
+│   Bet Type: Rec Yds OVER 55.5 (vs NYJ)
+│   Confidence: 71%
+│
+│   PREDICTION: Rec Yds OVER 55.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/2: jonnu smith (WR) - PIT
+│   Bet Type: Receptions OVER 3.5 (vs GB)
+│   Confidence: 70%
+│
+│   PREDICTION: Receptions OVER 3.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 22 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 74 | Units: 1.5
+│ Expected Value: +48.0% | Potential Payout: $6
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/2: tee higgins (WR) - CIN
+│   Bet Type: Receptions OVER 4.5 (vs NYJ)
+│   Confidence: 71%
+│
+│   PREDICTION: Receptions OVER 4.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/2: pat freiermuth (WR) - PIT
+│   Bet Type: Receptions OVER 2.5 (vs GB)
+│   Confidence: 70%
+│
+│   PREDICTION: Receptions OVER 2.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 23 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 74 | Units: 1.5
+│ Expected Value: +48.0% | Potential Payout: $6
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/2: tee higgins (WR) - CIN
+│   Bet Type: Rec Yds OVER 54.5 (vs NYJ)
+│   Confidence: 71%
+│
+│   PREDICTION: Rec Yds OVER 54.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/2: jonnu smith (WR) - PIT
+│   Bet Type: Rec Yds OVER 28.5 (vs GB)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 28.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 3-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 31 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 73 | Units: 1.5
+│ Expected Value: +46.0% | Potential Payout: $12
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/3: tee higgins (WR) - CIN
+│   Bet Type: Rec Yds OVER 50.5 (vs NYJ)
+│   Confidence: 71%
+│
+│   PREDICTION: Rec Yds OVER 50.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/3: pat freiermuth (WR) - PIT
+│   Bet Type: Rec Yds OVER 21.5 (vs GB)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 21.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/3: wan'dale robinson (RB) - NYG
+│   Bet Type: Rush+Rec Yds OVER 50.5 (vs PHI)
+│   Confidence: 67%
+│
+│   PREDICTION: Rush+Rec Yds OVER 50.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 32 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 68 | Units: 1.0
+│ Expected Value: +36.0% | Potential Payout: $8
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/3: pat freiermuth (WR) - PIT
+│   Bet Type: Rec Yds OVER 20.5 (vs GB)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 20.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/3: jonnu smith (WR) - PIT
+│   Bet Type: Rec Yds OVER 29.5 (vs GB)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 29.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/3: george pickens (RB) - DAL
+│   Bet Type: Rush+Rec Yds OVER 58.5 (vs DEN)
+│   Confidence: 66%
+│
+│   PREDICTION: Rush+Rec Yds OVER 58.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 33 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 68 | Units: 1.0
+│ Expected Value: +36.0% | Potential Payout: $8
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/3: jonnu smith (WR) - PIT
+│   Bet Type: Rec Yds OVER 26.5 (vs GB)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 26.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/3: pat freiermuth (WR) - PIT
+│   Bet Type: Rec Yds OVER 18.5 (vs GB)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 18.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/3: daniel jones (QB) - IND
+│   Bet Type: player_pass_attempts OVER 29.5 (vs TEN)
+│   Confidence: 66%
+│
+│   PREDICTION: player_pass_attempts OVER 29.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 4-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 41 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 71 | Units: 1.5
+│ Expected Value: +42.0% | Potential Payout: $24
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/4: jonnu smith (WR) - PIT
+│   Bet Type: Rec Yds OVER 25.5 (vs GB)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 25.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/4: rashee rice (WR) - KC
+│   Bet Type: Rec Yds OVER 67.5 (vs WAS)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 67.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/4: daniel jones (QB) - IND
+│   Bet Type: Pass Completions OVER 21.5 (vs TEN)
+│   Confidence: 66%
+│
+│   PREDICTION: Pass Completions OVER 21.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/4: rachaad white (RB) - TB
+│   Bet Type: Rush+Rec Yds OVER 89.5 (vs NO)
+│   Confidence: 64%
+│
+│   PREDICTION: Rush+Rec Yds OVER 89.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 42 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 66 | Units: 1.0
+│ Expected Value: +32.0% | Potential Payout: $16
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/4: rashee rice (WR) - KC
+│   Bet Type: Receptions OVER 6.5 (vs WAS)
+│   Confidence: 69%
+│
+│   PREDICTION: Receptions OVER 6.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/4: alec pierce (WR) - IND
+│   Bet Type: Rec Yds OVER 36.5 (vs TEN)
+│   Confidence: 68%
+│
+│   PREDICTION: Rec Yds OVER 36.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/4: daniel jones (QB) - IND
+│   Bet Type: Pass TDs OVER 1.5 (vs TEN)
+│   Confidence: 66%
+│
+│   PREDICTION: Pass TDs OVER 1.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/4: rachaad white (RB) - TB
+│   Bet Type: Rush+Rec Yds OVER 90.5 (vs NO)
+│   Confidence: 64%
+│
+│   PREDICTION: Rush+Rec Yds OVER 90.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─ PARLAY 43 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 66 | Units: 1.0
+│ Expected Value: +32.0% | Potential Payout: $16
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/4: rashee rice (WR) - KC
+│   Bet Type: Receptions OVER 5.5 (vs WAS)
+│   Confidence: 69%
+│
+│   PREDICTION: Receptions OVER 5.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/4: alec pierce (WR) - IND
+│   Bet Type: Receptions OVER 2.5 (vs TEN)
+│   Confidence: 68%
+│
+│   PREDICTION: Receptions OVER 2.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/4: daniel jones (QB) - IND
+│   Bet Type: Pass Yds OVER 240.5 (vs TEN)
+│   Confidence: 66%
+│
+│   PREDICTION: Pass Yds OVER 240.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/4: rachaad white (RB) - TB
+│   Bet Type: Rush+Rec Yds OVER 87.5 (vs NO)
+│   Confidence: 64%
+│
+│   PREDICTION: Rush+Rec Yds OVER 87.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 5-LEG PARLAYS
+================================================================================
+
+┌─ PARLAY 51 ─────────────────────────────────────────────────────┐
+│ Risk Level: MODERATE | Confidence: 66 | Units: 1.0
+│ Expected Value: +32.0% | Potential Payout: $32
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Leg 1/5: rashee rice (WR) - KC
+│   Bet Type: Rec Yds OVER 66.5 (vs WAS)
+│   Confidence: 69%
+│
+│   PREDICTION: Rec Yds OVER 66.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 2/5: alec pierce (WR) - IND
+│   Bet Type: Rec Yds OVER 35.5 (vs TEN)
+│   Confidence: 68%
+│
+│   PREDICTION: Rec Yds OVER 35.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 3/5: daniel jones (QB) - IND
+│   Bet Type: Pass Completions OVER 20.5 (vs TEN)
+│   Confidence: 66%
+│
+│   PREDICTION: Pass Completions OVER 20.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 4/5: javonte williams (RB) - DAL
+│   Bet Type: Rush+Rec Yds OVER 83.5 (vs DEN)
+│   Confidence: 64%
+│
+│   PREDICTION: Rush+Rec Yds OVER 83.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+│ Leg 5/5: ceedee lamb (RB) - DAL
+│   Bet Type: Rush+Rec Yds OVER 75.5 (vs DEN)
+│   Confidence: 64%
+│
+│   PREDICTION: Rush+Rec Yds OVER 75.5
+│   ACTUAL RESULT: ________________  (Enter HIT or MISS)
+│   LEG RESULT: [ ]  (System calculates)
+│
+├─ PARLAY RESULT ─────────────────────────────────────────────────────────────┤
+│ All legs must HIT for parlay to WIN
+│ PARLAY RESULT: [ ]  (System calculates: WON or LOST)
+│ UNITS WON/LOST: ________________
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+📊 VALIDATION SUMMARY
+================================================================================
+
+OVERALL RESULTS
+--------------------------------------------------------------------------------
+Total Recommended Units: 12.5
+At $10/unit: $125
+At $25/unit: $312
+
+RESULTS TO FILL IN:
+--------------------------------------------------------------------------------
+Total Parlays Placed: _____ / 10
+Parlays Won: _____
+Parlays Lost: _____
+Win Rate: ____% (Parlays Won / Parlays Placed)
+
+Total Units Wagered: _____ (should equal 12.5)
+Total Units Won: _____
+Total Units Lost: _____
+Net Profit/Loss: _____ units
+ROI: ____% (Net Profit / Units Wagered * 100)
+
+
+================================================================================
+📈 CALIBRATION NOTES
+================================================================================
+Use this section to track system performance and identify improvements:
+
+Which parlays performed better? (2-leg, 3-leg, 4-leg, 5-leg)
+________________________________________________________________________________
+
+Which positions/players underperformed?
+________________________________________________________________________________
+
+Any external factors that affected results? (injuries, weather, etc.)
+________________________________________________________________________________
+
+Confidence estimates accuracy (were high-confidence props more reliable?)
+________________________________________________________________________________
+
+Overall system assessment for Week {week}:
+________________________________________________________________________________
+
+================================================================================

@@ -1,0 +1,162 @@
+============================================================
+🎯 ACTIONABLE PARLAY RECOMMENDATIONS
+============================================================
+
+
+============================================================
+📊 2-LEG PARLAYS
+============================================================
+
+**PARLAY 21** - MODERATE RISK
+Combined Confidence: 71 | EV: +42.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: jaxson dart (NYG)
+         Pass Yds OVER 209.5
+         vs SF | Confidence: 67
+  Leg 2: mack hollins (NE)
+         Receptions OVER 2.5
+         vs ATL | Confidence: 67
+
+  Rationale:
+    • ✅ Diversified QB/WR across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 22** - MODERATE RISK
+Combined Confidence: 71 | EV: +42.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: ja'marr chase (CIN)
+         Receptions OVER 8.5
+         vs CHI | Confidence: 67
+  Leg 2: jaxson dart (NYG)
+         Pass Yds OVER 210.5
+         vs SF | Confidence: 67
+
+  Rationale:
+    • ✅ Diversified QB/WR across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 23** - MODERATE RISK
+Combined Confidence: 70 | EV: +40.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: jaxson dart (NYG)
+         Pass Yds OVER 215.5
+         vs SF | Confidence: 67
+  Leg 2: jauan jennings (SF)
+         Rec Yds OVER 50.5
+         vs NYG | Confidence: 66
+
+  Rationale:
+    • ✅ Diversified QB/WR across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 3-LEG PARLAYS
+============================================================
+
+**PARLAY 31** - MODERATE RISK
+Combined Confidence: 70 | EV: +40.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: mack hollins (NE)
+         Rec Yds OVER 20.5
+         vs ATL | Confidence: 66
+  Leg 2: jauan jennings (SF)
+         Rec Yds OVER 49.5
+         vs NYG | Confidence: 66
+  Leg 3: jaxson dart (NYG)
+         Pass Completions OVER 19.5
+         vs SF | Confidence: 66
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 32** - MODERATE RISK
+Combined Confidence: 69 | EV: +38.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: ja'marr chase (CIN)
+         Rec Yds OVER 93.5
+         vs CHI | Confidence: 66
+  Leg 2: jauan jennings (SF)
+         Receptions OVER 4.5
+         vs NYG | Confidence: 66
+  Leg 3: drake maye (NE)
+         Pass Yds OVER 236.5
+         vs ATL | Confidence: 65
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 33** - MODERATE RISK
+Combined Confidence: 69 | EV: +38.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: ja'marr chase (CIN)
+         Rec Yds OVER 90.5
+         vs CHI | Confidence: 66
+  Leg 2: tucker kraft (GB)
+         Rec Yds OVER 56.5
+         vs CAR | Confidence: 65
+  Leg 3: drake maye (NE)
+         Pass Yds OVER 233.5
+         vs ATL | Confidence: 65
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 4-LEG PARLAYS
+============================================================
+
+**PARLAY 41** - MODERATE RISK
+Combined Confidence: 69 | EV: +38.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: ladd mcconkey (LAC)
+         Receptions OVER 5.5
+         vs TEN | Confidence: 65
+  Leg 2: tucker kraft (GB)
+         Receptions OVER 4.5
+         vs CAR | Confidence: 65
+  Leg 3: jaxson dart (NYG)
+         player_pass_attempts OVER 31.5
+         vs SF | Confidence: 65
+  Leg 4: drake maye (NE)
+         Pass Yds OVER 230.5
+         vs ATL | Confidence: 65
+
+  Rationale:
+    • ✅ Diversified QB/WR across 4 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+💡 BETTING TIPS
+============================================================
+• 2-leg parlays have highest hit rate but lower payout
+• 3-leg and 4-leg balance risk/reward
+• 5-leg is high risk/high reward - consider reducing units
+• Same-game parlays have correlation bonus but higher variance
+• Uncorrelated parlays (different games) are safer
+• Position diversity reduces correlation risk
+• Never bet more than you can afford to lose!
+
+============================================================
+📊 SUMMARY
+============================================================
+Total Parlays: 7/10
+Total Units: 9.0
+At $10/unit: $90
+============================================================
