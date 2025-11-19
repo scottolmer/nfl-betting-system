@@ -112,14 +112,14 @@ class InjuryAgent(BaseAgent):
                 score = 0
                 rationale.append(f"🚨 PLAYER OUT ({status.upper()})")
             elif status == 'doubtful':
-                score = 20
-                rationale.append(f"⚠️ PLAYER DOUBTFUL (30pt penalty)")
+                score = 10  # Reduced from 20 (40pt penalty vs baseline 50)
+                rationale.append(f"⚠️ PLAYER DOUBTFUL (40pt penalty)")
             elif status == 'questionable':
                 score = 0  # 50 point penalty (0 vs baseline 50)
                 rationale.append(f"🟡 PLAYER QUESTIONABLE (50pt penalty)")
             elif status == 'probable':
-                score = 20  # 30 point penalty (20 vs baseline 50)
-                rationale.append(f"✅ PLAYER PROBABLE (30pt penalty)")
+                score = 25  # Increased from 20 (25pt penalty, less harsh)
+                rationale.append(f"✅ PLAYER PROBABLE (25pt penalty)")
             elif status == 'day to day':
                 score = 25  # 25 point penalty
                 rationale.append(f"⚠️ PLAYER DAY TO DAY (25pt penalty)")

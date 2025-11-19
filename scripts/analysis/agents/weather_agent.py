@@ -10,7 +10,7 @@ class WeatherAgent(BaseAgent):
     """Analyzes weather impact (extreme conditions only)"""
     
     def __init__(self):
-        super().__init__(weight=0.5)
+        super().__init__(weight=0.0)  # DISABLED - weather data not reliably loaded
     
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []

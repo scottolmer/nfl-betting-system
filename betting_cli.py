@@ -17,10 +17,12 @@ from scripts.analysis.parlay_builder import ParlayBuilder
 from scripts.analysis.parlay_optimizer import ParlayOptimizer
 from scripts.analysis.dependency_analyzer import DependencyAnalyzer
 from scripts.analysis.performance_tracker import PerformanceTracker
+from scripts.analysis.agent_calibrator import AgentCalibrator
 from scripts.analysis.kelly_optimizer import KellyOptimizer, format_kelly_report
 from scripts.analysis.position_size_optimizer import PositionSizeOptimizer
 from scripts.analysis.odds_integration import OddsIntegrator, integrate_odds_with_analysis
 from scripts.utils.parlay_gui import show_parlays_gui
+from scripts.utils.props_json_exporter import PropsJSONExporter
 import logging
 
 logging.basicConfig(level=logging.WARNING)
@@ -32,6 +34,7 @@ class BettingAnalyzerCLI:
         self.loader = NFLDataLoader(data_dir=str(project_root / "data"))
         self.parlay_builder = ParlayBuilder()
         self.tracker = PerformanceTracker(db_path=str(project_root / "bets.db"))
+        self.calibrator = AgentCalibrator(db_path=str(project_root / "bets.db"))
         self.odds_integrator = OddsIntegrator(data_dir=str(project_root / "data"))
         self.week = 9
         self.last_parlays = []
@@ -48,6 +51,7 @@ class BettingAnalyzerCLI:
         print("  parlays [conf]           - Generate standard parlays (default: 58)")
         print("  opt-parlays [quality]    - Generate optimized low-correlation parlays")
         print("  top-props [count]        - Show top N props by confidence (default: 20)")
+        print("  export-props [count]     - Export props as JSON for Claude (default: 50)")
         print("  week <number>            - Change week (1-18)")
         print("\n  💰 BANKROLL & SIZING:")
         print("  bankroll <amount>        - Set betting bankroll (e.g., 'bankroll 5000')")
@@ -57,7 +61,9 @@ class BettingAnalyzerCLI:
         print("\n  📊 TRACKING COMMANDS:")
         print("  log-parlay <index>       - Mark parlay N as one you're betting on")
         print("  log-result <id> <hits>   - Log results (e.g., 'log-result parlay_001 2/3')")
+        print("  log-legs <id> <W/L>...   - Log per-leg results (e.g., 'log-legs parlay_001 W W L')")
         print("  calibrate [week]         - Show calibration report (all weeks or specific)")
+        print("  calibrate-agents [week]  - Show agent accuracy & weight recommendations")
         print("  recent [limit]           - Show recent logged parlays (default: 10)")
         print("  summary <week>           - Show week summary stats")
         print("\n  help                     - Show this message")
@@ -71,6 +77,7 @@ class BettingAnalyzerCLI:
         print("="*70)
         print("  analyze <query>        | Example: analyze Mahomes 250 pass yards NYG")
         print("  top-props [count]      | Example: top-props 20 (default: 20)")
+        print("  export-props [count]   | Example: export-props 50 (default: 50)")
         print("  parlays [confidence]   | Example: parlays 65 (default: 65)")
         print("  opt-parlays [quality]  | Example: opt-parlays 75 (default: 65)")
         print("  week <number>          | Example: week 10")
@@ -78,7 +85,9 @@ class BettingAnalyzerCLI:
         print("  kelly [bankroll]       | Example: kelly 3000 (uses stored if not provided)")
         print("  log-parlay <index>     | Example: log-parlay 0 (mark parlay as bet)")
         print("  log-result <id> <hits> | Example: log-result parlay_001 3/3")
+        print("  log-legs <id> <W/L>... | Example: log-legs parlay_001 W W L")
         print("  calibrate [week]       | Example: calibrate 9 (or calibrate for all)")
+        print("  calibrate-agents [w]   | Example: calibrate-agents 9 (or all weeks)")
         print("="*70 + "\n")
     
     def pull_lines(self):
@@ -123,8 +132,22 @@ class BettingAnalyzerCLI:
         print(f"📊 Analyzing props (OVER + UNDER)...")
         all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
         
-        all_analyses.sort(key=lambda x: x.final_confidence, reverse=True)
-        top_props = all_analyses[:count]
+        # Deduplicate: keep only highest confidence for each player+stat_type+bet_type
+        seen = {}
+        deduped_analyses = []
+        
+        for analysis in sorted(all_analyses, key=lambda x: x.final_confidence, reverse=True):
+            prop = analysis.prop
+            bet_type = getattr(prop, 'bet_type', 'OVER')
+            key = (prop.player_name.lower(), prop.stat_type, bet_type)
+            
+            if key not in seen:
+                seen[key] = True
+                deduped_analyses.append(analysis)
+                if len(deduped_analyses) >= count:
+                    break
+        
+        top_props = deduped_analyses
         
         over_count = sum(1 for p in top_props if getattr(p.prop, 'bet_type', 'OVER') == 'OVER')
         under_count = sum(1 for p in top_props if getattr(p.prop, 'bet_type', 'OVER') == 'UNDER')
@@ -157,6 +180,64 @@ class BettingAnalyzerCLI:
         print("="*70)
         print(f"\n💡 Use any of these players to build your parlay!")
         print(f"   Example: analyze Mahomes 250 pass yards\n")
+    
+    def export_props_command(self, count_str="50"):
+        """Export top props as JSON for conversational Claude analysis"""
+        try:
+            count = int(count_str)
+        except ValueError:
+            count = 50
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        print(f"📊 Analyzing props...")
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        
+        # Deduplicate: keep only highest confidence for each player+stat_type+bet_type
+        seen = {}
+        deduped_analyses = []
+        
+        for analysis in sorted(all_analyses, key=lambda x: x.final_confidence, reverse=True):
+            prop = analysis.prop
+            bet_type = getattr(prop, 'bet_type', 'OVER')
+            key = (prop.player_name.lower(), prop.stat_type, bet_type)
+            
+            if key not in seen:
+                seen[key] = True
+                deduped_analyses.append(analysis)
+                if len(deduped_analyses) >= count:
+                    break
+        
+        top_props = deduped_analyses
+        
+        print(f"\n📤 Exporting {len(top_props)} props to JSON...")
+        
+        # Generate JSON export
+        json_export, summary = PropsJSONExporter.export_props_with_summary(top_props)
+        
+        # Print summary
+        print(summary)
+        print("\n" + "="*70)
+        print("📋 JSON EXPORT FOR CLAUDE")
+        print("="*70)
+        print(json_export)
+        print("="*70)
+        
+        # Try to copy to clipboard
+        try:
+            import pyperclip
+            pyperclip.copy(json_export)
+            print("\n✅ JSON copied to clipboard!")
+            print("   Paste into Claude with: Ctrl+V")
+            print("   Then ask Claude questions like:")
+            print("   - 'Create a 3-leg parlay from high passing yards props'")
+            print("   - 'Which players correlate most?'")
+            print("   - 'Show me all TD props with bellcow RBs'\n")
+        except ImportError:
+            print("\n💡 Tip: Install pyperclip for auto-clipboard:")
+            print("   pip install pyperclip")
+            print("\n   Or manually copy the JSON above and paste into Claude\n")
     
     def generate_parlays(self, min_conf_str="58"):
         """Generate standard parlay combinations"""
@@ -383,7 +464,7 @@ class BettingAnalyzerCLI:
             print("❌ Invalid week number\n")
     
     def log_parlay_command(self, index_str):
-        """Mark a parlay as one you're betting on (for tracking purposes)"""
+        """Mark a parlay as one you're betting on"""
         try:
             index = int(index_str)
             if index < 0 or index >= len(self.last_parlay_ids):
@@ -433,6 +514,42 @@ class BettingAnalyzerCLI:
         except Exception as e:
             print(f"❌ Error: {e}\n")
     
+    def log_legs_command(self, arg_str):
+        """Log per-leg results (W/L for each leg)"""
+        try:
+            parts = arg_str.split()
+            if len(parts) < 2:
+                print("❌ Usage: log-legs <parlay_id> <W/L> <W/L> ...\n")
+                print("   Example: log-legs parlay_001 W W L\n")
+                return
+            
+            parlay_id = parts[0]
+            leg_outcomes = parts[1:]
+            
+            # Validate all outcomes are W or L
+            for outcome in leg_outcomes:
+                if outcome.upper() not in ['W', 'L']:
+                    print(f"❌ Invalid outcome '{outcome}'. Use only W or L\n")
+                    return
+            
+            # Build leg results dict
+            leg_results = {}
+            for i, outcome in enumerate(leg_outcomes):
+                leg_results[f'leg_{i}'] = (outcome.upper() == 'W')
+            
+            self.tracker.log_results(parlay_id, leg_results)
+            
+            # Summary output
+            wins = sum(1 for v in leg_results.values() if v)
+            total = len(leg_results)
+            print(f"✅ Per-leg results logged!")
+            print(f"   Parlay ID: {parlay_id}")
+            print(f"   Result: {wins}/{total} legs hit")
+            print(f"   Details: {' '.join([f'Leg {i+1}={o.upper()}' for i, o in enumerate(leg_outcomes)])}\n")
+        
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
+    
     def calibrate_command(self, week_str=""):
         """Show calibration report"""
         try:
@@ -443,6 +560,17 @@ class BettingAnalyzerCLI:
             self.tracker.calibration_report(week=week)
         except ValueError:
             print("❌ Invalid week number\n")
+    
+    def calibrate_agents_command(self, week_str=""):
+        """Show agent accuracy & recalibration recommendations"""
+        try:
+            week = None
+            if week_str:
+                week = int(week_str)
+            
+            print(self.calibrator.generate_recalibration_report(week=week))
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
     
     def recent_command(self, limit_str="10"):
         """Show recent parlays"""
@@ -461,7 +589,7 @@ class BettingAnalyzerCLI:
             print("❌ Invalid week number\n")
     
     def injury_diagnostic_command(self, player_name=""):
-        """Show injury system diagnostic - optionally for a specific player"""
+        """Show injury system diagnostic"""
         print("\n" + "="*80)
         print("INJURY AGENT DIAGNOSTIC - COMPLETE SYSTEM CHECK")
         print("="*80 + "\n")
@@ -582,7 +710,7 @@ class BettingAnalyzerCLI:
         print()
 
     def kelly_sizing_command(self, arg_str=""):
-        """Calculate optimal Kelly sizing for last generated parlays"""
+        """Calculate optimal Kelly sizing"""
         if not self.last_parlays:
             print("❌ No parlays generated yet. Run 'parlays' or 'opt-parlays' first.\n")
             return
@@ -650,6 +778,8 @@ class BettingAnalyzerCLI:
                     self.analyze_prop(arg)
                 elif command == 'top-props':
                     self.show_top_props(arg)
+                elif command == 'export-props':
+                    self.export_props_command(arg)
                 elif command == 'parlays':
                     self.generate_parlays(arg)
                 elif command == 'opt-parlays':
@@ -664,8 +794,12 @@ class BettingAnalyzerCLI:
                     self.log_parlay_command(arg)
                 elif command == 'log-result':
                     self.log_results_command(arg)
+                elif command == 'log-legs':
+                    self.log_legs_command(arg)
                 elif command == 'calibrate':
                     self.calibrate_command(arg)
+                elif command == 'calibrate-agents':
+                    self.calibrate_agents_command(arg)
                 elif command == 'recent':
                     self.recent_command(arg)
                 elif command == 'summary':

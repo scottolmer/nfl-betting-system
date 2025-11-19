@@ -1,0 +1,111 @@
+event_id,home_team,away_team,commence_time,bookmaker,market,player_name,stat_type,line,direction,odds,fetch_time,week,source
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_tds,Josh Allen,Pass TDs,1.5,Over,113,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_tds,Josh Allen,Pass TDs,1.5,Under,-144,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_tds,Davis Mills,Pass TDs,1.5,Over,135,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_tds,Davis Mills,Pass TDs,1.5,Under,-173,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_yds,Josh Allen,Pass Yds,224.5,Over,-112,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_yds,Josh Allen,Pass Yds,224.5,Under,-112,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_yds,Davis Mills,Pass Yds,210.5,Over,-113,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_pass_yds,Davis Mills,Pass Yds,210.5,Under,-111,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Nico Collins,Rec Yds,74.5,Over,-113,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Nico Collins,Rec Yds,74.5,Under,-111,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Khalil Shakir,Rec Yds,41.5,Over,-114,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Khalil Shakir,Rec Yds,41.5,Under,-110,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Dalton Schultz,Rec Yds,37.5,Over,-110,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Dalton Schultz,Rec Yds,37.5,Under,-114,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Joshua Palmer,Rec Yds,27.5,Over,-113,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Joshua Palmer,Rec Yds,27.5,Under,-111,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Jayden Higgins,Rec Yds,27.5,Over,-111,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Jayden Higgins,Rec Yds,27.5,Under,-113,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Dawson Knox,Rec Yds,26.5,Over,-110,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Dawson Knox,Rec Yds,26.5,Under,-114,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Keon Coleman,Rec Yds,23.5,Over,-111,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Keon Coleman,Rec Yds,23.5,Under,-113,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Tyrell Shavers,Rec Yds,20.5,Over,-114,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Tyrell Shavers,Rec Yds,20.5,Under,-110,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,James Cook,Rec Yds,15.5,Over,-108,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,James Cook,Rec Yds,15.5,Under,-116,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Xavier Hutchinson,Rec Yds,14.5,Over,-115,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Xavier Hutchinson,Rec Yds,14.5,Under,-109,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Christian Kirk,Rec Yds,12.5,Over,-112,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Christian Kirk,Rec Yds,12.5,Under,-112,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Woody Marks,Rec Yds,11.5,Over,-113,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_reception_yds,Woody Marks,Rec Yds,11.5,Under,-111,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Nico Collins,Receptions,5.5,Over,-118,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Nico Collins,Receptions,5.5,Under,-108,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Khalil Shakir,Receptions,4.5,Over,-126,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Khalil Shakir,Receptions,4.5,Under,-101,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Dalton Schultz,Receptions,4.5,Over,107,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Dalton Schultz,Receptions,4.5,Under,-136,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Jayden Higgins,Receptions,2.5,Over,-116,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Jayden Higgins,Receptions,2.5,Under,-110,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Dawson Knox,Receptions,2.5,Over,110,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Dawson Knox,Receptions,2.5,Under,-141,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,James Cook,Receptions,2.5,Over,124,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,James Cook,Receptions,2.5,Under,-158,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Joshua Palmer,Receptions,2.5,Over,125,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Joshua Palmer,Receptions,2.5,Under,-160,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Keon Coleman,Receptions,2.5,Over,131,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Keon Coleman,Receptions,2.5,Under,-168,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Woody Marks,Receptions,1.5,Over,-155,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Woody Marks,Receptions,1.5,Under,121,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Tyrell Shavers,Receptions,1.5,Over,-121,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Tyrell Shavers,Receptions,1.5,Under,-106,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Christian Kirk,Receptions,1.5,Over,-112,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Christian Kirk,Receptions,1.5,Under,-114,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Xavier Hutchinson,Receptions,1.5,Over,-105,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_receptions,Xavier Hutchinson,Receptions,1.5,Under,-121,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,James Cook,Rush Yds,73.5,Over,-112,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,James Cook,Rush Yds,73.5,Under,-112,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Woody Marks,Rush Yds,63.5,Over,-114,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Woody Marks,Rush Yds,63.5,Under,-110,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Josh Allen,Rush Yds,34.5,Over,-115,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Josh Allen,Rush Yds,34.5,Under,-109,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Nick Chubb,Rush Yds,21.5,Over,-108,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Nick Chubb,Rush Yds,21.5,Under,-116,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Davis Mills,Rush Yds,8.5,Over,-107,2025-11-19T16:27:16.937329,11,draftkings
+cd2e0964817c30ad3f5144ea49b55f2b,Houston Texans,Buffalo Bills,2025-11-21T01:15:00Z,draftkings,player_rush_yds,Davis Mills,Rush Yds,8.5,Under,-118,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Lamar Jackson,Pass TDs,1.5,Over,-158,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Lamar Jackson,Pass TDs,1.5,Under,124,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Tyrod Taylor,Pass TDs,0.5,Over,-171,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Tyrod Taylor,Pass TDs,0.5,Under,133,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Lamar Jackson,Pass Yds,207.5,Over,-112,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Lamar Jackson,Pass Yds,207.5,Under,-112,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Tyrod Taylor,Pass Yds,188.5,Over,-112,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Tyrod Taylor,Pass Yds,188.5,Under,-112,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Zay Flowers,Rec Yds,63.5,Over,-114,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Zay Flowers,Rec Yds,63.5,Under,-110,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Mark Andrews,Rec Yds,31.5,Over,-114,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Mark Andrews,Rec Yds,31.5,Under,-110,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_receptions,Zay Flowers,Receptions,4.5,Over,-121,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_receptions,Zay Flowers,Receptions,4.5,Under,-106,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_receptions,Mark Andrews,Receptions,3.5,Over,103,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_receptions,Mark Andrews,Receptions,3.5,Under,-131,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_rush_yds,Derrick Henry,Rush Yds,85.5,Over,-111,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_rush_yds,Derrick Henry,Rush Yds,85.5,Under,-113,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_rush_yds,Breece Hall,Rush Yds,66.5,Over,-115,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_rush_yds,Breece Hall,Rush Yds,66.5,Under,-109,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_rush_yds,Lamar Jackson,Rush Yds,34.5,Over,-110,2025-11-19T16:27:16.937329,11,draftkings
+7159d60c7a31c7d593167637723d7663,Baltimore Ravens,New York Jets,2025-11-23T18:00:00Z,draftkings,player_rush_yds,Lamar Jackson,Rush Yds,34.5,Under,-114,2025-11-19T16:27:16.937329,11,draftkings
+c8913b70b63ae247f23a4e1dec08c668,Chicago Bears,Pittsburgh Steelers,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Caleb Williams,Pass TDs,1.5,Over,111,2025-11-19T16:27:16.937329,11,draftkings
+c8913b70b63ae247f23a4e1dec08c668,Chicago Bears,Pittsburgh Steelers,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Caleb Williams,Pass TDs,1.5,Under,-142,2025-11-19T16:27:16.937329,11,draftkings
+c8913b70b63ae247f23a4e1dec08c668,Chicago Bears,Pittsburgh Steelers,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Caleb Williams,Pass Yds,218.5,Over,-113,2025-11-19T16:27:16.937329,11,draftkings
+c8913b70b63ae247f23a4e1dec08c668,Chicago Bears,Pittsburgh Steelers,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Caleb Williams,Pass Yds,218.5,Under,-111,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Drake Maye,Pass TDs,1.5,Over,-165,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Drake Maye,Pass TDs,1.5,Under,129,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Drake Maye,Pass Yds,254.5,Over,-112,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_pass_yds,Drake Maye,Pass Yds,254.5,Under,-112,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Tee Higgins,Rec Yds,69.5,Over,-110,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Tee Higgins,Rec Yds,69.5,Under,-114,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Stefon Diggs,Rec Yds,53.5,Over,-113,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Stefon Diggs,Rec Yds,53.5,Under,-111,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_receptions,Tee Higgins,Receptions,5.5,Over,-102,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_receptions,Tee Higgins,Receptions,5.5,Under,-125,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_receptions,Stefon Diggs,Receptions,4.5,Over,-147,2025-11-19T16:27:16.937329,11,draftkings
+1a8f3d70399a5cad83c95196795ed77b,Cincinnati Bengals,New England Patriots,2025-11-23T18:00:00Z,draftkings,player_receptions,Stefon Diggs,Receptions,4.5,Under,115,2025-11-19T16:27:16.937329,11,draftkings
+535bbe97d4e56494b039ade88459c338,Detroit Lions,New York Giants,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Jared Goff,Pass TDs,1.5,Over,-210,2025-11-19T16:27:16.937329,11,draftkings
+535bbe97d4e56494b039ade88459c338,Detroit Lions,New York Giants,2025-11-23T18:00:00Z,draftkings,player_pass_tds,Jared Goff,Pass TDs,1.5,Under,162,2025-11-19T16:27:16.937329,11,draftkings
+535bbe97d4e56494b039ade88459c338,Detroit Lions,New York Giants,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Amon-Ra St. Brown,Rec Yds,82.5,Over,-114,2025-11-19T16:27:16.937329,11,draftkings
+535bbe97d4e56494b039ade88459c338,Detroit Lions,New York Giants,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Amon-Ra St. Brown,Rec Yds,82.5,Under,-110,2025-11-19T16:27:16.937329,11,draftkings
+535bbe97d4e56494b039ade88459c338,Detroit Lions,New York Giants,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Jameson Williams,Rec Yds,62.5,Over,-111,2025-11-19T16:27:16.937329,11,draftkings
+535bbe97d4e56494b039ade88459c338,Detroit Lions,New York Giants,2025-11-23T18:00:00Z,draftkings,player_reception_yds,Jameson Williams,Rec Yds,62.5,Under,-113,2025-11-19T16:27:16.937329,11,draftkings

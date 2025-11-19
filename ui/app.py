@@ -1,672 +1,267 @@
 #!/usr/bin/env python
-"""NFL Betting System - Streamlit UI Dashboard"""
+"""NFL Betting System - Streamlit Interface (CLI-Style)
+Direct, efficient, results-focused - just like your CLI"""
 
 import streamlit as st
 import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-import plotly.express as px
-from datetime import datetime
+from pathlib import Path
 import sys
 import os
-from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Add project root to path
 project_root = Path(__file__).resolve().parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root))
 
-from scripts.api.claude_query_handler import ClaudeQueryHandler
-from scripts.analysis.orchestrator import PropAnalyzer
-from scripts.analysis.data_loader import NFLDataLoader
-from scripts.analysis.parlay_builder import ParlayBuilder
-from scripts.analysis.parlay_optimizer import ParlayOptimizer
-from scripts.analysis.dependency_analyzer import DependencyAnalyzer
-from scripts.analysis.parlay_tracker import ParlayTracker
+try:
+    from scripts.api.claude_query_handler import ClaudeQueryHandler
+    from scripts.analysis.orchestrator import PropAnalyzer
+    from scripts.analysis.data_loader import NFLDataLoader
+    from scripts.analysis.parlay_builder import ParlayBuilder
+    from scripts.analysis.parlay_optimizer import ParlayOptimizer
+    from scripts.analysis.performance_tracker import PerformanceTracker
+except ImportError as e:
+    st.error(f"Import Error: {e}")
+    st.stop()
 
-# ============================================================================
-# PAGE CONFIG
-# ============================================================================
-
-st.set_page_config(
-    page_title="🏈 NFL Betting System",
-    page_icon="🏈",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# ============================================================================
-# SESSION STATE
-# ============================================================================
+st.set_page_config(page_title="🏈 NFL Betting CLI", layout="wide", initial_sidebar_state="collapsed")
 
 if 'week' not in st.session_state:
     st.session_state.week = 9
+if 'bankroll' not in st.session_state:
+    st.session_state.bankroll = 1000
 
-if 'context' not in st.session_state:
-    st.session_state.context = None
-
-if 'all_analyses' not in st.session_state:
-    st.session_state.all_analyses = None
-
-if 'selected_prop' not in st.session_state:
-    st.session_state.selected_prop = None
-
-# Initialize tracker
 @st.cache_resource
-def get_tracker():
-    tracker_file = project_root / "parlay_tracking.json"
-    return ParlayTracker(str(tracker_file))
+def init_components():
+    return {
+        'handler': ClaudeQueryHandler(),
+        'analyzer': PropAnalyzer(),
+        'loader': NFLDataLoader(data_dir="data"),
+        'builder': ParlayBuilder(),
+        'tracker': PerformanceTracker(db_path="bets.db"),
+    }
 
-tracker = get_tracker()
+components = init_components()
 
+st.title("🏈 NFL BETTING SYSTEM - CLI STYLE")
+st.markdown("---")
 
-# ============================================================================
-# SIDEBAR - SETTINGS & CONTROLS
-# ============================================================================
-
-st.sidebar.title("⚙️ Settings")
-
-# Week selector
-st.session_state.week = st.sidebar.slider(
-    "NFL Week",
-    1, 18,
-    st.session_state.week,
-    help="Select the NFL week to analyze"
-)
-
-# Load data button
-if st.sidebar.button("🔄 Load Data", use_container_width=True):
-    st.session_state.context = None
-    st.session_state.all_analyses = None
-
-st.sidebar.divider()
-
-# Analysis controls
-st.sidebar.subheader("📊 Analysis Controls")
-
-min_confidence = st.sidebar.slider(
-    "Minimum Confidence %",
-    40, 100, 58,
-    step=1,
-    help="Filter props by minimum confidence threshold"
-)
-
-st.sidebar.divider()
-
-# Parlay settings
-st.sidebar.subheader("🎯 Parlay Settings")
-
-parlay_min_conf = st.sidebar.slider(
-    "Parlay Minimum Confidence %",
-    50, 85, 65,
-    step=1,
-    help="Minimum confidence for props included in parlays"
-)
-
-optimization_enabled = st.sidebar.checkbox(
-    "Enable Dependency Analysis",
-    value=True,
-    help="Use Claude API to analyze hidden correlations"
-)
-
-quality_threshold = None
-if optimization_enabled:
-    quality_threshold = st.sidebar.slider(
-        "Quality Threshold %",
-        60, 90, 75,
-        step=1,
-        help="Filter parlays by adjusted confidence after dependency analysis"
-    )
-
-st.sidebar.divider()
-st.sidebar.markdown("---")
-st.sidebar.caption("🧠 Powered by Multi-Agent Analysis + Claude API")
-
-# ============================================================================
-# MAIN HEADER
-# ============================================================================
-
-col1, col2, col3 = st.columns([2, 1, 1])
+col1, col2 = st.columns(2)
 with col1:
-    st.title("🏈 NFL Betting System")
+    st.session_state.week = st.number_input("📅 Week", 1, 18, st.session_state.week)
 with col2:
-    st.metric("Week", st.session_state.week)
-with col3:
-    st.metric("Min Confidence", f"{min_confidence}%")
+    st.session_state.bankroll = st.number_input("💰 Bankroll", 0.0, 100000.0, float(st.session_state.bankroll))
 
-st.divider()
+st.markdown("---")
 
-# ============================================================================
-# NAVIGATION
-# ============================================================================
-
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Dashboard",
-    "🔍 Prop Analysis",
-    "🎯 Top Props",
-    "🎰 Parlay Generator",
-    "💡 Query Props"
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "⚙️ Analyze", "🔥 Top Props", "🎰 Parlays", "📊 Track", "💾 Results", "📈 Stats"
 ])
 
-# ============================================================================
-# TAB 1: DASHBOARD
-# ============================================================================
-
+# TAB 1: ANALYZE
 with tab1:
-    st.header("📊 Week Dashboard")
+    st.subheader("⚙️ Analyze Single Prop")
+    query = st.text_input("Enter prop query:", placeholder="e.g., Mahomes 250 pass yards", key="analyze_query")
+    weather = st.text_input("Weather (optional):", placeholder="e.g., 15mph wind", key="analyze_weather")
     
-    # Load data if not cached
-    if st.session_state.context is None:
-        with st.spinner(f"Loading data for Week {st.session_state.week}..."):
-            loader = NFLDataLoader(data_dir=str(project_root / "data"))
-            st.session_state.context = loader.load_all_data(week=st.session_state.week)
-    
-    context = st.session_state.context
-    
-    if context is None or not context.get('props'):
-        st.warning("❌ No data available for this week")
-    else:
-        # Show loaded files
-        if context.get('loaded_files'):
-            with st.expander("📁 Loaded Data Files", expanded=False):
-                for file_info in context['loaded_files']:
-                    st.success(f"✅ {file_info}")
-                st.info(f"Total: {len(context['loaded_files'])} files loaded")
-        
-        # Summary stats
-        col1, col2, col3, col4 = st.columns(4)
-        
-        props_list = context.get('props', [])
-        games_list = context.get('games', [])
-        
-        with col1:
-            st.metric("Total Props", len(props_list))
-        with col2:
-            st.metric("Games", len(games_list) // 2 if games_list else 0)
-        with col3:
-            st.metric("Data Timestamp", datetime.now().strftime("%H:%M:%S"))
-        with col4:
-            st.metric("Status", "✅ Ready")
-        
-        st.divider()
-        
-        # Analyze all props if not done yet
-        if st.session_state.all_analyses is None:
-            with st.spinner("🧠 Analyzing all props with multi-agent framework..."):
-                analyzer = PropAnalyzer()
-                st.session_state.all_analyses = analyzer.analyze_all_props(
-                    context,
-                    min_confidence=40
-                )
-        
-        all_analyses = st.session_state.all_analyses
-        
-        # Confidence distribution
-        if all_analyses:
-            confidences = [a.final_confidence for a in all_analyses]
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                # Histogram of confidence scores
-                fig_hist = px.histogram(
-                    x=confidences,
-                    nbins=20,
-                    title="Confidence Score Distribution",
-                    labels={"x": "Confidence %", "count": "Number of Props"}
-                )
-                fig_hist.update_layout(height=400)
-                st.plotly_chart(fig_hist, use_container_width=True)
-            
-            with col2:
-                # Summary statistics
-                conf_stats = {
-                    "80%+": len([c for c in confidences if c >= 80]),
-                    "75-80%": len([c for c in confidences if 75 <= c < 80]),
-                    "70-75%": len([c for c in confidences if 70 <= c < 75]),
-                    "65-70%": len([c for c in confidences if 65 <= c < 70]),
-                    "60-65%": len([c for c in confidences if 60 <= c < 65]),
-                    "50-60%": len([c for c in confidences if 50 <= c < 60]),
-                    "<50%": len([c for c in confidences if c < 50]),
-                }
-                
-                fig_pie = px.pie(
-                    values=list(conf_stats.values()),
-                    names=list(conf_stats.keys()),
-                    title="Props by Confidence Bracket"
-                )
-                fig_pie.update_layout(height=400)
-                st.plotly_chart(fig_pie, use_container_width=True)
-            
-            # Key stats
-            st.subheader("📈 Key Statistics")
-            
-            col1, col2, col3, col4, col5 = st.columns(5)
-            
-            with col1:
-                avg_conf = np.mean(confidences)
-                st.metric("Average Confidence", f"{avg_conf:.1f}%")
-            
-            with col2:
-                max_conf = np.max(confidences)
-                st.metric("Max Confidence", f"{max_conf:.1f}%")
-            
-            with col3:
-                median_conf = np.median(confidences)
-                st.metric("Median Confidence", f"{median_conf:.1f}%")
-            
-            with col4:
-                elite_props = len([c for c in confidences if c >= 80])
-                st.metric("Elite Props (80%+)", elite_props)
-            
-            with col5:
-                solid_props = len([c for c in confidences if c >= 75])
-                st.metric("Solid Props (75%+)", solid_props)
-
-# ============================================================================
-# TAB 2: PROP ANALYSIS
-# ============================================================================
-
-with tab2:
-    st.header("🔍 Individual Prop Analysis")
-    
-    # Load data if needed
-    if st.session_state.context is None:
-        with st.spinner(f"Loading data for Week {st.session_state.week}..."):
-            loader = NFLDataLoader(data_dir=str(project_root / "data"))
-            st.session_state.context = loader.load_all_data(week=st.session_state.week)
-    
-    context = st.session_state.context
-    
-    if context and context.get('props'):
-        analyzer = PropAnalyzer()
-        
-        # Get list of all available props for quick selection
-        props_list = context.get('props', [])
-        prop_labels = [
-            f"{p.get('player_name', 'Unknown')} - {p.get('stat_type', 'Unknown')} O{p.get('line', 0)}"
-            for p in props_list[:100]  # Show first 100 for performance
-        ]
-        
-        selected_label = st.selectbox(
-            "Select a prop to analyze:",
-            prop_labels,
-            help="Choose from top 100 available props"
-        )
-        
-        if selected_label:
-            # Find the prop
-            idx = prop_labels.index(selected_label)
-            prop_data = props_list[idx]
-            
-            # Analyze it
-            if st.button("🔍 Analyze This Prop", use_container_width=True):
-                with st.spinner("Analyzing prop..."):
-                    analysis = analyzer.analyze_prop(prop_data, context)
-                    st.session_state.selected_prop = analysis
-            
-            if st.session_state.selected_prop:
-                analysis = st.session_state.selected_prop
-                prop = analysis.prop
-                
-                # Display prop details
-                st.subheader(f"📋 {prop.player_name} - {prop.stat_type}")
-                
-                col1, col2, col3, col4, col5 = st.columns(5)
-                
-                with col1:
-                    st.metric("Team", prop.team)
-                with col2:
-                    st.metric("vs", prop.opponent)
-                with col3:
-                    st.metric("Line", f"{prop.line:.1f}")
-                with col4:
-                    st.metric("Confidence", f"{analysis.final_confidence:.1f}%")
-                with col5:
-                    recommendation = analysis.recommendation
-                    st.metric("Recommendation", recommendation)
-                
-                st.divider()
-                
-                # Agent breakdown
-                st.subheader("🧠 Agent Breakdown")
-                
-                if analysis.agent_breakdown:
-                    agent_data = []
-                    for agent_name, result in analysis.agent_breakdown.items():
-                        agent_data.append({
-                            "Agent": agent_name,
-                            "Score": result['raw_score'],
-                            "Direction": result['direction'],
-                            "Weight": result['weight']
-                        })
-                    
-                    agent_df = pd.DataFrame(agent_data)
-                    
-                    # Agent scores chart
-                    fig_agents = px.bar(
-                        agent_df,
-                        x="Agent",
-                        y="Score",
-                        color="Score",
-                        color_continuous_scale="RdYlGn",
-                        title="Agent Confidence Scores",
-                        range_color=[0, 100]
-                    )
-                    fig_agents.update_layout(height=400)
-                    st.plotly_chart(fig_agents, use_container_width=True)
-                    
-                    # Agent details table
-                    st.dataframe(agent_df, use_container_width=True)
-                
-                st.divider()
-                
-                # Rationale
-                st.subheader("💭 Analysis Rationale")
-                
-                if analysis.rationale:
-                    for point in analysis.rationale:
-                        st.info(point)
-                
-                if analysis.edge_explanation:
-                    st.success(f"**Edge:** {analysis.edge_explanation}")
-
-# ============================================================================
-# TAB 3: TOP PROPS
-# ============================================================================
-
-with tab3:
-    st.header("🎯 Top Props by Confidence")
-    
-    # Load data if needed
-    if st.session_state.context is None:
-        with st.spinner(f"Loading data for Week {st.session_state.week}..."):
-            loader = NFLDataLoader(data_dir=str(project_root / "data"))
-            st.session_state.context = loader.load_all_data(week=st.session_state.week)
-    
-    context = st.session_state.context
-    
-    if context and context.get('props'):
-        # Analyze all if needed
-        if st.session_state.all_analyses is None:
-            with st.spinner("🧠 Analyzing all props..."):
-                analyzer = PropAnalyzer()
-                st.session_state.all_analyses = analyzer.analyze_all_props(
-                    context,
-                    min_confidence=40
-                )
-        
-        all_analyses = st.session_state.all_analyses
-        
-        # Filter by confidence
-        filtered_analyses = [
-            a for a in all_analyses
-            if a.final_confidence >= min_confidence
-        ]
-        
-        # Sort by confidence
-        filtered_analyses.sort(
-            key=lambda x: x.final_confidence,
-            reverse=True
-        )
-        
-        st.info(f"📊 Showing {len(filtered_analyses)} props with {min_confidence}%+ confidence")
-        
-        if filtered_analyses:
-            # Create dataframe for display
-            props_data = []
-            for i, analysis in enumerate(filtered_analyses, 1):
-                prop = analysis.prop
-                props_data.append({
-                    "Rank": i,
-                    "Player": prop.player_name,
-                    "Team": prop.team,
-                    "vs": prop.opponent,
-                    "Stat": prop.stat_type,
-                    "Line": f"{prop.line:.1f}",
-                    "Confidence": f"{analysis.final_confidence:.1f}%",
-                    "Recommendation": analysis.recommendation,
-                })
-            
-            df_props = pd.DataFrame(props_data)
-            
-            # Display table
-            st.dataframe(
-                df_props,
-                use_container_width=True,
-                hide_index=True,
-                column_config={
-                    "Rank": st.column_config.NumberColumn(width="small"),
-                    "Confidence": st.column_config.ProgressColumn(
-                        "Confidence",
-                        min_value=0,
-                        max_value=100,
-                    ),
-                }
-            )
-            
-            # Export option
-            csv_data = df_props.to_csv(index=False)
-            st.download_button(
-                label="📥 Download as CSV",
-                data=csv_data,
-                file_name=f"top_props_week{st.session_state.week}.csv",
-                mime="text/csv"
-            )
+    if st.button("🔍 Analyze", use_container_width=True, type="primary"):
+        if query:
+            with st.spinner("Analyzing..."):
+                try:
+                    weather_obj = {'conditions': weather} if weather else None
+                    response = components['handler'].query(query, week=st.session_state.week, weather=weather_obj)
+                    st.markdown(response)
+                except Exception as e:
+                    st.error(f"Error: {e}")
         else:
-            st.warning("No props found with this confidence threshold")
+            st.error("Enter a query")
 
-# ============================================================================
-# TAB 4: PARLAY GENERATOR
-# ============================================================================
+# TAB 2: TOP PROPS
+with tab2:
+    st.subheader("🔥 Top Props by Confidence")
+    count = st.number_input("Show top N props:", 1, 100, 20, key="top_props_count")
+    
+    if st.button("📊 Load Top Props", use_container_width=True, type="primary"):
+        with st.spinner(f"Analyzing Week {st.session_state.week}..."):
+            try:
+                context = components['loader'].load_all_data(week=st.session_state.week)
+                all_analyses = components['analyzer'].analyze_all_props(context, min_confidence=40)
+                all_analyses.sort(key=lambda x: x.final_confidence, reverse=True)
+                top_props = all_analyses[:count]
+                
+                props_data = []
+                for i, analysis in enumerate(top_props, 1):
+                    prop = analysis.prop
+                    conf = analysis.final_confidence
+                    emoji = "🔥" if conf >= 80 else "⭐" if conf >= 75 else "✅" if conf >= 70 else "📈"
+                    
+                    props_data.append({
+                        "": emoji,
+                        "Rank": i,
+                        "Player": prop.player_name,
+                        "Team": prop.team,
+                        "vs": prop.opponent,
+                        "Stat": prop.stat_type,
+                        "Line": f"{prop.line:.1f}",
+                        "Confidence": f"{conf:.1f}%",
+                    })
+                
+                st.dataframe(pd.DataFrame(props_data), use_container_width=True, hide_index=True)
+                st.success(f"✅ Loaded {len(top_props)} props")
+            except Exception as e:
+                st.error(f"Error: {e}")
 
-with tab4:
-    st.header("🎰 Parlay Generator")
+# TAB 3: PARLAYS
+with tab3:
+    st.subheader("🎰 Generate Parlays")
     
-    # Load data if needed
-    if st.session_state.context is None:
-        with st.spinner(f"Loading data for Week {st.session_state.week}..."):
-            loader = NFLDataLoader(data_dir=str(project_root / "data"))
-            st.session_state.context = loader.load_all_data(week=st.session_state.week)
+    col1, col2 = st.columns(2)
+    with col1:
+        parlay_type = st.radio("Type:", ["Standard", "Optimized"], horizontal=True, key="parlay_type")
+    with col2:
+        min_conf = st.number_input("Min Confidence %:", 40, 80, 62, key="parlay_conf")
     
-    context = st.session_state.context
-    
-    if context and context.get('props'):
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            parlay_type = st.radio(
-                "Parlay Type",
-                ["Standard", "Optimized"],
-                help="Standard uses simple math. Optimized uses Claude API to analyze correlations."
-            )
-        
-        with col2:
-            st.write("")  # Spacer
-            generate_button = st.button(
-                "🚀 Generate Parlays",
-                use_container_width=True,
-                type="primary"
-            )
-        
-        with col3:
-            st.write("")  # Spacer
-        
-        if generate_button:
-            # Analyze all props first
-            if st.session_state.all_analyses is None:
-                with st.spinner("🧠 Analyzing all props..."):
-                    analyzer = PropAnalyzer()
-                    st.session_state.all_analyses = analyzer.analyze_all_props(
-                        context,
-                        min_confidence=40
-                    )
-            
-            all_analyses = st.session_state.all_analyses
-            
-            if parlay_type == "Standard":
-                with st.spinner("Building standard parlays..."):
-                    parlay_builder = ParlayBuilder()
-                    parlays = parlay_builder.build_parlays(
-                        all_analyses,
-                        min_confidence=parlay_min_conf
-                    )
-                    
-                    # Display parlays
-                    st.subheader("📋 Generated Parlays")
-                    
-                    for leg_type in ['2-leg', '3-leg', '4-leg', '5-leg']:
+    if st.button("🚀 Generate Parlays", use_container_width=True, type="primary"):
+        with st.spinner(f"Generating {parlay_type} parlays..."):
+            try:
+                context = components['loader'].load_all_data(week=st.session_state.week)
+                all_analyses = components['analyzer'].analyze_all_props(context, min_confidence=40)
+                
+                if parlay_type == "Standard":
+                    parlays = components['builder'].build_parlays(all_analyses, min_confidence=min_conf)
+                    for leg_type in ['2-leg', '3-leg', '4-leg']:
                         leg_parlays = parlays.get(leg_type, [])
                         if leg_parlays:
-                            st.markdown(f"### {leg_type.upper()} PARLAYS ({len(leg_parlays)})")
-                            
-                            for i, parlay in enumerate(leg_parlays, 1):
-                                with st.expander(f"Parlay {i}"):
-                                    parlay_props = parlay.legs
-                                    parlay_df = pd.DataFrame([
-                                        {
-                                            "Player": p.prop.player_name,
-                                            "Team": p.prop.team,
-                                            "Stat": p.prop.stat_type,
-                                            "Line": f"{p.prop.line:.1f}",
-                                            "Confidence": f"{p.final_confidence:.1f}%"
-                                        }
-                                        for p in parlay_props
-                                    ])
-                                    st.dataframe(parlay_df, use_container_width=True, hide_index=True)
-                                    
-                                    parlay_confidence = parlay.combined_confidence
-                                    st.metric("Parlay Confidence", f"{parlay_confidence:.1f}%")
-            
-            else:  # Optimized
-                with st.spinner("🧠 Building optimized parlays with dependency analysis..."):
+                            st.markdown(f"### {leg_type.upper()} ({len(leg_parlays)})")
+                            for i, parlay in enumerate(leg_parlays[:5], 1):
+                                conf = parlay.combined_confidence
+                                emoji = "🔥" if conf >= 80 else "✅"
+                                with st.container(border=True):
+                                    st.write(f"**{emoji} Parlay {i}** - {conf:.1f}%")
+                                    legs_list = [{"Player": leg.prop.player_name, "Stat": leg.prop.stat_type, "Line": f"{leg.prop.line:.1f}", "Conf": f"{leg.final_confidence:.1f}%"} for leg in parlay.legs]
+                                    st.dataframe(pd.DataFrame(legs_list), use_container_width=True, hide_index=True)
+                else:
                     api_key = os.environ.get('ANTHROPIC_API_KEY')
-                    
                     if not api_key:
-                        st.error("❌ ANTHROPIC_API_KEY not set in .env")
+                        st.error("ANTHROPIC_API_KEY not set")
                     else:
                         optimizer = ParlayOptimizer(api_key=api_key)
-                        optimized_parlays = optimizer.rebuild_parlays_low_correlation(
-                            all_analyses,
-                            target_parlays=10,
-                            min_confidence=parlay_min_conf
-                        )
-                        
-                        # Analyze dependencies
-                        with st.spinner("🔍 Analyzing parlay dependencies..."):
-                            dep_analyzer = DependencyAnalyzer(api_key=api_key)
-                            
-                            best = []
-                            for ptype in ['2-leg', '3-leg', '4-leg', '5-leg']:
-                                for parlay in optimized_parlays.get(ptype, []):
-                                    analysis = dep_analyzer.analyze_parlay_dependencies(parlay)
-                                    rec = analysis.get('recommendation')
-                                    adj_conf = analysis.get('adjusted_confidence')
-                                    
-                                    if quality_threshold and adj_conf < quality_threshold:
-                                        continue
-                                    
-                                    if rec != "AVOID":
-                                        best.append({
-                                            'parlay': parlay,
-                                            'adjusted_confidence': adj_conf,
-                                            'recommendation': rec,
-                                            'adjustment': analysis.get('correlation_adjustment', {}).get('adjustment_value', 0),
-                                            'analysis': analysis
-                                        })
-                        
-                        best.sort(key=lambda x: x['adjusted_confidence'], reverse=True)
-                        
-                        # Display optimized parlays
-                        st.subheader("📋 Optimized Parlays (Low-Correlation)")
-                        
-                        for i, item in enumerate(best, 1):
-                            parlay = item['parlay']
-                            adj_conf = item['adjusted_confidence']
-                            recommendation = item['recommendation']
-                            adjustment = item['adjustment']
-                            
-                            with st.expander(f"Parlay {i} - {adj_conf:.1f}% | {recommendation}"):
-                                parlay_props = parlay.legs
-                                parlay_df = pd.DataFrame([
-                                    {
-                                        "Player": p.prop.player_name,
-                                        "Team": p.prop.team,
-                                        "Stat": p.prop.stat_type,
-                                        "Line": f"{p.prop.line:.1f}",
-                                        "Confidence": f"{p.final_confidence:.1f}%"
-                                    }
-                                    for p in parlay_props
-                                ])
-                                st.dataframe(parlay_df, use_container_width=True, hide_index=True)
-                                
-                                col1, col2, col3, col4 = st.columns(4)
-                                
-                                with col1:
-                                    st.metric("Base Confidence", f"{parlay.combined_confidence:.1f}%")
-                                
-                                with col2:
-                                    st.metric("Adjusted Confidence", f"{adj_conf:.1f}%")
-                                
-                                with col3:
-                                    st.metric("Adjustment", f"{adjustment:+.1f}%")
-                                
-                                with col4:
-                                    st.metric("Recommendation", recommendation)
+                        optimized = optimizer.rebuild_parlays_low_correlation(all_analyses, target_parlays=10, min_confidence=min_conf)
+                        st.success("✅ Generated optimized parlays")
+                        all_parlays = []
+                        for ptype in ['2-leg', '3-leg', '4-leg']:
+                            all_parlays.extend(optimized.get(ptype, []))
+                        all_parlays.sort(key=lambda x: x.combined_confidence, reverse=True)
+                        for i, parlay in enumerate(all_parlays[:10], 1):
+                            conf = parlay.combined_confidence
+                            emoji = "🔥" if conf >= 80 else "✅"
+                            with st.container(border=True):
+                                st.write(f"**{emoji} Parlay {i}** - {conf:.1f}%")
+                                legs_list = [{"Player": leg.prop.player_name, "Stat": leg.prop.stat_type, "Conf": f"{leg.final_confidence:.1f}%"} for leg in parlay.legs]
+                                st.dataframe(pd.DataFrame(legs_list), use_container_width=True, hide_index=True)
+            except Exception as e:
+                st.error(f"Error: {e}")
 
-# ============================================================================
-# TAB 5: QUERY PROPS
-# ============================================================================
+# TAB 4: TRACK
+with tab4:
+    st.subheader("📊 Parlay Tracking")
+    col1, col2 = st.columns(2)
+    with col1:
+        track_week = st.number_input("Week to track:", 1, 18, st.session_state.week, key="track_week")
+    with col2:
+        track_filter = st.selectbox("Filter:", ["All", "Won", "Lost", "Pending"], key="track_filter")
+    
+    if st.button("📋 Load Tracked Parlays", use_container_width=True):
+        try:
+            tracker = components['tracker']
+            parlays = tracker.get_parlays_by_week(track_week)
+            if track_filter == "Won":
+                parlays = [p for p in parlays if p.get('result') == 'won']
+            elif track_filter == "Lost":
+                parlays = [p for p in parlays if p.get('result') == 'lost']
+            elif track_filter == "Pending":
+                parlays = [p for p in parlays if p.get('result') == 'pending']
+            
+            if not parlays:
+                st.info(f"No {track_filter.lower()} parlays for Week {track_week}")
+            else:
+                st.success(f"Found {len(parlays)} parlays")
+                for parlay in parlays[:20]:
+                    parlay_id = parlay.get('parlay_id', 'Unknown')
+                    conf = parlay.get('effective_confidence', 0)
+                    result = parlay.get('result', 'pending')
+                    result_emoji = {"won": "✅", "lost": "❌", "pending": "⏳"}.get(result, "❓")
+                    with st.container(border=True):
+                        col1, col2, col3 = st.columns([2, 1, 1])
+                        with col1:
+                            st.write(f"**{parlay_id}** - {conf:.1f}%")
+                        with col2:
+                            st.write(f"{result_emoji} {result.upper()}")
+                        with col3:
+                            with st.expander("Legs"):
+                                for prop in parlay.get('props', []):
+                                    st.write(f"• {prop['player']} {prop['direction']} {prop['line']}")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
+# TAB 5: RESULTS
 with tab5:
-    st.header("💡 Natural Language Prop Query")
-    
-    st.write("Ask about specific player props in natural language")
-    st.write("*Examples: 'Mahomes 250 pass yards', 'Justin Jefferson 75 receiving yards'*")
-    
-    query = st.text_input(
-        "Enter your prop query:",
-        placeholder="e.g., Mahomes 250 pass yards NYG"
-    )
-    
-    weather_input = st.text_input(
-        "Weather conditions (optional):",
-        placeholder="e.g., 15mph wind, 32°F, clear"
-    )
-    
-    if st.button("🔍 Analyze Query", use_container_width=True, type="primary"):
-        if query:
-            with st.spinner("Analyzing your query..."):
-                handler = ClaudeQueryHandler()
-                
-                weather = None
-                if weather_input:
-                    weather = {'conditions': weather_input}
-                
-                response = handler.query(
-                    query,
-                    week=st.session_state.week,
-                    weather=weather
-                )
-                
-                st.markdown(response)
-        else:
-            st.warning("Please enter a prop query")
+    st.subheader("💾 Log Results")
+    parlay_id = st.text_input("Parlay ID:", key="result_id")
+    result_str = st.text_input("Result (e.g., 2/3):", key="result_input")
+    if st.button("📝 Log Result", use_container_width=True):
+        try:
+            if '/' not in result_str:
+                st.error("Format: X/Y (e.g., 2/3)")
+            else:
+                hits, total = map(int, result_str.split('/'))
+                tracker = components['tracker']
+                tracker.log_results(parlay_id, {f'leg_{i}': i < hits for i in range(total)})
+                st.success(f"✅ Logged {hits}/{total} for {parlay_id}")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
-# ============================================================================
-# FOOTER
-# ============================================================================
+# TAB 6: STATS
+with tab6:
+    st.subheader("📈 Performance Stats")
+    stats_view = st.radio("View:", ["Overall", "By Week", "By Type"], horizontal=True, key="stats_view")
+    
+    if st.button("📊 Load Statistics", use_container_width=True):
+        try:
+            tracker = components['tracker']
+            if stats_view == "Overall":
+                stats = tracker.get_statistics()
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Record", f"{stats['won']}-{stats['lost']}")
+                with col2:
+                    st.metric("Win Rate", f"{stats.get('win_rate', 0):.1f}%")
+                with col3:
+                    st.metric("Avg Confidence", f"{stats.get('avg_predicted_confidence', 0):.1f}%")
+                with col4:
+                    st.metric("Calibration", f"{stats.get('calibration_error', 0):+.1f}")
+            elif stats_view == "By Week":
+                stats_week = st.number_input("Week:", 1, 18, st.session_state.week, key="stats_week_input")
+                stats = tracker.get_statistics(weeks=[stats_week])
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Record", f"{stats['won']}-{stats['lost']}")
+                with col2:
+                    st.metric("Win Rate", f"{stats.get('win_rate', 0):.1f}%")
+                with col3:
+                    st.metric("Calibration", f"{stats.get('calibration_error', 0):+.1f}")
+            else:
+                for leg in [2, 3, 4]:
+                    stats = tracker.get_statistics(parlay_legs=leg)
+                    if stats and (stats['won'] + stats['lost']) > 0:
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"**{leg}-Leg Parlays**")
+                        with col2:
+                            st.write(f"{stats['won']}-{stats['lost']} | {stats.get('win_rate', 0):.1f}%")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
 st.divider()
-st.markdown(
-    """
-    <div style='text-align: center'>
-    <small>🏈 NFL Betting System v2.0 | Multi-Agent Analysis + Claude API | Week {}</small>
-    </div>
-    """.format(st.session_state.week),
-    unsafe_allow_html=True
-)
+st.caption("🏈 NFL Betting System (CLI-Style) | Quick, Direct, Efficient")

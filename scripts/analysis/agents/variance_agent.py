@@ -30,8 +30,8 @@ class VarianceAgent(BaseAgent):
                 score += 8
                 rationale.append("✓ Pass completions: good reliability")
             elif 'TD' in stat_type:
-                score -= 8
-                rationale.append("⚠️ Passing TD: moderate variance")
+                score -= 5
+                rationale.append("⚠️ QB TD: moderate variance (volume-dependent)")
         
         elif position in ['WR', 'TE']:
             if 'Rec Yds' in stat_type:
@@ -41,16 +41,16 @@ class VarianceAgent(BaseAgent):
                 score += 8
                 rationale.append("✓✓ Reception props: high reliability")
             elif 'TD' in stat_type:
-                score -= 10
-                rationale.append("⚠️ TD props: high variance")
+                score -= 12
+                rationale.append("⚠️⚠️ WR/TE TD: high variance (game-script dependent)")
         
         elif position == 'RB':
             if 'Rush Yds' in stat_type:
                 score += 3
                 rationale.append("✓ Rushing yards: moderate reliability")
             elif 'TD' in stat_type:
-                score -= 10
-                rationale.append("⚠️ TD props: high variance")
+                score -= 12
+                rationale.append("⚠️⚠️ RB TD: high variance (goal-line touches unpredictable)")
         
         direction = "OVER" if score >= 50 else "UNDER"
         return (score, direction, rationale)

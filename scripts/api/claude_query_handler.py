@@ -36,7 +36,7 @@ class ClaudeQueryHandler:
         self.narrative_generator = MatchupNarrativeGenerator()
         self.weather_analyzer = WeatherImpactAnalyzer()
         self.csv_normalizer = CSVNormalizer()
-        self.calibrator = AgentCalibrator()
+        self.calibrator = AgentCalibrator(db_path=str(project_root / "bets.db"))
         self.logger = logging.getLogger(self.__class__.__name__)
     
     def parse_query(self, user_query: str) -> Dict:

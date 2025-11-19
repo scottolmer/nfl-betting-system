@@ -154,23 +154,24 @@ class DVOAAgent(BaseAgent):
                     rationale.append("⚡ PREMIUM STACK: Elite rush O vs weak D")
             
             elif 'Rec' in prop.stat_type:
+                # RB receiving: Reduced scoring vs WR (RBs not priority targets)
                 if pass_off_dvoa >= 20:
-                    score += 20
-                    rationale.append(f"Elite receiving O: +{pass_off_dvoa:.1f}%")
+                    score += 10  # Reduced from 20
+                    rationale.append(f"Good receiving O: +{pass_off_dvoa:.1f}%")
                 elif pass_off_dvoa >= 10:
-                    score += 14
-                    rationale.append(f"Strong receiving O: +{pass_off_dvoa:.1f}%")
+                    score += 7
+                    rationale.append(f"Moderate receiving O: +{pass_off_dvoa:.1f}%")
                 
                 if pass_def_dvoa >= 20:
-                    score += 18
+                    score += 9  # Reduced from 18
                     rationale.append(f"Weak pass D: +{pass_def_dvoa:.1f}%")
                 elif pass_def_dvoa >= 10:
-                    score += 12
+                    score += 6
                     rationale.append(f"Favorable pass D: +{pass_def_dvoa:.1f}%")
                 
                 if pass_off_dvoa >= 20 and pass_def_dvoa >= 10:
-                    score += 10
-                    rationale.append("⚡ Premium receiving stack")
+                    score += 5  # Reduced from 10
+                    rationale.append("Modest receiving stack")
         
         direction = "OVER" if score >= 50 else "UNDER"
         

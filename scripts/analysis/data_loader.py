@@ -268,6 +268,7 @@ def transform_def_vs_receiver(def_vs_wr_df):
     col_map = {
         'vs_wr1_dvoa_col': actual_cols[4] if len(actual_cols) > 4 else 'DVOA',
         'vs_wr2_dvoa_col': actual_cols[7] if len(actual_cols) > 7 else 'DVOA.1',
+        'vs_wr3_dvoa_col': actual_cols[10] if len(actual_cols) > 10 else 'DVOA.2',
         'vs_te_dvoa_col': actual_cols[13] if len(actual_cols) > 13 else 'DVOA.3',
         'vs_rb_dvoa_col': actual_cols[16] if len(actual_cols) > 16 else 'DVOA.4',
     }
@@ -286,7 +287,8 @@ def transform_def_vs_receiver(def_vs_wr_df):
             result[team_abbr] = {
                 'vs_wr1_dvoa': clean_dvoa(row.get(col_map['vs_wr1_dvoa_col'], 0)),
                 'vs_wr2_dvoa': clean_dvoa(row.get(col_map['vs_wr2_dvoa_col'], 0)),
-                'vs_wr3_dvoa': 0.0, 'vs_te_dvoa': clean_dvoa(row.get(col_map['vs_te_dvoa_col'], 0)),
+                'vs_wr3_dvoa': clean_dvoa(row.get(col_map['vs_wr3_dvoa_col'], 0)),
+                'vs_te_dvoa': clean_dvoa(row.get(col_map['vs_te_dvoa_col'], 0)),
                 'vs_rb_dvoa': clean_dvoa(row.get(col_map['vs_rb_dvoa_col'], 0)),
                 'vs_wr1_yds_per_game': 0.0, 'vs_wr2_yds_per_game': 0.0,'vs_te_yds_per_game': 0.0,
             }

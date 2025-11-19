@@ -1,191 +1,223 @@
 """
-Agent Calibration - Weekly performance tracking and Claude-powered agent weighting
+Agent Calibration System
+Analyzes historical agent performance and recommends weight adjustments
 """
 
-import os
-from anthropic import Anthropic
-from typing import Dict, List
-import json
-import logging
-from datetime import datetime
-
-logger = logging.getLogger(__name__)
+import sqlite3
+from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 
 class AgentCalibrator:
-    """Tracks agent accuracy and recommends weight adjustments"""
+    def __init__(self, db_path: str):
+        """Initialize with database connection"""
+        self.db_path = db_path
+        self.agents = [
+            'DVOA', 'Matchup', 'Volume', 'Injury', 
+            'Trend', 'GameScript', 'Variance', 'Weather'
+        ]
     
-    def __init__(self):
-        self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
-        self.model = "claude-sonnet-4-20250514"
+    def get_logged_legs(self, week: int = None) -> List[Dict]:
+        """Fetch all logged leg results from database"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        if week:
+            query = """
+                SELECT pl.parlay_id, pl.leg_index, pl.result, 
+                       p.confidence, p.agent_scores, p.week
+                FROM parlay_legs pl
+                JOIN parlays p ON pl.parlay_id = p.id
+                WHERE p.week = ?
+                ORDER BY p.created_at DESC
+            """
+            cursor.execute(query, (week,))
+        else:
+            query = """
+                SELECT pl.parlay_id, pl.leg_index, pl.result, 
+                       p.confidence, p.agent_scores, p.week
+                FROM parlay_legs pl
+                JOIN parlays p ON pl.parlay_id = p.id
+                ORDER BY p.created_at DESC
+            """
+            cursor.execute(query)
+        
+        results = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return results
     
-    def analyze_agent_performance(self, performance_data: Dict[str, List[Dict]]) -> Dict:
-        """
-        Analyze which agents performed best/worst this week
+    def calculate_agent_accuracy(self, legs: List[Dict]) -> Dict[str, Dict]:
+        """Calculate accuracy metrics for each agent"""
+        agent_stats = defaultdict(lambda: {
+            'predictions': [],
+            'actuals': [],
+            'hits': 0,
+            'total': 0,
+            'accuracy': 0,
+            'calibration_error': 0
+        })
         
-        Args:
-            performance_data: {
-                'agent_name': [
-                    {'confidence': 65, 'prediction': 'OVER', 'actual': 'OVER', 'hit': True, 'line': 250, 'actual_value': 275},
-                    ...
-                ]
-            }
+        for leg in legs:
+            if not leg['agent_scores']:
+                continue
+            
+            actual = leg['result']  # True if W, False if L
+            agent_scores = eval(leg['agent_scores']) if isinstance(leg['agent_scores'], str) else leg['agent_scores']
+            
+            for agent_name, score in agent_scores.items():
+                # Convert agent score (0-100) to confidence (0-1)
+                predicted_conf = score / 100.0
+                agent_stats[agent_name]['predictions'].append(predicted_conf)
+                agent_stats[agent_name]['actuals'].append(1 if actual else 0)
+                agent_stats[agent_name]['total'] += 1
+                
+                if actual:
+                    agent_stats[agent_name]['hits'] += 1
         
-        Returns:
-            {
-                'accuracy': {agent: accuracy%},
-                'top_agents': [agents],
-                'struggling_agents': [agents],
-                'weight_recommendations': {agent: new_weight},
-                'analysis': str
-            }
-        """
-        prompt = f"""Analyze NFL betting agent performance data.
-
-PERFORMANCE DATA:
-{json.dumps(performance_data, indent=2)[:2000]}
-
-Analyze:
-1. Accuracy % for each agent (correct predictions / total)
-2. Hit rate on high-confidence predictions (>65%)
-3. Which agent predictions correlate best with wins
-4. Which agents are over/under-confident
-
-Return JSON:
-{{
-  "accuracy": {{"DVOA": 0.65, "Matchup": 0.62, ...}},
-  "top_performers": ["agent1", "agent2"],
-  "needs_improvement": ["agent3"],
-  "confidence_calibration": {{"DVOA": "overconfident", "Matchup": "well_calibrated"}},
-  "weight_recommendations": {{"DVOA": 1.5, "Matchup": 1.2, ...}},
-  "key_finding": "<1-2 sentences about this week's trends>",
-  "recommendation": "<action to improve next week>"
-}}
-
-Current weights are all 1.0. Recommend 0.5-2.0 based on accuracy.
-Higher weight = agent more accurate.
-
-RESPOND ONLY WITH JSON."""
-
-        try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=1500,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            
-            response_text = response.content[0].text.strip()
-            response_text = response_text.replace('```json', '').replace('```', '').strip()
-            
-            result = json.loads(response_text)
-            logger.info(f"Agent calibration analysis complete")
-            return result
-            
-        except Exception as e:
-            logger.error(f"Agent performance analysis failed: {e}")
-            return {
-                'accuracy': {},
-                'top_performers': [],
-                'needs_improvement': [],
-                'weight_recommendations': {},
-                'recommendation': f'Could not analyze: {str(e)}'
-            }
+        # Calculate metrics
+        for agent_name, stats in agent_stats.items():
+            if stats['total'] > 0:
+                # Actual accuracy
+                stats['accuracy'] = stats['hits'] / stats['total']
+                
+                # Calibration error (predicted vs actual)
+                total_error = sum(
+                    abs(pred - actual) 
+                    for pred, actual in zip(stats['predictions'], stats['actuals'])
+                )
+                stats['calibration_error'] = total_error / stats['total']
+                
+                # Overconfidence: predicted higher than actual
+                stats['overconfidence'] = (
+                    sum(stats['predictions']) / len(stats['predictions']) - stats['accuracy']
+                )
+        
+        return dict(agent_stats)
     
-    def generate_weekly_calibration_report(self, week: int, performance_summary: Dict) -> str:
-        """
-        Generate human-readable weekly calibration report
+    def generate_recalibration_report(self, week: int = None) -> str:
+        """Generate recalibration recommendations"""
+        legs = self.get_logged_legs(week)
         
-        Returns formatted report with agent rankings and recommendations
-        """
-        prompt = f"""Generate a weekly betting system calibration report.
-
-WEEK: {week}
-SUMMARY:
-{json.dumps(performance_summary, indent=2)[:1500]}
-
-Write a 3-4 paragraph report covering:
-1. Top performing agents and why
-2. Struggling agents and suspected causes
-3. Recommended weight adjustments
-4. Strategy adjustments for next week
-
-Be specific and actionable. Format as markdown.
-No JSON in response - just the report text."""
-
-        try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=800,
-                messages=[{"role": "user", "content": prompt}]
-            )
+        if not legs:
+            return "❌ No logged leg results found for calibration.\n"
+        
+        accuracy = self.calculate_agent_accuracy(legs)
+        
+        report = "\n" + "="*80 + "\n"
+        report += "🔬 AGENT RECALIBRATION ANALYSIS\n"
+        report += "="*80 + "\n\n"
+        
+        if week:
+            report += f"Week {week} | {len(legs)} legs analyzed\n"
+        else:
+            report += f"All-time | {len(legs)} legs analyzed\n"
+        
+        report += "-"*80 + "\n\n"
+        
+        # Sort by calibration error
+        sorted_agents = sorted(
+            accuracy.items(),
+            key=lambda x: x[1]['calibration_error'],
+            reverse=True
+        )
+        
+        report += "AGENT PERFORMANCE RANKING:\n"
+        report += "-"*80 + "\n"
+        
+        for rank, (agent_name, stats) in enumerate(sorted_agents, 1):
+            if stats['total'] < 3:
+                status = "⚠️ (insufficient data)"
+            elif stats['overconfidence'] > 0.15:
+                status = "🔴 (overconfident)"
+            elif stats['overconfidence'] < -0.15:
+                status = "🔵 (underconfident)"
+            else:
+                status = "✅ (well-calibrated)"
             
-            report = response.content[0].text.strip()
-            logger.info(f"Generated calibration report for week {week}")
-            return report
+            report += f"\n{rank}. {agent_name:15} {status}\n"
+            report += f"   Accuracy:          {stats['accuracy']*100:.1f}% ({stats['hits']}/{stats['total']} hits)\n"
+            report += f"   Calibration Error: {stats['calibration_error']:.3f}\n"
+            report += f"   Overconfidence:   {stats['overconfidence']:+.3f}\n"
             
-        except Exception as e:
-            logger.error(f"Report generation failed: {e}")
-            return f"Could not generate report: {str(e)}"
+            # Recommendation
+            if stats['total'] >= 3:
+                if stats['overconfidence'] > 0.15:
+                    report += f"   → REDUCE weight (agent too bullish)\n"
+                elif stats['overconfidence'] < -0.15:
+                    report += f"   → INCREASE weight (agent too conservative)\n"
+                else:
+                    report += f"   → OK (no adjustment needed)\n"
+        
+        report += "\n" + "="*80 + "\n"
+        report += "WEIGHT ADJUSTMENT GUIDE:\n"
+        report += "-"*80 + "\n"
+        report += "• Overconfident agents: -0.5 weight per 0.1 overconfidence\n"
+        report += "• Underconfident agents: +0.5 weight per 0.1 underconfidence\n"
+        report += "• Sample size matters: <5 legs = unreliable\n"
+        report += "="*80 + "\n\n"
+        
+        return report
     
-    def compare_to_historical(self, current_week: int, historical_performance: Dict[int, Dict]) -> Dict:
-        """
-        Compare current week to historical trends
+    def get_agent_recommendation(self, agent_name: str, current_weight: float, week: int = None) -> Tuple[float, str]:
+        """Get specific weight recommendation for an agent"""
+        legs = self.get_logged_legs(week)
+        accuracy = self.calculate_agent_accuracy(legs)
         
-        Returns insights on seasonal patterns
-        """
-        prompt = f"""Analyze NFL betting system trends across season.
+        if agent_name not in accuracy or accuracy[agent_name]['total'] < 3:
+            return current_weight, "Insufficient data for recommendation"
+        
+        stats = accuracy[agent_name]
+        overconf = stats['overconfidence']
+        
+        # Weight adjustment formula
+        adjustment = -overconf * 5  # Amplify for weight adjustment
+        new_weight = max(0.5, min(5.0, current_weight + adjustment))  # Clamp 0.5-5.0
+        
+        if abs(adjustment) < 0.2:
+            reasoning = "Well-calibrated, no change needed"
+        elif overconf > 0:
+            reasoning = f"Over-predicting (by {overconf:.1%}), reduce weight"
+        else:
+            reasoning = f"Under-predicting (by {abs(overconf):.1%}), increase weight"
+        
+        return new_weight, reasoning
 
-CURRENT WEEK: {current_week}
-HISTORICAL DATA (weeks 1-{current_week-1}):
-{json.dumps(historical_performance, indent=2)[:2000]}
 
-Return JSON:
-{{
-  "seasonal_trend": "<improving/declining/stable>",
-  "best_agents_historically": ["agent1", "agent2"],
-  "most_volatile_agent": "agent_name",
-  "accuracy_trend": "<getting better or worse over time>",
-  "week_{current_week}_prediction": "<expected accuracy range>",
-  "recommendation": "<strategic adjustment for rest of season>"
-}}
-
-RESPOND ONLY WITH JSON."""
-
-        try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=800,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            
-            response_text = response.content[0].text.strip()
-            response_text = response_text.replace('```json', '').replace('```', '').strip()
-            
-            result = json.loads(response_text)
-            return result
-            
-        except Exception as e:
-            logger.error(f"Historical comparison failed: {e}")
-            return {'seasonal_trend': 'unknown', 'recommendation': f'Error: {str(e)}'}
+def calibrate_agents_interactive(db_path: str, week: int = None):
+    """Interactive calibration interface"""
+    cal = AgentCalibrator(db_path)
+    print(cal.generate_recalibration_report(week))
+    
+    # Get all agent recommendations
+    print("\nWEIGHT ADJUSTMENT RECOMMENDATIONS:\n")
+    
+    # Default weights (from orchestrator)
+    default_weights = {
+        'DVOA': 2.5,
+        'Matchup': 2.0,
+        'Volume': 2.0,
+        'Injury': 4.0,
+        'Trend': 1.5,
+        'GameScript': 2.0,
+        'Variance': 1.0,
+        'Weather': 1.5
+    }
+    
+    for agent_name, current_weight in sorted(default_weights.items()):
+        new_weight, reasoning = cal.get_agent_recommendation(agent_name, current_weight, week)
+        
+        if new_weight != current_weight:
+            print(f"📊 {agent_name:15}")
+            print(f"   Current:  {current_weight:.2f}")
+            print(f"   Proposed: {new_weight:.2f}")
+            print(f"   Reason:   {reasoning}\n")
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    import sys
+    db_path = sys.argv[1] if len(sys.argv) > 1 else "bets.db"
+    week = int(sys.argv[2]) if len(sys.argv) > 2 else None
     
-    calibrator = AgentCalibrator()
-    
-    # Test with sample performance data
-    sample_performance = {
-        'DVOA': [
-            {'confidence': 70, 'prediction': 'OVER', 'actual': 'OVER', 'hit': True},
-            {'confidence': 65, 'prediction': 'UNDER', 'actual': 'OVER', 'hit': False},
-            {'confidence': 75, 'prediction': 'OVER', 'actual': 'OVER', 'hit': True},
-        ],
-        'Matchup': [
-            {'confidence': 60, 'prediction': 'OVER', 'actual': 'OVER', 'hit': True},
-            {'confidence': 55, 'prediction': 'UNDER', 'actual': 'UNDER', 'hit': True},
-        ],
-    }
-    
-    analysis = calibrator.analyze_agent_performance(sample_performance)
-    print("Agent Analysis:", json.dumps(analysis, indent=2))
+    calibrate_agents_interactive(db_path, week)

@@ -112,9 +112,36 @@ class MatchupAgent(BaseAgent):
                 rationale.append(f"⚠️ Elite TE coverage: {te_dvoa:.1f}% DVOA")
         
         elif prop.position == 'RB':
-            rb_dvoa = opp_def.get('vs_rb_dvoa', 0)
+            if 'Rush' in prop.stat_type or 'Rushing' in prop.stat_type:
+                # RUSHING: Use rush_defense_dvoa (primary driver for rushing volume)
+                def_dvoa = context.get('dvoa_defensive', {}).get(prop.opponent, {})
+                rush_def_dvoa = def_dvoa.get('rush_defense_dvoa', 0)
+                
+                if rush_def_dvoa >= 25:
+                    score += 25
+                    rationale.append(f"🔥🔥 ELITE weak run D: {prop.opponent} allows +{rush_def_dvoa:.1f}% DVOA")
+                elif rush_def_dvoa >= 15:
+                    score += 20
+                    rationale.append(f"🔥 Great weak run D: +{rush_def_dvoa:.1f}% DVOA")
+                elif rush_def_dvoa >= 5:
+                    score += 12
+                    rationale.append(f"🎯 Favorable run matchup: +{rush_def_dvoa:.1f}% DVOA")
+                elif rush_def_dvoa >= -5:
+                    rationale.append(f"⚖️ Neutral run matchup: {rush_def_dvoa:.1f}% DVOA")
+                elif rush_def_dvoa >= -15:
+                    score -= 12
+                    rationale.append(f"⚠️ Strong run defense: {rush_def_dvoa:.1f}% DVOA")
+                elif rush_def_dvoa >= -25:
+                    score -= 18
+                    rationale.append(f"⚠️⚠️ ELITE run D: {rush_def_dvoa:.1f}% DVOA")
+                else:
+                    score -= 25
+                    rationale.append(f"🛡️ ELITE ELITE run D: {rush_def_dvoa:.1f}% DVOA")
             
-            if 'Rec' in prop.stat_type:
+            elif 'Rec' in prop.stat_type:
+                # RECEIVING: Use vs_rb_dvoa (receiving-specific)
+                rb_dvoa = opp_def.get('vs_rb_dvoa', 0)
+                
                 if rb_dvoa >= 40:
                     score += 20
                     rationale.append(f"🔥 Weak vs RB receiving: +{rb_dvoa:.1f}% DVOA")

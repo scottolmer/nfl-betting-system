@@ -52,8 +52,16 @@ class GameScriptAgent(BaseAgent):
         if spread_magnitude >= 7:
             if is_favorite:
                 if prop.position == 'RB' and 'Rush' in prop.stat_type:
-                    score += 12
-                    rationale.append(f"Big favorite → clock-killing RB volume")
+                    # Check if opponent has elite run defense (overrides game script)
+                    def_dvoa = context.get('dvoa_defensive', {}).get(prop.opponent, {})
+                    rush_def_dvoa = def_dvoa.get('rush_defense_dvoa', 0)
+                    
+                    if rush_def_dvoa <= -20:  # Elite run defense
+                        score -= 5
+                        rationale.append(f"🛡️ Elite run D ({rush_def_dvoa:.1f}%) overrides clock-kill script")
+                    else:
+                        score += 12
+                        rationale.append(f"Big favorite → clock-killing RB volume")
                 elif prop.position in ['WR', 'TE'] and game_total < 48:
                     score -= 8
                     rationale.append(f"⚠️ Big favorite may ease off passing")
