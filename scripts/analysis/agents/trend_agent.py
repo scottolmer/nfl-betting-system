@@ -58,7 +58,6 @@ class TrendAgent(BaseAgent):
         else:
             score += 5  # Stable is slightly positive
             rationale.append(f"⚖️ Stable opportunity trend")
-        
         direction = "OVER" if score >= 50 else "UNDER"
         
         if score >= 65:

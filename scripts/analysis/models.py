@@ -3,7 +3,7 @@ Data models for NFL betting analysis system
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Tuple
 from datetime import datetime
 import numpy as np
 import logging # Keep logging import if other parts use it
@@ -43,6 +43,9 @@ class PropAnalysis:
     agent_breakdown: dict
     edge_explanation: str
     created_at: datetime = field(default_factory=datetime.now)
+    
+    # PROJECT 3: Track which agents drove the confidence score for correlation detection
+    top_contributing_agents: List[Tuple[str, float]] = field(default_factory=list)  # [(agent_name, contribution %), ...]
 
 
 @dataclass

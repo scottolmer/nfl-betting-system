@@ -92,7 +92,8 @@ class InjuryAgent(BaseAgent):
         - DAY TO DAY: 25 (25 point penalty)
         - Not listed/Healthy: 50 (neutral, no penalty)
         """
-        if not hasattr(self, 'logger'): return (50, "AVOID", ["⚠️ Agent Error"]) # Safety check
+        if not hasattr(self, 'logger'): 
+            return None # Safety check - can't analyze without logger
 
         rationale = []
         score = 50
@@ -100,9 +101,13 @@ class InjuryAgent(BaseAgent):
 
         if not self.injury_data and injury_text:
             self._parse_injury_report(injury_text)
+        
+        # PROJECT 1 FIX: Return None if we have no injury data available
+        if not self.injury_data:
+            return None  # No injury data source - can't analyze
 
         player_name_norm = normalize_player_name(prop.player_name)
-        status = self.injury_data.get(player_name_norm)
+        status = self.injury_data.get(player_name_norm) if self.injury_data else None
 
         if status:
             self.logger.debug(f"Injury Status for {player_name_norm}: {status}")
@@ -128,6 +133,10 @@ class InjuryAgent(BaseAgent):
         else:
             score = 50  # Assume healthy if not listed
 
+        # NOTE: Injury status doesn't invert for UNDER bets
+        # An OUT player can't play for OVER or UNDER volume
+        # So we DON'T invert here - injuries affect both bet types equally
+        
         direction = "AVOID" if score < 30 else ("UNDER" if score < 50 else "OVER")
         final_rationale = rationale if score != 50 else []
 

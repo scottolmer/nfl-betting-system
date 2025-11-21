@@ -392,7 +392,8 @@ class ParlayOptimizer:
             lines.append(f"   Bet: {units:.2f} units (${units*10:.0f})")
             
             for j, leg in enumerate(parlay.legs, 1):
-                lines.append(f"     {j}. {leg.prop.player_name} - {leg.prop.stat_type} OVER {leg.prop.line}")
+                bet_type = getattr(leg.prop, 'bet_type', 'OVER')
+                lines.append(f"     {j}. {leg.prop.player_name} - {leg.prop.stat_type} {bet_type} {leg.prop.line}")
             
             lines.append("")
         
@@ -401,3 +402,7 @@ class ParlayOptimizer:
         lines.append("="*70)
         
         return "\n".join(lines)
+    
+    def _create_under_variation(self, over_analysis):
+        """Deprecated: Use orchestrator._create_complementary_bet instead"""
+        pass

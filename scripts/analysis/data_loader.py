@@ -200,15 +200,16 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
 
             position = infer_position(stat_type)
 
-            if label == 'Over':
-                prop = {
-                    'player_name': player_name_norm, 'team': player_team_abbr, 'opponent': opponent_abbr,
-                    'position': position, 'stat_type': stat_type, 'line': line,
-                    'game_total': 44.5,  # Default reasonable NFL game total
-                    'spread': 0.0,  # Default neutral (ideally from separate moneyline data)
-                    'is_home': is_home, 'week': week,
-                }
-                props.append(prop)
+            # Include both OVER and UNDER bets (not just Over)
+            prop = {
+                'player_name': player_name_norm, 'team': player_team_abbr, 'opponent': opponent_abbr,
+                'position': position, 'stat_type': stat_type, 'line': line,
+                'bet_type': label,  # Store 'Over' or 'Under' explicitly
+                'game_total': 44.5,  # Default reasonable NFL game total
+                'spread': 0.0,  # Default neutral (ideally from separate moneyline data)
+                'is_home': is_home, 'week': week,
+            }
+            props.append(prop)
     else: logger.error("Betting lines CSV format unrecognized.")
 
     if skipped_roster_lookup > 0:

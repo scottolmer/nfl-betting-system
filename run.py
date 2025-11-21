@@ -458,6 +458,169 @@ def run_parlay_builder_optimized(week=None, quality_threshold=None):
     print()
 
 
+def run_parlay_builder_with_correlation(week=None, quality_threshold=None):
+    """Build optimized parlays with CORRELATION-ADJUSTED CONFIDENCE SCORING
+    
+    This shows you REAL confidence scores accounting for dependencies between legs.
+    A parlay showing 75% raw might actually be 55-60% adjusted.
+    
+    Usage:
+        python run build-parlays-correlation 8
+        python run build-parlays-correlation 8 --quality 50
+    """
+    import json
+    
+    if week is None:
+        week = int(os.environ.get('NFL_WEEK', 8))
+    
+    from scripts.analysis.orchestrator import PropAnalyzer
+    from scripts.analysis.data_loader import NFLDataLoader
+    from scripts.analysis.parlay_optimizer import ParlayOptimizer
+    from scripts.analysis.correlation_confidence_scorer import CorrelationConfidenceScorer
+    
+    print_banner()
+    print(f"🔄 Building parlays with CORRELATION ADJUSTMENT for Week {week}...")
+    if quality_threshold:
+        print(f"📊 Quality filter: {quality_threshold}%+ adjusted confidence")
+    print()
+    
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if not api_key:
+        print("❌ ERROR: ANTHROPIC_API_KEY not set in .env")
+        sys.exit(1)
+    
+    # Load data and analyze props
+    data_loader = NFLDataLoader(data_dir=str(project_root / "data"))
+    prop_analyzer = PropAnalyzer()
+    context = data_loader.load_all_data(week=week)
+    all_analyses = prop_analyzer.analyze_all_props(context, min_confidence=60)
+    print(f"📊 {len(all_analyses)} props analyzed\n")
+    
+    # Build parlays optimized for low correlation
+    optimizer = ParlayOptimizer(api_key=api_key)
+    optimized_parlays = optimizer.rebuild_parlays_low_correlation(
+        all_analyses,
+        target_parlays=10,
+        min_confidence=65
+    )
+    
+    # ========== NEW: Apply Correlation-Adjusted Confidence ==========
+    print("\n" + "="*70)
+    print("🔍 APPLYING CORRELATION-ADJUSTED CONFIDENCE SCORING")
+    print("="*70)
+    
+    adjusted_parlays = optimizer.apply_correlation_adjusted_confidence(optimized_parlays)
+    
+    # Filter by quality threshold if specified
+    if quality_threshold:
+        filtered = {'2-leg': [], '3-leg': [], '4-leg': [], '5-leg': []}
+        for ptype in ['2-leg', '3-leg', '4-leg', '5-leg']:
+            for item in adjusted_parlays.get(ptype, []):
+                if item['adjustment']['adjusted_confidence'] >= quality_threshold:
+                    filtered[ptype].append(item)
+        adjusted_parlays = filtered
+    
+    # Format and display
+    output = optimizer.format_adjusted_parlays_with_correlation(adjusted_parlays)
+    print(output)
+    
+    # ========== NEW: Save adjusted parlay data ==========
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = project_root / "parlay_runs" / f"wk{week}_correlation_adj" / run_timestamp
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Build save data structure
+    save_data = {
+        'timestamp': run_timestamp,
+        'week': week,
+        'quality_threshold': quality_threshold,
+        'method': 'correlation_adjusted_confidence',
+        'parlays': []
+    }
+    
+    total_parlays = 0
+    total_units = 0
+    high_corr_count = 0
+    
+    for parlay_type in ['2-leg', '3-leg', '4-leg', '5-leg']:
+        for item in adjusted_parlays.get(parlay_type, []):
+            parlay = item['parlay']
+            adjustment = item['adjustment']
+            
+            # Determine units based on severity
+            if 'HIGH' in adjustment['correlation_severity']:
+                high_corr_count += 1
+                units = parlay.recommended_units * 0.5  # 50% of normal
+            elif 'MODERATE' in adjustment['correlation_severity']:
+                units = parlay.recommended_units * 0.75  # 75% of normal
+            else:
+                units = parlay.recommended_units  # Full units
+            
+            parlay_data = {
+                'type': parlay.parlay_type,
+                'raw_confidence': adjustment['raw_confidence'],
+                'correlation_drag': adjustment['correlation_drag'],
+                'adjusted_confidence': adjustment['adjusted_confidence'],
+                'adjustment_pct': adjustment['adjustment_pct'],
+                'confidence_band': adjustment['confidence_band'],
+                'severity': adjustment['correlation_severity'],
+                'recommended_units': units,
+                'recommended_dollars': units * 10,
+                'legs': [
+                    {
+                        'player': leg.prop.player_name,
+                        'position': leg.prop.position,
+                        'team': leg.prop.team,
+                        'opponent': leg.prop.opponent,
+                        'stat': leg.prop.stat_type,
+                        'line': leg.prop.line,
+                        'confidence': leg.final_confidence
+                    }
+                    for leg in parlay.legs
+                ],
+                'pairwise_correlations': [
+                    {
+                        'legs': f"{corr['leg_i']+1} ↔ {corr['leg_j']+1}",
+                        'type': corr['correlation_type'],
+                        'strength': corr['correlation_strength'],
+                        'adjustment_pct': corr['adjustment_pct'] * 100
+                    }
+                    for corr in adjustment['pairwise_correlations']
+                ]
+            }
+            save_data['parlays'].append(parlay_data)
+            total_parlays += 1
+            total_units += units
+    
+    # Save data
+    with open(output_dir / "correlation_adjusted_parlays.json", "w") as f:
+        json.dump(save_data, f, indent=2)
+    
+    # Save summary
+    summary = {
+        'timestamp': run_timestamp,
+        'week': week,
+        'type': 'correlation_adjusted_confidence',
+        'quality_threshold': quality_threshold,
+        'total_parlays': total_parlays,
+        'total_units': total_units,
+        'total_dollars': total_units * 10,
+        'high_correlation_parlays': high_corr_count,
+        'file': 'correlation_adjusted_parlays.json'
+    }
+    
+    with open(output_dir / "summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+    
+    print(f"\n💾 Correlation-adjusted parlays saved to:")
+    print(f"   parlay_runs\\wk{week}_correlation_adj\\{run_timestamp}\\")
+    print(f"\n📊 Summary:")
+    print(f"   Total Parlays: {total_parlays}")
+    print(f"   Total Units:   {total_units:.1f} (${total_units*10:.0f})")
+    print(f"   High Correlation Parlays: {high_corr_count} (reduced sizing)")
+    print()
+
+
 def main():
     """Main entry point"""
     

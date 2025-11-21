@@ -1,0 +1,120 @@
+{
+  "timestamp": "20251120_154145",
+  "week": 12,
+  "quality_threshold": null,
+  "total_props_analyzed": 104,
+  "parlays": [
+    {
+      "type": "2-leg",
+      "adjusted_confidence": 66,
+      "recommendation": "ACCEPT",
+      "adjustment": 0,
+      "recommended_units": 1.0,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "khalil shakir",
+          "team": "BUF",
+          "opponent": "HOU",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "position": "WR",
+          "confidence": 67
+        },
+        {
+          "player_name": "josh allen",
+          "team": "BUF",
+          "opponent": "HOU",
+          "stat_type": "Pass Completions",
+          "line": 19.5,
+          "position": "QB",
+          "confidence": 66
+        }
+      ]
+    },
+    {
+      "type": "2-leg",
+      "adjusted_confidence": 66,
+      "recommendation": "ACCEPT",
+      "adjustment": 0,
+      "recommended_units": 1.0,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "trevor lawrence",
+          "team": "JAC",
+          "opponent": "ARI",
+          "stat_type": "Pass Yds",
+          "line": 213.5,
+          "position": "QB",
+          "confidence": 66
+        },
+        {
+          "player_name": "brock purdy",
+          "team": "SF",
+          "opponent": "CAR",
+          "stat_type": "Pass Yds",
+          "line": 249.5,
+          "position": "QB",
+          "confidence": 66
+        }
+      ]
+    },
+    {
+      "type": "2-leg",
+      "adjusted_confidence": 65,
+      "recommendation": "ACCEPT",
+      "adjustment": 0,
+      "recommended_units": 1.0,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "christian mccaffrey",
+          "team": "SF",
+          "opponent": "CAR",
+          "stat_type": "Rec Yds",
+          "line": 42.5,
+          "position": "WR",
+          "confidence": 65
+        },
+        {
+          "player_name": "hunter henry",
+          "team": "NE",
+          "opponent": "CIN",
+          "stat_type": "Rec Yds",
+          "line": 40.5,
+          "position": "WR",
+          "confidence": 65
+        }
+      ]
+    },
+    {
+      "type": "2-leg",
+      "adjusted_confidence": 65,
+      "recommendation": "ACCEPT",
+      "adjustment": 0,
+      "recommended_units": 1.0,
+      "risk_level": "MODERATE",
+      "legs": [
+        {
+          "player_name": "alvin kamara",
+          "team": "NO",
+          "opponent": "ATL",
+          "stat_type": "Rush Attempts",
+          "line": 15.5,
+          "position": "RB",
+          "confidence": 65
+        },
+        {
+          "player_name": "drake maye",
+          "team": "NE",
+          "opponent": "CIN",
+          "stat_type": "Pass Completions",
+          "line": 20.5,
+          "position": "QB",
+          "confidence": 66
+        }
+      ]
+    }
+  ]
+}

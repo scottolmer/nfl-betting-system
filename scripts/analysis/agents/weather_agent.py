@@ -25,15 +25,17 @@ class WeatherAgent(BaseAgent):
             game_key = f"{prop.opponent}_vs_{prop.team}"
             game_weather = weather.get(game_key, {})
         
+        # PROJECT 1 FIX: Return None if no weather data available instead of neutral 50
         if not game_weather:
-            return (50, "OVER", [])
+            return None
         
         temp = game_weather.get('temperature', 70)
         wind = game_weather.get('wind_mph', 0)
         venue = game_weather.get('venue_type', 'outdoor')
         
+        # PROJECT 1 FIX: Return None for dome games (weather irrelevant) instead of neutral 50
         if venue == 'dome':
-            return (50, "OVER", [])
+            return None
         
         if temp <= 20 and prop.position in ['QB', 'WR', 'TE']:
             score -= 10
@@ -42,6 +44,5 @@ class WeatherAgent(BaseAgent):
         if wind >= 20 and prop.position in ['QB', 'WR', 'TE']:
             score -= 12
             rationale.append(f"⚠️ HIGH WIND: {wind} mph")
-        
         direction = "OVER" if score >= 50 else "UNDER"
         return (score, direction, rationale)

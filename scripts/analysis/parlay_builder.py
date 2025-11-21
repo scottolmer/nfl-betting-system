@@ -5,6 +5,7 @@ FIXED: Maintains recently_used_players throughout all parlays to force explorati
 
 from typing import List, Dict, Set, Tuple, Optional
 from .models import PropAnalysis, Parlay
+from .props_validator import PropsValidator
 import logging
 import itertools
 from collections import defaultdict
@@ -13,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 def get_prop_analysis_id(analysis: PropAnalysis) -> Tuple:
     prop = analysis.prop
-    return (prop.player_name, prop.stat_type, prop.line, prop.team, prop.opponent)
+    bet_type = getattr(prop, 'bet_type', 'OVER')
+    return (prop.player_name, prop.stat_type, prop.line, prop.team, prop.opponent, bet_type)
 
 class ParlayBuilder:
     """Builds optimal parlay combinations with player diversity"""
@@ -24,6 +26,8 @@ class ParlayBuilder:
         
         Each player can appear in up to 3 different parlays
         """
+        # ✅ NEW: Validate all analyses have PlayerProp objects (not dicts)
+        all_analyses = PropsValidator.validate_all_analyses(all_analyses)
 
         eligible_props = sorted(
             [prop for prop in all_analyses if prop.final_confidence >= min_confidence],
@@ -173,7 +177,13 @@ class ParlayBuilder:
             parlay_num = parlay_counter[leg_count_str]
 
             parlay_lines.append(f"\n**PARLAY {leg_count_str}{parlay_num}** - {parlay.risk_level} RISK")
-            parlay_lines.append(f"Combined Confidence: {parlay.combined_confidence} | EV: +{parlay.expected_value:.1f}%")
+            
+            # PROJECT 3: Show correlation adjustment if present
+            if hasattr(parlay, 'correlation_penalty') and parlay.correlation_penalty < 0:
+                original_conf = parlay.combined_confidence - int(parlay.correlation_penalty)
+                parlay_lines.append(f"Combined Confidence: {parlay.combined_confidence}% (was {original_conf}%, {int(parlay.correlation_penalty)}% correlation)")
+            else:
+                parlay_lines.append(f"Combined Confidence: {parlay.combined_confidence} | EV: +{parlay.expected_value:.1f}%")
             
             units = parlay.recommended_units
             total_units += units
@@ -182,11 +192,24 @@ class ParlayBuilder:
             
             for j, leg in enumerate(parlay.legs, 1):
                 parlay_lines.append(f"  Leg {j}: {leg.prop.player_name} ({leg.prop.team})")
-                parlay_lines.append(f"         {leg.prop.stat_type} OVER {leg.prop.line}")
+                bet_type = getattr(leg.prop, 'bet_type', 'OVER')
+                parlay_lines.append(f"         {leg.prop.stat_type} {bet_type} {leg.prop.line}")
                 parlay_lines.append(f"         vs {leg.prop.opponent} | Confidence: {leg.final_confidence}")
+                
+                # PROJECT 3: Show top contributing agents for each leg
+                if hasattr(leg, 'top_contributing_agents') and leg.top_contributing_agents:
+                    drivers = ", ".join(f"{agent[0]}" for agent in leg.top_contributing_agents[:2])
+                    parlay_lines.append(f"         [driven by {drivers}]")
             
             parlay_lines.append("\n  Rationale:")
             parlay_lines.append(f"    • {parlay.rationale}")
+            
+            # PROJECT 3: Show correlation warnings if present
+            if hasattr(parlay, 'correlation_warnings') and parlay.correlation_warnings:
+                parlay_lines.append(f"\n  ⚠️  Correlation Risks:")
+                for warning in parlay.correlation_warnings:
+                    parlay_lines.append(f"    • {warning}")
+            
             if parlay.correlation_bonus > 0:
                  parlay_lines.append(f"    • Correlation bonus: +{parlay.correlation_bonus} confidence")
             

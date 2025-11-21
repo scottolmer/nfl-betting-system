@@ -126,9 +126,10 @@ def format_parlays_for_display(parlays: Dict, optimized: bool = False, week: int
             # Display each leg
             for j, leg in enumerate(parlay.legs, 1):
                 prop = leg.prop
+                bet_type = getattr(prop, 'bet_type', 'OVER')
                 lines.append(f"│ LEG {j}:")
                 lines.append(f"│   Player: {prop.player_name} ({prop.team} vs {prop.opponent})")
-                lines.append(f"│   Prop: {prop.stat_type} OVER {prop.line}")
+                lines.append(f"│   Prop: {prop.stat_type} {bet_type} {prop.line}")
                 lines.append(f"│   Confidence: {leg.final_confidence:.1f}%")
                 if j < len(parlay.legs):
                     lines.append("│")

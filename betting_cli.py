@@ -14,6 +14,7 @@ from scripts.api.claude_query_handler import ClaudeQueryHandler
 from scripts.analysis.orchestrator import PropAnalyzer
 from scripts.analysis.data_loader import NFLDataLoader
 from scripts.analysis.parlay_builder import ParlayBuilder
+from scripts.analysis.correlation_detector import EnhancedParlayBuilder
 from scripts.analysis.parlay_optimizer import ParlayOptimizer
 from scripts.analysis.dependency_analyzer import DependencyAnalyzer
 from scripts.analysis.performance_tracker import PerformanceTracker
@@ -51,6 +52,9 @@ class BettingAnalyzerCLI:
         print("  parlays [conf]           - Generate standard parlays (default: 58)")
         print("  opt-parlays [quality]    - Generate optimized low-correlation parlays")
         print("  top-props [count]        - Show top N props by confidence (default: 20)")
+        print("  top-overs [count]        - Show top N OVER props only (default: 20)")
+        print("  top-unders [count]       - Show top N UNDER props only (default: 20)")
+        print("  top-team <team> [count]  - Show top N props for team (e.g., 'top-team SEA')")
         print("  export-props [count]     - Export props as JSON for Claude (default: 50)")
         print("  week <number>            - Change week (1-18)")
         print("\n  💰 BANKROLL & SIZING:")
@@ -77,6 +81,9 @@ class BettingAnalyzerCLI:
         print("="*70)
         print("  analyze <query>        | Example: analyze Mahomes 250 pass yards NYG")
         print("  top-props [count]      | Example: top-props 20 (default: 20)")
+        print("  top-overs [count]      | Example: top-overs 20 (default: 20)")
+        print("  top-unders [count]     | Example: top-unders 20 (default: 20)")
+        print("  top-team <team> [cnt]  | Example: top-team SEA 15 (default count: 20)")
         print("  export-props [count]   | Example: export-props 50 (default: 50)")
         print("  parlays [confidence]   | Example: parlays 65 (default: 65)")
         print("  opt-parlays [quality]  | Example: opt-parlays 75 (default: 65)")
@@ -181,6 +188,201 @@ class BettingAnalyzerCLI:
         print(f"\n💡 Use any of these players to build your parlay!")
         print(f"   Example: analyze Mahomes 250 pass yards\n")
     
+    def show_top_overs(self, count_str="20"):
+        """Show top OVER props only by confidence score"""
+        try:
+            count = int(count_str)
+        except ValueError:
+            count = 20
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        print(f"📊 Analyzing OVER props...")
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        
+        # Filter to OVER only
+        over_analyses = [a for a in all_analyses if getattr(a.prop, 'bet_type', 'OVER') == 'OVER']
+        
+        # Deduplicate: keep only highest confidence for each player+stat_type
+        seen = {}
+        deduped_analyses = []
+        
+        for analysis in sorted(over_analyses, key=lambda x: x.final_confidence, reverse=True):
+            prop = analysis.prop
+            key = (prop.player_name.lower(), prop.stat_type)
+            
+            if key not in seen:
+                seen[key] = True
+                deduped_analyses.append(analysis)
+                if len(deduped_analyses) >= count:
+                    break
+        
+        top_props = deduped_analyses
+        
+        print(f"\n🔥 TOP {len(top_props)} OVER PROPS BY CONFIDENCE - WEEK {self.week}")
+        print("="*70)
+        print("")
+        
+        for i, analysis in enumerate(top_props, 1):
+            prop = analysis.prop
+            conf = analysis.final_confidence
+            
+            if conf >= 80:
+                emoji = "🔥"
+            elif conf >= 75:
+                emoji = "⭐"
+            elif conf >= 70:
+                emoji = "✅"
+            elif conf >= 65:
+                emoji = "📊"
+            else:
+                emoji = "📈"
+            
+            print(f"{emoji} {i:2d}. {prop.player_name:20s} ({prop.team:3s}) vs {prop.opponent:3s}")
+            print(f"     {prop.stat_type:15s} OVER {prop.line:6.1f} | Confidence: {conf:5.1f}%")
+            print()
+        
+        print("="*70)
+        print(f"\n💡 Use any of these players to build your parlay!")
+        print(f"   Example: analyze Mahomes 250 pass yards\n")
+    
+    def show_top_unders(self, count_str="20"):
+        """Show top UNDER props only by confidence score"""
+        try:
+            count = int(count_str)
+        except ValueError:
+            count = 20
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        print(f"📊 Analyzing UNDER props...")
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        
+        # Filter to UNDER only
+        under_analyses = [a for a in all_analyses if getattr(a.prop, 'bet_type', 'OVER') == 'UNDER']
+        
+        # Deduplicate: keep only highest confidence for each player+stat_type
+        seen = {}
+        deduped_analyses = []
+        
+        for analysis in sorted(under_analyses, key=lambda x: x.final_confidence, reverse=True):
+            prop = analysis.prop
+            key = (prop.player_name.lower(), prop.stat_type)
+            
+            if key not in seen:
+                seen[key] = True
+                deduped_analyses.append(analysis)
+                if len(deduped_analyses) >= count:
+                    break
+        
+        top_props = deduped_analyses
+        
+        print(f"\n🔥 TOP {len(top_props)} UNDER PROPS BY CONFIDENCE - WEEK {self.week}")
+        print("="*70)
+        print("")
+        
+        for i, analysis in enumerate(top_props, 1):
+            prop = analysis.prop
+            conf = analysis.final_confidence
+            
+            if conf >= 80:
+                emoji = "🔥"
+            elif conf >= 75:
+                emoji = "⭐"
+            elif conf >= 70:
+                emoji = "✅"
+            elif conf >= 65:
+                emoji = "📊"
+            else:
+                emoji = "📈"
+            
+            print(f"{emoji} {i:2d}. {prop.player_name:20s} ({prop.team:3s}) vs {prop.opponent:3s}")
+            print(f"     {prop.stat_type:15s} UNDER {prop.line:6.1f} | Confidence: {conf:5.1f}%")
+            print()
+        
+        print("="*70)
+        print(f"\n💡 Use any of these players to build your parlay!")
+        print(f"   Example: analyze Mahomes 250 pass yards\n")
+    
+    def show_top_props_by_team(self, team_str=""):
+        """Show top props by team and confidence score"""
+        if not team_str:
+            print("❌ Please provide a team abbreviation (e.g., 'top-team SEA' or 'top-team KC 15')\n")
+            return
+        
+        # Parse arguments - could be "SEA" or "SEA 15"
+        args = team_str.split()
+        team_abbr = args[0].upper()
+        
+        try:
+            count = int(args[1]) if len(args) > 1 else 20
+        except (ValueError, IndexError):
+            count = 20
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        print(f"📊 Analyzing props for {team_abbr}...")
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        
+        # Filter to team only
+        team_analyses = [a for a in all_analyses if a.prop.team.upper() == team_abbr]
+        
+        if not team_analyses:
+            print(f"\n⚠️  No props found for {team_abbr}. Check the team abbreviation.\n")
+            return
+        
+        # Deduplicate: keep only highest confidence for each player+stat_type+bet_type
+        seen = {}
+        deduped_analyses = []
+        
+        for analysis in sorted(team_analyses, key=lambda x: x.final_confidence, reverse=True):
+            prop = analysis.prop
+            bet_type = getattr(prop, 'bet_type', 'OVER')
+            key = (prop.player_name.lower(), prop.stat_type, bet_type)
+            
+            if key not in seen:
+                seen[key] = True
+                deduped_analyses.append(analysis)
+                if len(deduped_analyses) >= count:
+                    break
+        
+        top_props = deduped_analyses
+        
+        over_count = sum(1 for p in top_props if getattr(p.prop, 'bet_type', 'OVER') == 'OVER')
+        under_count = sum(1 for p in top_props if getattr(p.prop, 'bet_type', 'OVER') == 'UNDER')
+        
+        print(f"\n🔥 TOP {len(top_props)} PROPS FOR {team_abbr} BY CONFIDENCE - WEEK {self.week}")
+        print(f"   ({over_count} OVER | {under_count} UNDER)")
+        print("="*70)
+        print("")
+        
+        for i, analysis in enumerate(top_props, 1):
+            prop = analysis.prop
+            conf = analysis.final_confidence
+            
+            if conf >= 80:
+                emoji = "🔥"
+            elif conf >= 75:
+                emoji = "⭐"
+            elif conf >= 70:
+                emoji = "✅"
+            elif conf >= 65:
+                emoji = "📊"
+            else:
+                emoji = "📈"
+            
+            bet_type = getattr(prop, 'bet_type', 'OVER')
+            print(f"{emoji} {i:2d}. {prop.player_name:20s} ({prop.team:3s}) vs {prop.opponent:3s}")
+            print(f"     {prop.stat_type:15s} {bet_type} {prop.line:6.1f} | Confidence: {conf:5.1f}%")
+            print()
+        
+        print("="*70)
+        print(f"\n💡 Use any of these players to build your parlay!")
+        print(f"   Example: analyze Metcalf 75 receiving yards\n")
+    
     def export_props_command(self, count_str="50"):
         """Export top props as JSON for conversational Claude analysis"""
         try:
@@ -240,7 +442,7 @@ class BettingAnalyzerCLI:
             print("\n   Or manually copy the JSON above and paste into Claude\n")
     
     def generate_parlays(self, min_conf_str="58"):
-        """Generate standard parlay combinations"""
+        """Generate standard parlay combinations WITH CORRELATION DETECTION (PROJECT 3)"""
         try:
             min_conf = int(min_conf_str)
         except ValueError:
@@ -251,36 +453,33 @@ class BettingAnalyzerCLI:
         
         props_list = context.get('props', [])
         betting_source = context.get('betting_lines_source', 'UNKNOWN')
-        print(f"📊 Analyzing {len(props_list)} props...")
-        all_analyses = []
+        print(f"📊 Analyzing {len(props_list)} props (OVER + UNDER)...")
+        
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        
+        print(f"✅ Analyzed {len(all_analyses)} props (OVER + UNDER)")
+        
+        # Build confidence distribution
         confidence_distribution = {'0-20': 0, '20-40': 0, '40-50': 0, '50-60': 0, '60-70': 0, '70-80': 0, '80+': 0}
+        for analysis in all_analyses:
+            conf = analysis.final_confidence
+            if conf >= 80: confidence_distribution['80+'] += 1
+            elif conf >= 70: confidence_distribution['70-80'] += 1
+            elif conf >= 60: confidence_distribution['60-70'] += 1
+            elif conf >= 50: confidence_distribution['50-60'] += 1
+            elif conf >= 40: confidence_distribution['40-50'] += 1
+            elif conf >= 20: confidence_distribution['20-40'] += 1
+            else: confidence_distribution['0-20'] += 1
         
-        for i, prop in enumerate(props_list, 1):
-            if i % 100 == 0:
-                print(f"   Progress: {i}/{len(props_list)}")
-            
-            try:
-                analysis = self.analyzer.analyze_prop(prop, context)
-                if analysis:
-                    all_analyses.append(analysis)
-                    conf = analysis.final_confidence
-                    if conf >= 80: confidence_distribution['80+'] += 1
-                    elif conf >= 70: confidence_distribution['70-80'] += 1
-                    elif conf >= 60: confidence_distribution['60-70'] += 1
-                    elif conf >= 50: confidence_distribution['50-60'] += 1
-                    elif conf >= 40: confidence_distribution['40-50'] += 1
-                    elif conf >= 20: confidence_distribution['20-40'] += 1
-                    else: confidence_distribution['0-20'] += 1
-            except Exception:
-                pass
-        
-        print(f"✅ Analyzed {len(all_analyses)} props")
         print(f"📊 Confidence Distribution:")
         for range_label, count in confidence_distribution.items():
-            pct = (count / len(props_list) * 100) if props_list else 0
+            pct = (count / len(all_analyses) * 100) if all_analyses else 0
             print(f"   {range_label}: {count} props ({pct:.1f}%)")
         
-        parlays = self.parlay_builder.build_parlays(all_analyses, min_confidence=min_conf)
+        # PROJECT 3: Use EnhancedParlayBuilder with correlation detection
+        print(f"\n🔍 Analyzing correlations (PROJECT 3)...")
+        enhanced_builder = EnhancedParlayBuilder()
+        parlays = enhanced_builder.build_parlays_with_correlation(all_analyses, min_confidence=min_conf)
         output = self.parlay_builder.format_parlays_for_betting(parlays, betting_source=betting_source)
         print(output)
         
@@ -313,20 +512,11 @@ class BettingAnalyzerCLI:
         context = self.loader.load_all_data(week=self.week)
         
         props_list = context.get('props', [])
-        print(f"📊 Analyzing {len(props_list)} props...")
+        print(f"📊 Analyzing {len(props_list)} props (OVER + UNDER)...")
         
-        all_analyses = []
-        for i, prop in enumerate(props_list, 1):
-            if i % 100 == 0:
-                print(f"   Progress: {i}/{len(props_list)}")
-            try:
-                analysis = self.analyzer.analyze_prop(prop, context)
-                if analysis and analysis.final_confidence >= 50:
-                    all_analyses.append(analysis)
-            except Exception:
-                pass
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=50)
         
-        print(f"✅ Analyzed {len(all_analyses)} high-confidence props")
+        print(f"✅ Analyzed {len(all_analyses)} high-confidence props (OVER + UNDER)")
         
         print("\n" + "="*70)
         print("🔄 REBUILDING PARLAYS - LOW CORRELATION OPTIMIZATION")
@@ -778,6 +968,12 @@ class BettingAnalyzerCLI:
                     self.analyze_prop(arg)
                 elif command == 'top-props':
                     self.show_top_props(arg)
+                elif command == 'top-overs':
+                    self.show_top_overs(arg)
+                elif command == 'top-unders':
+                    self.show_top_unders(arg)
+                elif command == 'top-team':
+                    self.show_top_props_by_team(arg)
                 elif command == 'export-props':
                     self.export_props_command(arg)
                 elif command == 'parlays':

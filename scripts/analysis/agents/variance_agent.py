@@ -51,6 +51,5 @@ class VarianceAgent(BaseAgent):
             elif 'TD' in stat_type:
                 score -= 12
                 rationale.append("⚠️⚠️ RB TD: high variance (goal-line touches unpredictable)")
-        
         direction = "OVER" if score >= 50 else "UNDER"
         return (score, direction, rationale)

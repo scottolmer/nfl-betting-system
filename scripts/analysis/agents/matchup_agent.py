@@ -153,6 +153,12 @@ class MatchupAgent(BaseAgent):
                 elif rb_dvoa <= -30:
                     score -= 15
                     rationale.append(f"⚠️ Strong vs RB receiving: {rb_dvoa:.1f}% DVOA")
+# INVERT SCORE FOR UNDER BETS
+        if prop.bet_type == 'UNDER':
+            score = 100 - score
+# INVERT SCORE FOR UNDER BETS
+        if prop.bet_type == 'UNDER':
+            score = 100 - score
         
         direction = "OVER" if score >= 50 else "UNDER"
         

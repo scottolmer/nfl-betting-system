@@ -1,0 +1,11 @@
+{
+  "timestamp": "20251120_154145",
+  "week": 12,
+  "type": "optimized",
+  "quality_threshold": null,
+  "props_analyzed": 104,
+  "parlays_generated": 4,
+  "accepts": 4,
+  "modifies": 0,
+  "file": "optimized_parlays.json"
+}
