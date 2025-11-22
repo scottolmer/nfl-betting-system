@@ -24,6 +24,7 @@ from scripts.analysis.position_size_optimizer import PositionSizeOptimizer
 from scripts.analysis.odds_integration import OddsIntegrator, integrate_odds_with_analysis
 from scripts.utils.parlay_gui import show_parlays_gui
 from scripts.utils.props_json_exporter import PropsJSONExporter
+from scripts.utils.enhanced_props_exporter import EnhancedPropsExporter
 import logging
 
 logging.basicConfig(level=logging.WARNING)
@@ -56,6 +57,7 @@ class BettingAnalyzerCLI:
         print("  top-unders [count]       - Show top N UNDER props only (default: 20)")
         print("  top-team <team> [count]  - Show top N props for team (e.g., 'top-team SEA')")
         print("  export-props [count]     - Export props as JSON for Claude (default: 50)")
+        print("  export-enhanced [count]  - Export props with clustering & contradictions (default: 50)")
         print("  week <number>            - Change week (1-18)")
         print("\n  💰 BANKROLL & SIZING:")
         print("  bankroll <amount>        - Set betting bankroll (e.g., 'bankroll 5000')")
@@ -85,6 +87,7 @@ class BettingAnalyzerCLI:
         print("  top-unders [count]     | Example: top-unders 20 (default: 20)")
         print("  top-team <team> [cnt]  | Example: top-team SEA 15 (default count: 20)")
         print("  export-props [count]   | Example: export-props 50 (default: 50)")
+        print("  export-enhanced [cnt]  | Example: export-enhanced 50 (default: 50)")
         print("  parlays [confidence]   | Example: parlays 65 (default: 65)")
         print("  opt-parlays [quality]  | Example: opt-parlays 75 (default: 65)")
         print("  week <number>          | Example: week 10")
@@ -436,6 +439,69 @@ class BettingAnalyzerCLI:
             print("   - 'Create a 3-leg parlay from high passing yards props'")
             print("   - 'Which players correlate most?'")
             print("   - 'Show me all TD props with bellcow RBs'\n")
+        except ImportError:
+            print("\n💡 Tip: Install pyperclip for auto-clipboard:")
+            print("   pip install pyperclip")
+            print("\n   Or manually copy the JSON above and paste into Claude\n")
+    
+    def export_enhanced_command(self, count_str="50"):
+        """Export props with correlation clustering and contradiction detection"""
+        try:
+            count = int(count_str)
+        except ValueError:
+            count = 50
+        
+        print(f"\n🔄 Loading data for Week {self.week}...")
+        context = self.loader.load_all_data(week=self.week)
+        
+        print(f"📊 Analyzing props...")
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        
+        # Deduplicate: keep only highest confidence for each player+stat_type+bet_type
+        seen = {}
+        deduped_analyses = []
+        
+        for analysis in sorted(all_analyses, key=lambda x: x.final_confidence, reverse=True):
+            prop = analysis.prop
+            bet_type = getattr(prop, 'bet_type', 'OVER')
+            key = (prop.player_name.lower(), prop.stat_type, bet_type)
+            
+            if key not in seen:
+                seen[key] = True
+                deduped_analyses.append(analysis)
+                if len(deduped_analyses) >= count:
+                    break
+        
+        top_props = deduped_analyses
+        
+        print(f"\n📤 Exporting {len(top_props)} props with enhanced analysis...")
+        
+        # Use EnhancedPropsExporter
+        exporter = EnhancedPropsExporter()
+        json_export = exporter.export_enhanced(top_props)
+        
+        # Print summary
+        print(f"\n✅ Enhanced export complete!")
+        print(f"   • Analyzed {len(top_props)} props")
+        print(f"   • Correlation clusters detected")
+        print(f"   • Contradictions identified")
+        print(f"   • Agent analysis included")
+        
+        print("\n" + "="*70)
+        print("📋 ENHANCED JSON EXPORT FOR CLAUDE")
+        print("="*70)
+        print(json_export)
+        print("="*70)
+        
+        # Try to copy to clipboard
+        try:
+            import pyperclip
+            pyperclip.copy(json_export)
+            print("\n✅ JSON copied to clipboard!")
+            print("   Paste into Claude and ask:")
+            print("   - 'Which clusters create hidden correlation risk?'")
+            print("   - 'Are there any contradictory high-confidence bets?'")
+            print("   - 'Which agents disagree most on these props?'\n")
         except ImportError:
             print("\n💡 Tip: Install pyperclip for auto-clipboard:")
             print("   pip install pyperclip")
@@ -976,6 +1042,8 @@ class BettingAnalyzerCLI:
                     self.show_top_props_by_team(arg)
                 elif command == 'export-props':
                     self.export_props_command(arg)
+                elif command == 'export-enhanced':
+                    self.export_enhanced_command(arg)
                 elif command == 'parlays':
                     self.generate_parlays(arg)
                 elif command == 'opt-parlays':

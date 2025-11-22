@@ -82,12 +82,15 @@ class PropAnalyzer:
         if skipped_agents:
             self.logger.info(f"⏭️  Skipped agents: {', '.join(skipped_agents)}")
 
+        # Invert agent scores if analyzing UNDER bet
+        if original_bet_type == 'UNDER':
+            for agent_name in agent_results:
+                agent_results[agent_name]['raw_score'] = 100 - agent_results[agent_name]['raw_score']
+
         final_confidence = self._calculate_final_confidence(agent_results)
         
-        # Restore original bet type and invert if needed
+        # Restore original bet type (no longer need to invert final_confidence since agents are already inverted)
         prop.bet_type = original_bet_type
-        if original_bet_type == 'UNDER':
-            final_confidence = 100 - final_confidence
         
         final_direction = "OVER" if final_confidence >= 50 else "UNDER"
         recommendation = AgentConfig.get_recommendation(final_confidence, final_direction)
@@ -104,128 +107,35 @@ class PropAnalyzer:
         return analysis
 
     def analyze_all_props(self, context: Dict, min_confidence: int = 50) -> List[PropAnalysis]:
-        """Analyze all props - each prop is analyzed AS-IS (OVER or UNDER as labeled in data)
-        PLUS generate complementary UNDER/OVER variants for fair consideration"""
+        """Analyze all props with proper directional inversion"""
         props = context.get('props', [])
         if not props:
             self.logger.error("No props found in context!"); return []
 
-        self.logger.info(f"📊 Analyzing {len(props)} props (each as OVER or UNDER)...")
-        results = []; skipped_count = 0
-        complementary_count = 0
+        self.logger.info(f"📊 Analyzing {len(props)} props...")
+        results = []
         
-        for i, prop_data in enumerate(props):
+        for prop_data in props:
             try:
                 if not prop_data.get('player_name') or not prop_data.get('stat_type'):
-                     skipped_count += 1; continue
+                    continue
                 
-                # Analyze EACH PROP as-is (OVER or UNDER - not inverted)
                 analysis = self.analyze_prop(prop_data, context)
                 if analysis and hasattr(analysis, 'final_confidence'):
-                    # ✅ NEW: Validate that prop is a PlayerProp object (not dict)
                     analysis = PropsValidator.validate_prop_analysis(analysis)
-                    
                     if analysis.final_confidence >= min_confidence:
                         results.append(analysis)
                         
-                        # ✅ NEW: Generate complementary UNDER/OVER variant with SAME confidence
-                        # This ensures UNDER bets get fair competition at full confidence values
-                        # IMPORTANT: Don't invert! Keep same confidence as original
-                        complementary_analysis = self._create_complementary_bet_same_confidence(analysis)
-                        results.append(complementary_analysis)
-                        complementary_count += 1
-                        
             except Exception as e:
-                player = prop_data.get('player_name', '?'); stat = prop_data.get('stat_type', '?')
-                label = prop_data.get('label', '?')
-                self.logger.error(f"❌ Analysis failed for prop: {player} {stat} ({label}) - {e}", exc_info=False)
-                skipped_count += 1
+                player = prop_data.get('player_name', '?')
+                stat = prop_data.get('stat_type', '?')
+                self.logger.error(f"❌ Failed: {player} {stat} - {e}", exc_info=False)
         
-        # ✅ NEW: Final validation - ensure ALL props are PlayerProp objects
         results = PropsValidator.validate_all_analyses(results)
-        
         results.sort(key=lambda x: x.final_confidence, reverse=True)
-        self.logger.info(f"✅ Found {len(results)} props analyzed ({complementary_count} complementary variants added)")
+        self.logger.info(f"✅ Analyzed {len(results)} props")
         return results
-    
-    def _create_complementary_bet(self, analysis: PropAnalysis) -> PropAnalysis:
-        """Create complementary bet by inverting confidence (OVER->UNDER or UNDER->OVER)"""
-        import copy
-        
-        # Get the complementary confidence
-        complementary_confidence = 100 - analysis.final_confidence
-        
-        # Create prop with opposite bet type
-        comp_prop = copy.deepcopy(analysis.prop)
-        comp_prop.bet_type = "UNDER" if analysis.prop.bet_type == "OVER" else "OVER"
-        
-        # Invert agent scores
-        inverted_breakdown = {}
-        for agent_name, result in analysis.agent_breakdown.items():
-            inverted_score = 100 - result.get('raw_score', 50)
-            inverted_breakdown[agent_name] = {
-                'raw_score': inverted_score,
-                'direction': 'UNDER' if result.get('direction') == 'OVER' else 'OVER',
-                'rationale': result.get('rationale', []),
-                'weight': result.get('weight', 0),
-            }
-        
-        recommendation = AgentConfig.get_recommendation(complementary_confidence, comp_prop.bet_type)
-        
-        # Create complementary analysis
-        complementary_analysis = PropAnalysis(
-            prop=comp_prop,
-            final_confidence=complementary_confidence,
-            recommendation=recommendation,
-            rationale=analysis.rationale,
-            agent_breakdown=inverted_breakdown,
-            edge_explanation=f"{comp_prop.bet_type} bet (complement of {analysis.prop.bet_type} at {analysis.final_confidence}%)",
-            top_contributing_agents=analysis.top_contributing_agents,
-        )
-        
-        return complementary_analysis
-    
-    def _create_complementary_bet_same_confidence(self, analysis: PropAnalysis) -> PropAnalysis:
-        """Create complementary bet with SAME confidence (not inverted)
-        
-        CRITICAL FIX: Instead of inverting confidence (70% OVER -> 30% UNDER),
-        create the complementary at the SAME confidence (70% OVER -> 70% UNDER).
-        This ensures fair competition and UNDER bets actually appear in parlays.
-        """
-        import copy
-        
-        # Create prop with opposite bet type
-        comp_prop = copy.deepcopy(analysis.prop)
-        comp_prop.bet_type = "UNDER" if analysis.prop.bet_type == "OVER" else "OVER"
-        
-        # CRITICAL: Keep same confidence, don't invert!
-        complementary_confidence = analysis.final_confidence
-        
-        # Invert agent scores for symmetry
-        inverted_breakdown = {}
-        for agent_name, result in analysis.agent_breakdown.items():
-            inverted_score = 100 - result.get('raw_score', 50)
-            inverted_breakdown[agent_name] = {
-                'raw_score': inverted_score,
-                'direction': 'UNDER' if result.get('direction') == 'OVER' else 'OVER',
-                'rationale': result.get('rationale', []),
-                'weight': result.get('weight', 0),
-            }
-        
-        recommendation = AgentConfig.get_recommendation(complementary_confidence, comp_prop.bet_type)
-        
-        # Create complementary analysis with SAME confidence
-        complementary_analysis = PropAnalysis(
-            prop=comp_prop,
-            final_confidence=complementary_confidence,  # NOT inverted!
-            recommendation=recommendation,
-            rationale=analysis.rationale,
-            agent_breakdown=inverted_breakdown,
-            edge_explanation=f"{comp_prop.bet_type} bet (equal confidence alternative to {analysis.prop.bet_type} at {analysis.final_confidence}%)",
-            top_contributing_agents=analysis.top_contributing_agents,
-        )
-        
-        return complementary_analysis
+
 
     def _create_prop_object(self, prop_data: Dict) -> PlayerProp:
         """Convert dict to PlayerProp object"""

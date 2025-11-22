@@ -127,7 +127,14 @@ class EnhancedPropsExporter:
         
         for prop in props:
             agent_scores = prop.agent_breakdown
-            scores = [v for v in agent_scores.values() if v and v != 50]
+            scores = []
+            for v in agent_scores.values():
+                if isinstance(v, dict):
+                    score = v.get('raw_score', 50)
+                else:
+                    score = v if isinstance(v, (int, float)) else 50
+                if score and score != 50:
+                    scores.append(score)
             
             if scores:
                 high_scores = sum(1 for s in scores if s > 65)
@@ -163,7 +170,13 @@ class EnhancedPropsExporter:
         
         for agent in agents:
             for prop in props:
-                score = prop.agent_breakdown.get(agent, 50)
+                score_raw = prop.agent_breakdown.get(agent, 50)
+                # Handle case where agent_breakdown returns a dict instead of a number
+                if isinstance(score_raw, dict):
+                    score = score_raw.get('raw_score', 50)
+                else:
+                    score = score_raw if isinstance(score_raw, (int, float)) else 50
+                
                 agent_profiles[agent]['scores'].append(score)
                 
                 if score > 65:
@@ -190,7 +203,13 @@ class EnhancedPropsExporter:
                 avg_score = sum(scores) / len(scores)
                 agreements = 0
                 for prop in props:
-                    agent_score = prop.agent_breakdown.get(agent, 50)
+                    score_raw = prop.agent_breakdown.get(agent, 50)
+                    # Handle case where agent_breakdown returns a dict instead of a number
+                    if isinstance(score_raw, dict):
+                        agent_score = score_raw.get('raw_score', 50)
+                    else:
+                        agent_score = score_raw if isinstance(score_raw, (int, float)) else 50
+                    
                     final_conf = prop.final_confidence
                     if (agent_score > 60 and final_conf > 60) or (agent_score < 40 and final_conf < 40):
                         agreements += 1
@@ -206,7 +225,8 @@ class EnhancedPropsExporter:
     @staticmethod
     def export_with_clusters(props: List[PropAnalysis], num_props: Optional[int] = None) -> str:
         """Export props WITH correlation clusters and contradiction detection"""
-        if num_props:
+        # Only slice if num_props is an integer and is less than len(props)
+        if isinstance(num_props, int) and num_props > 0:
             props = props[:num_props]
         
         clusters = EnhancedPropsExporter.analyze_correlations(props)
@@ -215,6 +235,15 @@ class EnhancedPropsExporter:
         
         props_data = []
         for prop in props:
+            # Safely process agent_breakdown
+            agent_breakdown_output = {}
+            for agent, value in prop.agent_breakdown.items():
+                if isinstance(value, dict):
+                    score = value.get('raw_score', 50)
+                else:
+                    score = value if isinstance(value, (int, float)) else 50
+                agent_breakdown_output[agent] = round(score, 1)
+            
             prop_dict = {
                 "player": prop.prop.player_name,
                 "position": prop.prop.position,
@@ -225,10 +254,7 @@ class EnhancedPropsExporter:
                 "bet_type": prop.prop.bet_type,
                 "confidence": round(prop.final_confidence, 1),
                 "recommendation": prop.recommendation,
-                "agent_breakdown": {
-                    agent: round(score, 1) if score else 50
-                    for agent, score in prop.agent_breakdown.items()
-                },
+                "agent_breakdown": agent_breakdown_output,
                 "rationale": prop.rationale[:3] if prop.rationale else [],
             }
             props_data.append(prop_dict)
@@ -286,7 +312,8 @@ class EnhancedPropsExporter:
     @staticmethod
     def export_with_clusters_formatted(props: List[PropAnalysis], num_props: Optional[int] = None) -> Tuple[str, str]:
         """Export with clusters AND return formatted summary for display"""
-        if num_props:
+        # Only slice if num_props is an integer and is less than len(props)
+        if isinstance(num_props, int) and num_props > 0:
             props = props[:num_props]
         
         clusters = EnhancedPropsExporter.analyze_correlations(props)
@@ -327,3 +354,12 @@ class EnhancedPropsExporter:
         summary_text = "\n".join(summary_lines)
         
         return json_export, summary_text
+
+    def export_enhanced(self, props: List[PropAnalysis], num_props: Optional[int] = None) -> str:
+        """
+        Export props with enhanced clustering and contradiction analysis.
+        Main entry point for CLI integration.
+        """
+        # The props are already limited by the CLI before calling this
+        # So we just call export_with_clusters directly
+        return EnhancedPropsExporter.export_with_clusters(props)
