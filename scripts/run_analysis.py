@@ -16,6 +16,7 @@ from scripts.api.odds_api import OddsAPI
 from scripts.analysis.data_loader import NFLDataLoader
 from scripts.analysis.orchestrator import PropAnalyzer
 from scripts.analysis.parlay_builder import ParlayBuilder
+from scripts.analysis.parlay_saver import save_parlays_after_analysis
 
 
 def run_complete_analysis(week: int = 7, skip_fetch: bool = False):
@@ -134,11 +135,14 @@ def run_complete_analysis(week: int = 7, skip_fetch: bool = False):
     
     # We use min_confidence=52 here, which is our threshold for betting
     parlays = parlay_builder.build_parlays(diversified_analyses, min_confidence=52)
-    
+
     total_parlays = sum(len(p) for p in parlays.values())
     print(f"✅ Built {total_parlays} optimal parlays (from props with 58+ confidence)")
     print()
-    
+
+    # STEP 5.5: Save parlays to tracking system
+    save_parlays_after_analysis(parlays, week=week, year=2024, parlay_type="traditional")
+
     # STEP 6: Generate betting card
     print("📄 STEP 6: GENERATING BETTING CARD")
     print("-"*70)

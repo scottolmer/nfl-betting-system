@@ -1,0 +1,274 @@
+============================================================
+🎯 ACTIONABLE PARLAY RECOMMENDATIONS
+============================================================
+
+📊 Betting Lines Source: UNKNOWN
+
+
+============================================================
+📊 2-LEG PARLAYS
+============================================================
+
+**PARLAY 21** - MODERATE RISK
+Combined Confidence: 70 | EV: +40.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: khalil shakir (BUF)
+         Receptions OVER 4.5
+         vs HOU | Confidence: 67
+         [driven by DVOA, Matchup]
+  Leg 2: drake maye (NE)
+         Pass Completions OVER 20.5
+         vs CIN | Confidence: 66
+         [driven by DVOA, Matchup]
+
+  Rationale:
+    • ✅ Diversified QB/WR across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 22** - MODERATE RISK
+Combined Confidence: 70 | EV: +40.0%
+Recommended Bet: 1.5 units ($15 if $10/unit)
+
+  Leg 1: brock purdy (SF)
+         Pass Yds OVER 249.5
+         vs CAR | Confidence: 66
+         [driven by DVOA, Matchup]
+  Leg 2: trevor lawrence (JAC)
+         Pass Yds OVER 213.5
+         vs ARI | Confidence: 66
+         [driven by DVOA, Matchup]
+
+  Rationale:
+    • ✅ Diversified QB across 2 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 23** - MODERATE RISK
+Combined Confidence: 69 | EV: +38.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: josh allen (BUF)
+         Pass Completions OVER 19.5
+         vs HOU | Confidence: 66
+         [driven by DVOA, Matchup]
+  Leg 2: alvin kamara (NO)
+         Rush Attempts UNDER 15.5
+         vs ATL | Confidence: 65
+         [driven by Injury, Matchup]
+
+  Rationale:
+    • ✅ Diversified QB/RB across 2 games
+    • Correlation bonus: +4 confidence
+    • ⚠️ DVOA data not available
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 3-LEG PARLAYS
+============================================================
+
+**PARLAY 31** - MODERATE RISK
+Combined Confidence: 68 | EV: +36.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: christian mccaffrey (SF)
+         Rec Yds OVER 42.5
+         vs CAR | Confidence: 65
+         [driven by DVOA, Matchup]
+  Leg 2: hunter henry (NE)
+         Rec Yds OVER 40.5
+         vs CIN | Confidence: 65
+         [driven by DVOA, Matchup]
+  Leg 3: sam darnold (SEA)
+         Pass Completions OVER 19.5
+         vs TEN | Confidence: 63
+         [driven by DVOA, Volume]
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 32** - MODERATE RISK
+Combined Confidence: 67 | EV: +34.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: matthew golden (GB)
+         Receptions UNDER 2.5
+         vs MIN | Confidence: 63
+         [driven by Injury, DVOA]
+  Leg 2: tetairoa mcmillan (CAR)
+         Rec Yds OVER 59.5
+         vs SF | Confidence: 63
+         [driven by DVOA, Volume]
+  Leg 3: jared goff (DET)
+         Pass Yds OVER 258.5
+         vs NYG | Confidence: 63
+         [driven by DVOA, Matchup]
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 33** - MODERATE RISK
+Combined Confidence: 66 | EV: +32.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: brian thomas jr (JAC)
+         Receptions OVER 4.5
+         vs ARI | Confidence: 63
+         [driven by DVOA, Matchup]
+  Leg 2: tyrell shavers (BUF)
+         Receptions OVER 1.5
+         vs HOU | Confidence: 63
+         [driven by DVOA, Matchup]
+  Leg 3: bryce young (CAR)
+         Pass Yds OVER 200.5
+         vs SF | Confidence: 62
+         [driven by DVOA, Volume]
+
+  Rationale:
+    • ✅ Diversified QB/WR across 3 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 4-LEG PARLAYS
+============================================================
+
+**PARLAY 41** - MODERATE RISK
+Combined Confidence: 65 | EV: +30.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: travis etienne jr (JAC)
+         Rec Yds OVER 13.5
+         vs ARI | Confidence: 62
+         [driven by DVOA, Matchup]
+  Leg 2: joshua palmer (BUF)
+         Rec Yds OVER 27.5
+         vs HOU | Confidence: 62
+         [driven by DVOA, Matchup]
+  Leg 3: chase brown (CIN)
+         Receptions OVER 4.5
+         vs NE | Confidence: 61
+         [driven by Matchup, Volume]
+  Leg 4: christian watson (GB)
+         Rec Yds UNDER 50.5
+         vs MIN | Confidence: 61
+         [driven by Injury, DVOA]
+
+  Rationale:
+    • ✅ Diversified WR across 4 games
+    • Correlation bonus: +4 confidence
+    • ⚠️ Weak passing O: -20.0%
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 42** - MODERATE RISK
+Combined Confidence: 64 | EV: +28.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: dontayvion wicks (GB)
+         Rec Yds UNDER 20.5
+         vs MIN | Confidence: 61
+         [driven by Injury, DVOA]
+  Leg 2: aj barner (SEA)
+         Receptions OVER 3.5
+         vs TEN | Confidence: 61
+         [driven by DVOA, Matchup]
+  Leg 3: ty johnson (BUF)
+         Rec Yds OVER 8.5
+         vs HOU | Confidence: 61
+         [driven by DVOA, Matchup]
+  Leg 4: aj brown (PHI)
+         Receptions OVER 4.5
+         vs DAL | Confidence: 60
+         [driven by DVOA, Volume]
+
+  Rationale:
+    • ✅ Diversified WR across 4 games
+    • Correlation bonus: +4 confidence
+    • ✅ DVOA strongly favors OVER
+
+**PARLAY 43** - MODERATE RISK
+Combined Confidence: 64 | EV: +28.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: dak prescott (DAL)
+         player_pass_attempts UNDER 35.5
+         vs PHI | Confidence: 60
+         [driven by Injury, DVOA]
+  Leg 2: jaxson dart (NYG)
+         Pass TDs UNDER 1.5
+         vs DET | Confidence: 60
+         [driven by Injury, Matchup]
+  Leg 3: devonta smith (PHI)
+         Receptions OVER 4.5
+         vs DAL | Confidence: 60
+         [driven by Matchup, DVOA]
+  Leg 4: jaxon smith-njigba (SEA)
+         Rec Yds OVER 92.5
+         vs TEN | Confidence: 60
+         [driven by DVOA, Matchup]
+
+  Rationale:
+    • ✅ Diversified QB/WR across 4 games
+    • Correlation bonus: +4 confidence
+    • 💪 Strong passing O: NYG +17.7%
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+📊 5-LEG PARLAYS
+============================================================
+
+**PARLAY 51** - MODERATE RISK
+Combined Confidence: 63 | EV: +26.0%
+Recommended Bet: 1.0 units ($10 if $10/unit)
+
+  Leg 1: romeo doubs (GB)
+         Rec Yds UNDER 50.5
+         vs MIN | Confidence: 60
+         [driven by Injury, DVOA]
+  Leg 2: cooper kupp (SEA)
+         Receptions OVER 2.5
+         vs TEN | Confidence: 60
+         [driven by DVOA, Matchup]
+  Leg 3: josh downs (IND)
+         Receptions OVER 3.5
+         vs KC | Confidence: 59
+         [driven by Matchup, Volume]
+  Leg 4: zay flowers (BAL)
+         Receptions OVER 4.5
+         vs NYJ | Confidence: 59
+         [driven by Matchup, DVOA]
+  Leg 5: xavier worthy (KC)
+         Rec Yds UNDER 41.5
+         vs IND | Confidence: 59
+         [driven by Injury, Volume]
+
+  Rationale:
+    • ✅ Diversified WR across 5 games
+    • Correlation bonus: +4 confidence
+    • ⚠️ Weak passing O: -28.7%
+    • ⚠️ DVOA data not available
+    • ✅ DVOA strongly favors OVER
+
+============================================================
+💡 BETTING TIPS
+============================================================
+• 2-leg parlays have highest hit rate but lower payout
+• 3-leg and 4-leg balance risk/reward
+• 5-leg is high risk/high reward - consider reducing units
+• Same-game parlays have correlation bonus but higher variance
+• Uncorrelated parlays (different games) are safer
+• Position diversity reduces correlation risk
+• Never bet more than you can afford to lose!
+
+============================================================
+📊 SUMMARY
+============================================================
+Total Parlays: 10/10
+Total Units: 11.0
+At $10/unit: $110
+============================================================

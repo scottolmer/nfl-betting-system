@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/export_parlays_cli.py:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -87,7 +87,7 @@ class ParlayTracker:
         self,
         week: int,
         year: int,
-        parlay_type: Literal["traditional", "enhanced"],
+        parlay_type: Literal["traditional", "enhanced", "custom"],
         props: List[Dict],
         raw_confidence: float,
         effective_confidence: float,
@@ -99,11 +99,11 @@ class ParlayTracker:
     ) -> str:
         """
         Add a newly generated parlay to tracking.
-        
+
         Args:
             week: NFL week number
             year: Year
-            parlay_type: "traditional" or "enhanced"
+            parlay_type: "traditional", "enhanced", or "custom"
             props: List of prop dicts with player, stat_type, line, direction, confidence, etc.
             raw_confidence: Original confidence before correlation adjustment
             effective_confidence: Confidence after correlation adjustment (same as raw for traditional)
@@ -119,8 +119,10 @@ class ParlayTracker:
         """
         content_hash = self._generate_content_hash(props)
         version = self._get_next_version(content_hash, week, year, parlay_type)
-        
-        parlay_id = f"{parlay_type.upper()[:4]}_W{week}_{content_hash}_v{version}"
+
+        # Generate prefix: TRAD, ENHA, or CUST
+        prefix = parlay_type.upper()[:4]
+        parlay_id = f"{prefix}_W{week}_{content_hash}_v{version}"
         
         parlay = {
             "parlay_id": parlay_id,

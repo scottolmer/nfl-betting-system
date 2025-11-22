@@ -11,7 +11,7 @@ class PerformanceTracker:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(str(self.db_path))
         self.create_tables()
-        print(f"✅ Performance tracker initialized at {self.db_path}")
+        print(f"[OK] Performance tracker initialized at {self.db_path}")
     
     def create_tables(self):
         """Create database schema"""
@@ -125,11 +125,11 @@ class PerformanceTracker:
                 leg_count += 1
             
             self.conn.commit()
-            print(f"   ✅ Logged parlay {parlay_id} ({len(parlay.get('legs', []))} legs, {parlay['confidence']:.1f}% confidence)")
+            print(f"   [OK] Logged parlay {parlay_id} ({len(parlay.get('legs', []))} legs, {parlay['confidence']:.1f}% confidence)")
             return parlay_id
-        
+
         except Exception as e:
-            print(f"   ❌ Error logging parlay: {e}")
+            print(f"   [ERROR] Error logging parlay: {e}")
             return None
     
     def log_results(self, parlay_id, leg_results):
@@ -160,10 +160,10 @@ class PerformanceTracker:
             self.conn.commit()
             hit_count = sum(1 for hit in leg_results.values() if hit)
             total_legs = len(leg_results)
-            print(f"✅ Logged results for {parlay_id}: {hit_count}/{total_legs} legs hit")
-        
+            print(f"[OK] Logged results for {parlay_id}: {hit_count}/{total_legs} legs hit")
+
         except Exception as e:
-            print(f"❌ Error logging results: {e}")
+            print(f"[ERROR] Error logging results: {e}")
     
     def get_all_results(self):
         """Get all completed parlays with their agent breakdown for calibration analysis"""
@@ -198,9 +198,9 @@ class PerformanceTracker:
                 })
             
             return parsed_results
-        
+
         except Exception as e:
-            print(f"❌ Error getting all results: {e}")
+            print(f"[ERROR] Error getting all results: {e}")
             return []
     
     def get_week_results(self, week):
@@ -238,7 +238,7 @@ class PerformanceTracker:
             return parsed_results
         
         except Exception as e:
-            print(f"❌ Error getting week results: {e}")
+            print(f"[ERROR] Error getting week results: {e}")
             return []
     
     def calibration_report(self, week=None):
@@ -265,7 +265,7 @@ class PerformanceTracker:
             results = cursor.execute(query).fetchall()
             
             if not results:
-                print("\n❌ No completed parlays to analyze yet\n")
+                print("\n[ERROR] No completed parlays to analyze yet\n")
                 return
             
             print("\n" + "="*80)
@@ -301,7 +301,7 @@ class PerformanceTracker:
             print("  • Persistent negative error = system is too confident\n")
         
         except Exception as e:
-            print(f"\n❌ Error generating report: {e}\n")
+            print(f"\n[ERROR] Error generating report: {e}\n")
     
     def week_summary(self, week):
         """Show summary stats for a specific week"""
@@ -322,7 +322,7 @@ class PerformanceTracker:
             result = cursor.execute(query, (week,)).fetchone()
             
             if not result or result[0] == 0:
-                print(f"\n❌ No parlays found for Week {week}\n")
+                print(f"\n[ERROR] No parlays found for Week {week}\n")
                 return
             
             total, wins, losses, pending, avg_conf = result
@@ -337,7 +337,7 @@ class PerformanceTracker:
             print("="*50 + "\n")
         
         except Exception as e:
-            print(f"\n❌ Error getting summary: {e}\n")
+            print(f"\n[ERROR] Error getting summary: {e}\n")
     
     def list_recent_parlays(self, limit=10):
         """List recent parlays and their status"""
@@ -356,7 +356,7 @@ class PerformanceTracker:
             results = cursor.execute(query, (limit,)).fetchall()
             
             if not results:
-                print("\n❌ No parlays logged yet\n")
+                print("\n[ERROR] No parlays logged yet\n")
                 return
             
             print(f"\n📋 RECENT PARLAYS (Latest {len(results)})")
@@ -365,14 +365,14 @@ class PerformanceTracker:
             print("-"*80)
             
             for parlay_id, week, conf, status, legs in results:
-                status_emoji = "✅" if status == "won" else "❌" if status == "lost" else "⏳"
+                status_emoji = "[OK]" if status == "won" else "[ERROR]" if status == "lost" else "[PENDING]"
                 print(f"{parlay_id:<25} {week:<6} {legs:<6} {conf:>6.1f}%      "
                       f"{status_emoji} {status:<8}")
             
             print("="*80 + "\n")
         
         except Exception as e:
-            print(f"\n❌ Error listing parlays: {e}\n")
+            print(f"\n[ERROR] Error listing parlays: {e}\n")
     
     def close(self):
         """Close database connection"""

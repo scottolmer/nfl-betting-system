@@ -1,0 +1,3145 @@
+{
+  "parlays": [
+    {
+      "parlay_id": "CUST_W12_daf007ad_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "custom",
+      "content_hash": "daf007ad",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T13:42:54.538773",
+      "data_source": "custom_builder",
+      "props": [
+        {
+          "player": "josh allen",
+          "team": "BUF",
+          "opponent": "HOU",
+          "position": "QB",
+          "stat_type": "Pass Completions",
+          "line": 19.5,
+          "direction": "OVER",
+          "confidence": 66,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: BUF +71.2%",
+                "🎯 ELITE weak D: HOU +38.2%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "🔥 Weak pass defense: HOU allows +38.2% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 100.0% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Pass completions: good reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "khalil shakir",
+          "team": "BUF",
+          "opponent": "HOU",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "direction": "OVER",
+          "confidence": 67,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: BUF +71.2%",
+                "🎯 ELITE weak D: HOU +38.2%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥 ELITE WR1 MATCHUP: +34.1% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Volume strongly supports OVER",
+                "🎯 High volume: 27.6% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Strong trend supports OVER",
+                "💶 Opportunity trending UP (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 66.5,
+      "effective_confidence": 50,
+      "correlations": [
+        {
+          "type": "custom_parlay_analysis",
+          "adjustment": 0,
+          "reasoning": "No correlation detected"
+        }
+      ],
+      "payout_odds": 260,
+      "kelly_bet_size": 0.5,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 100.0,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 72.5,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 50.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 58.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 70.0,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 60.0,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 58.0,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_48264d19_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "48264d19",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.979846",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "khalil shakir",
+          "team": "BUF",
+          "opponent": "HOU",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "direction": "OVER",
+          "confidence": 67,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: BUF +71.2%",
+                "🎯 ELITE weak D: HOU +38.2%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥 ELITE WR1 MATCHUP: +34.1% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Volume strongly supports OVER",
+                "🎯 High volume: 27.6% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Strong trend supports OVER",
+                "💶 Opportunity trending UP (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "drake maye",
+          "team": "NE",
+          "opponent": "CIN",
+          "position": "QB",
+          "stat_type": "Pass Completions",
+          "line": 20.5,
+          "direction": "OVER",
+          "confidence": 66,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "💪 Elite passing O: NE +39.0%",
+                "🎯 ELITE weak D: CIN +62.8%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "🔥 Weak pass defense: CIN allows +62.8% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 100.0% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Pass completions: good reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 66.5,
+      "effective_confidence": 70,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "2-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 260,
+      "kelly_bet_size": 1.5,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 100.0,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 72.5,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 50.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 58.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 70.0,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 60.0,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 58.0,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_3a79a58d_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "3a79a58d",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.981624",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "brock purdy",
+          "team": "SF",
+          "opponent": "CAR",
+          "position": "QB",
+          "stat_type": "Pass Yds",
+          "line": 249.5,
+          "direction": "OVER",
+          "confidence": 66,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: SF +58.3%",
+                "🎯 ELITE weak D: CAR +49.3%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "🔥 Weak pass defense: CAR allows +49.3% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 90.4% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Pass yards: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "trevor lawrence",
+          "team": "JAC",
+          "opponent": "ARI",
+          "position": "QB",
+          "stat_type": "Pass Yds",
+          "line": 213.5,
+          "direction": "OVER",
+          "confidence": 66,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "💪 Elite passing O: JAC +39.6%",
+                "🎯 ELITE weak D: ARI +25.7%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "🔥 Weak pass defense: ARI allows +25.7% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 100.0% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Pass yards: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 66.0,
+      "effective_confidence": 70,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "2-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 260,
+      "kelly_bet_size": 1.5,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 100.0,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 75.0,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 50.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 58.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 65.0,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 50.0,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 62.0,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_ad26e61d_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "ad26e61d",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.983505",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "josh allen",
+          "team": "BUF",
+          "opponent": "HOU",
+          "position": "QB",
+          "stat_type": "Pass Completions",
+          "line": 19.5,
+          "direction": "OVER",
+          "confidence": 66,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: BUF +71.2%",
+                "🎯 ELITE weak D: HOU +38.2%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "🔥 Weak pass defense: HOU allows +38.2% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 100.0% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Pass completions: good reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "alvin kamara",
+          "team": "NO",
+          "opponent": "ATL",
+          "position": "RB",
+          "stat_type": "Rush Attempts",
+          "line": 15.5,
+          "direction": "OVER",
+          "confidence": 65,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚠️ DVOA data not available"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "UNDER",
+              "rationale": [
+                "✅ Position matchup disfavors UNDER",
+                "🛡️ ELITE ELITE run D: -43.2% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 45,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 40,
+              "direction": "OVER",
+              "rationale": [
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 65.5,
+      "effective_confidence": 69,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "2-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 260,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 75.0,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 75.0,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 75.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 51.5,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 52.5,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 52.5,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 54.0,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_8410be44_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "8410be44",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.985691",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "christian mccaffrey",
+          "team": "SF",
+          "opponent": "CAR",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 42.5,
+          "direction": "OVER",
+          "confidence": 65,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: SF +58.3%",
+                "🎯 ELITE weak D: CAR +49.3%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥🔥 PREMIUM WR1 MATCHUP: CAR allows +52.5% DVOA vs WR1"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "🎯 High volume: 23.1% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "hunter henry",
+          "team": "NE",
+          "opponent": "CIN",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 40.5,
+          "direction": "OVER",
+          "confidence": 65,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "💪 Elite passing O: NE +39.0%",
+                "🎯 ELITE weak D: CIN +62.8%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥 ELITE WR2 MATCHUP: +41.0% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 68,
+              "direction": "OVER",
+              "rationale": [
+                "Solid volume: 17.1% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "sam darnold",
+          "team": "SEA",
+          "opponent": "TEN",
+          "position": "QB",
+          "stat_type": "Pass Completions",
+          "line": 19.5,
+          "direction": "OVER",
+          "confidence": 63,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 78,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "Average passing O: +1.9%",
+                "🎯 Weak pass D: TEN +11.8%",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "🎯 Favorable pass matchup: +11.8% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Volume strongly supports OVER",
+                "💪 Elite starter: 100.0% snaps",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Strong trend supports OVER",
+                "💶 Opportunity trending UP (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Pass completions: good reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 64.3,
+      "effective_confidence": 68,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "3-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 600,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 92.66666666666667,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 70.0,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 50.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 58.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 69.33333333333333,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 55.0,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 56.0,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_4be2ed1d_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "4be2ed1d",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.988696",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "matthew golden",
+          "team": "GB",
+          "opponent": "MIN",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 2.5,
+          "direction": "OVER",
+          "confidence": 63,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 31,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: GB +54.2%",
+                "⚠️ ELITE PASS D: -12.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 60,
+              "direction": "UNDER",
+              "rationale": [
+                "✅ Position matchup disfavors UNDER",
+                "⚠️ Tough WR3 matchup: -21.0% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 75,
+              "direction": "UNDER",
+              "rationale": [
+                "⚠️ LOW VOLUME: Only 7.9% targets",
+                "📉 Usage trending DOWN"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 65,
+              "direction": "UNDER",
+              "rationale": [
+                "⚠️ Negative trend indicates UNDER",
+                "💹 Opportunity trending DOWN (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "tetairoa mcmillan",
+          "team": "CAR",
+          "opponent": "SF",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 59.5,
+          "direction": "OVER",
+          "confidence": 63,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 92,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: CAR +56.3%",
+                "Favorable pass D: +4.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🎯 Great WR1 matchup: +18.8% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 72,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Volume strongly supports OVER",
+                "🎯 ELITE VOLUME: 28.6% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "jared goff",
+          "team": "DET",
+          "opponent": "NYG",
+          "position": "QB",
+          "stat_type": "Pass Yds",
+          "line": 258.5,
+          "direction": "OVER",
+          "confidence": 63,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 80,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🎯 ELITE weak D: NYG +26.8%",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "🔥 Weak pass defense: NYG allows +26.8% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 98.3% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Pass yards: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 63.0,
+      "effective_confidence": 67,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "3-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 600,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 67.66666666666667,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 65.66666666666667,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 66.66666666666667,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 52.666666666666664,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 70.66666666666667,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 55.0,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 53.0,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_a427f799_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "a427f799",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.992135",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "brian thomas jr",
+          "team": "JAC",
+          "opponent": "ARI",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "direction": "OVER",
+          "confidence": 63,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "💪 Elite passing O: JAC +39.6%",
+                "🎯 ELITE weak D: ARI +25.7%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🎯 Great WR3 matchup: +15.6% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "tyrell shavers",
+          "team": "BUF",
+          "opponent": "HOU",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 1.5,
+          "direction": "OVER",
+          "confidence": 63,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: BUF +71.2%",
+                "🎯 ELITE weak D: HOU +38.2%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🎯 Great WR3 matchup: +15.9% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 45,
+              "direction": "UNDER",
+              "rationale": [
+                "⚠️ LOW VOLUME: Only 3.4% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Strong trend supports OVER",
+                "💶 Opportunity trending UP (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "bryce young",
+          "team": "CAR",
+          "opponent": "SF",
+          "position": "QB",
+          "stat_type": "Pass Yds",
+          "line": 200.5,
+          "direction": "OVER",
+          "confidence": 62,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 97,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: CAR +56.3%",
+                "Favorable pass D: +4.8%",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Neutral pass matchup: 4.8% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 100.0% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Pass yards: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 62.7,
+      "effective_confidence": 66,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "3-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 600,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 99.0,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 58.0,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 50.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 58.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 53.333333333333336,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 56.666666666666664,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 59.333333333333336,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_7a711f6a_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "7a711f6a",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.995587",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "travis etienne jr",
+          "team": "JAC",
+          "opponent": "ARI",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 13.5,
+          "direction": "OVER",
+          "confidence": 62,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "💪 Elite passing O: JAC +39.6%",
+                "🎯 ELITE weak D: ARI +25.7%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🎯 Great WR3 matchup: +15.6% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚠️ Limited usage data"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "joshua palmer",
+          "team": "BUF",
+          "opponent": "HOU",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 27.5,
+          "direction": "OVER",
+          "confidence": 62,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: BUF +71.2%",
+                "🎯 ELITE weak D: HOU +38.2%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🎯 Great WR3 matchup: +15.9% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚠️ Limited usage data"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "chase brown",
+          "team": "CIN",
+          "opponent": "NE",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "direction": "OVER",
+          "confidence": 61,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 57,
+              "direction": "OVER",
+              "rationale": [
+                "⚠️ Weak passing O: -20.0%",
+                "🎯 Weak pass D: NE +15.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥🔥 PREMIUM WR1 MATCHUP: NE allows +172.0% DVOA vs WR1"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 82,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Volume strongly supports OVER",
+                "🎯 ELITE VOLUME: 28.0% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Strong trend supports OVER",
+                "💶 Opportunity trending UP (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "christian watson",
+          "team": "GB",
+          "opponent": "MIN",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 50.5,
+          "direction": "OVER",
+          "confidence": 61,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 31,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: GB +54.2%",
+                "⚠️ ELITE PASS D: -12.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 60,
+              "direction": "UNDER",
+              "rationale": [
+                "✅ Position matchup disfavors UNDER",
+                "⚠️ Tough WR3 matchup: -21.0% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 60,
+              "direction": "UNDER",
+              "rationale": [
+                "📉 Usage trending DOWN"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 45,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 61.5,
+      "effective_confidence": 65,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "4-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 1200,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 72.0,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 64.75,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 62.5,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 54.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 60.5,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 53.75,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 53.25,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_eb4bc42d_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "eb4bc42d",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:17.999347",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "dontayvion wicks",
+          "team": "GB",
+          "opponent": "MIN",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 20.5,
+          "direction": "OVER",
+          "confidence": 61,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 31,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: GB +54.2%",
+                "⚠️ ELITE PASS D: -12.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 60,
+              "direction": "UNDER",
+              "rationale": [
+                "✅ Position matchup disfavors UNDER",
+                "⚠️ Tough WR3 matchup: -21.0% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 65,
+              "direction": "UNDER",
+              "rationale": [
+                "⚠️ LOW VOLUME: Only 7.1% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 45,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "aj barner",
+          "team": "SEA",
+          "opponent": "TEN",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 3.5,
+          "direction": "OVER",
+          "confidence": 61,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 73,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "Average passing O: +1.9%",
+                "🎯 Weak pass D: TEN +11.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥 ELITE WR2 MATCHUP: +33.8% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 68,
+              "direction": "OVER",
+              "rationale": [
+                "Solid volume: 16.7% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "ty johnson",
+          "team": "BUF",
+          "opponent": "HOU",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 8.5,
+          "direction": "OVER",
+          "confidence": 61,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 100,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: BUF +71.2%",
+                "🎯 ELITE weak D: HOU +38.2%",
+                "⚡ PREMIUM STACK: Elite O vs weak D",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🎯 Great WR3 matchup: +15.9% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 45,
+              "direction": "UNDER",
+              "rationale": [
+                "⚠️ LOW VOLUME: Only 6.9% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "aj brown",
+          "team": "PHI",
+          "opponent": "DAL",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "direction": "OVER",
+          "confidence": 60,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 69,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "💪 Strong passing O: PHI +12.3%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🎯 Great WR1 matchup: +26.6% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 72,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Volume strongly supports OVER",
+                "🎯 ELITE VOLUME: 37.9% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 60.8,
+      "effective_confidence": 64,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "4-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 1200,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 68.25,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 63.5,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 62.5,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 54.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 62.5,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 52.5,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 54.0,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_fba07694_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "fba07694",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:18.004148",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "dak prescott",
+          "team": "DAL",
+          "opponent": "PHI",
+          "position": "QB",
+          "stat_type": "player_pass_attempts",
+          "line": 35.5,
+          "direction": "OVER",
+          "confidence": 60,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 30,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: DAL +51.2%",
+                "⚠️ ELITE PASS D: -38.9%",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "UNDER",
+              "rationale": [
+                "🛡️ Elite pass defense: -38.9% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 35,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Elite starter: 100.0% snaps"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 45,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "jaxson dart",
+          "team": "NYG",
+          "opponent": "DET",
+          "position": "QB",
+          "stat_type": "Pass TDs",
+          "line": 1.5,
+          "direction": "OVER",
+          "confidence": 60,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "💪 Strong passing O: NYG +17.7%",
+                "⚠️ ELITE PASS D: -35.9%",
+                "✅ QB consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "UNDER",
+              "rationale": [
+                "🛡️ Elite pass defense: -35.9% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 25,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Volume strongly supports OVER",
+                "💪 Elite starter: 100.0% snaps",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 35,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Strong trend supports OVER",
+                "💶 Opportunity trending UP (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "UNDER",
+              "rationale": [
+                "⚠️ QB TD: moderate variance (volume-dependent)"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "devonta smith",
+          "team": "PHI",
+          "opponent": "DAL",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "direction": "OVER",
+          "confidence": 60,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 69,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "💪 Strong passing O: PHI +12.3%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥🔥 PREMIUM WR2 MATCHUP: DAL allows +95.4% DVOA vs WR2"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Solid volume: 17.2% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "jaxon smith-njigba",
+          "team": "SEA",
+          "opponent": "TEN",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 92.5,
+          "direction": "OVER",
+          "confidence": 60,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 73,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "Average passing O: +1.9%",
+                "🎯 Weak pass D: TEN +11.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥🔥 PREMIUM WR1 MATCHUP: TEN allows +64.8% DVOA vs WR1"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 62,
+              "direction": "OVER",
+              "rationale": [
+                "🎯 ELITE VOLUME: 37.5% targets",
+                "📉 Usage trending DOWN"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 60.0,
+      "effective_confidence": 64,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "4-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 1200,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 53.5,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 72.5,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 75.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 50.0,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 45.0,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 46.25,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 54.5,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    },
+    {
+      "parlay_id": "TRAD_W12_ba99ba77_v1",
+      "week": 12,
+      "year": 2024,
+      "parlay_type": "traditional",
+      "content_hash": "ba99ba77",
+      "version": 1,
+      "generated_timestamp": "2025-11-22T14:01:18.009616",
+      "data_source": "run_analysis",
+      "props": [
+        {
+          "player": "romeo doubs",
+          "team": "GB",
+          "opponent": "MIN",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 50.5,
+          "direction": "OVER",
+          "confidence": 60,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 31,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "🔥🔥 ELITE O: GB +54.2%",
+                "⚠️ ELITE PASS D: -12.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "UNDER",
+              "rationale": [
+                "✅ Position matchup disfavors UNDER",
+                "⚠️⚠️ ELITE WR1 COVERAGE: -31.0% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 35,
+              "direction": "OVER",
+              "rationale": [
+                "🎯 High volume: 26.3% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 45,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "cooper kupp",
+          "team": "SEA",
+          "opponent": "TEN",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 2.5,
+          "direction": "OVER",
+          "confidence": 60,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 73,
+              "direction": "OVER",
+              "rationale": [
+                "✅ DVOA strongly favors OVER",
+                "Average passing O: +1.9%",
+                "🎯 Weak pass D: TEN +11.8%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥 ELITE WR2 MATCHUP: +33.8% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Solid volume: 15.9% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "josh downs",
+          "team": "IND",
+          "opponent": "KC",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 3.5,
+          "direction": "OVER",
+          "confidence": 59,
+          "is_home": false,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚠️ DVOA data not available"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 75,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥🔥 PREMIUM WR2 MATCHUP: KC allows +56.7% DVOA vs WR2"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 68,
+              "direction": "OVER",
+              "rationale": [
+                "Solid volume: 16.4% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 65,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Strong trend supports OVER",
+                "💶 Opportunity trending UP (TD/Rec context)"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "zay flowers",
+          "team": "BAL",
+          "opponent": "NYJ",
+          "position": "WR",
+          "stat_type": "Receptions",
+          "line": 4.5,
+          "direction": "OVER",
+          "confidence": 59,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 64,
+              "direction": "OVER",
+              "rationale": [
+                "⚠️ Weak passing O: -28.7%",
+                "🎯 ELITE weak D: NYJ +38.7%",
+                "✅ Pass-catching consistency bonus"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 70,
+              "direction": "OVER",
+              "rationale": [
+                "✅ Position matchup favors OVER",
+                "🔥 ELITE WR2 MATCHUP: +36.4% DVOA"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 50,
+              "direction": "OVER",
+              "rationale": [],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "Solid volume: 20.0% targets"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 55,
+              "direction": "OVER",
+              "rationale": [
+                "⚖️ Stable opportunity trend"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 58,
+              "direction": "OVER",
+              "rationale": [
+                "✓✓ Reception props: high reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        },
+        {
+          "player": "xavier worthy",
+          "team": "KC",
+          "opponent": "IND",
+          "position": "WR",
+          "stat_type": "Rec Yds",
+          "line": 41.5,
+          "direction": "OVER",
+          "confidence": 59,
+          "is_home": true,
+          "agent_scores": {
+            "DVOA": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚠️ DVOA data not available"
+              ],
+              "weight": 2.0
+            },
+            "Matchup": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚠️ Position-specific defensive data unavailable for IND"
+              ],
+              "weight": 1.8
+            },
+            "Injury": {
+              "raw_score": 100,
+              "direction": "AVOID",
+              "rationale": [
+                "🟡 PLAYER QUESTIONABLE (50pt penalty)"
+              ],
+              "weight": 3.0
+            },
+            "GameScript": {
+              "raw_score": 42,
+              "direction": "OVER",
+              "rationale": [
+                "Moderate-scoring game (44.5 total)",
+                "Pass-friendly environment expected"
+              ],
+              "weight": 1.3
+            },
+            "Volume": {
+              "raw_score": 32,
+              "direction": "OVER",
+              "rationale": [
+                "Solid volume: 18.9% targets",
+                "📈 Usage trending UP"
+              ],
+              "weight": 1.2
+            },
+            "Trend": {
+              "raw_score": 50,
+              "direction": "AVOID",
+              "rationale": [
+                "⚖️ Volume prop - matchup DVOA takes precedence"
+              ],
+              "weight": 1.0
+            },
+            "Variance": {
+              "raw_score": 45,
+              "direction": "OVER",
+              "rationale": [
+                "✓ Receiving yards: moderate reliability"
+              ],
+              "weight": 1.5
+            }
+          }
+        }
+      ],
+      "raw_confidence": 59.4,
+      "effective_confidence": 63,
+      "correlations": [
+        {
+          "type": "same_game_bonus",
+          "adjustment": 4,
+          "reasoning": "5-leg same-game correlation bonus"
+        }
+      ],
+      "payout_odds": 2500,
+      "kelly_bet_size": 1.0,
+      "agent_breakdown": {
+        "DVOA": {
+          "raw_score": 53.6,
+          "weight": 2.0
+        },
+        "Matchup": {
+          "raw_score": 67.0,
+          "weight": 1.8
+        },
+        "Injury": {
+          "raw_score": 70.0,
+          "weight": 3.0
+        },
+        "GameScript": {
+          "raw_score": 51.6,
+          "weight": 1.3
+        },
+        "Volume": {
+          "raw_score": 50.2,
+          "weight": 1.2
+        },
+        "Trend": {
+          "raw_score": 55.0,
+          "weight": 1.0
+        },
+        "Variance": {
+          "raw_score": 52.8,
+          "weight": 1.5
+        }
+      },
+      "bet_on": false,
+      "actual_bet_amount": null,
+      "bet_timestamp": null,
+      "result": null,
+      "result_entered_timestamp": null,
+      "actual_payout": null,
+      "prop_results": []
+    }
+  ],
+  "metadata": {
+    "created": "2025-11-22T13:41:37.896883",
+    "last_updated": "2025-11-22T14:01:18.009643",
+    "weeks_tracked": [
+      12
+    ],
+    "total_parlays_generated": 11,
+    "total_parlays_bet": 0,
+    "total_results_entered": 0
+  }
+}
