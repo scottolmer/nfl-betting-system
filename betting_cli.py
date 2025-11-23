@@ -25,6 +25,8 @@ from scripts.analysis.odds_integration import OddsIntegrator, integrate_odds_wit
 from scripts.utils.parlay_gui import show_parlays_gui
 from scripts.utils.props_json_exporter import PropsJSONExporter
 from scripts.utils.enhanced_props_exporter import EnhancedPropsExporter
+from scripts.analysis.chat_interface import run_chat_interface
+import auto_scorer
 import logging
 
 logging.basicConfig(level=logging.WARNING)
@@ -58,6 +60,7 @@ class BettingAnalyzerCLI:
         print("  top-team <team> [count]  - Show top N props for team (e.g., 'top-team SEA')")
         print("  export-props [count]     - Export props as JSON for Claude (default: 50)")
         print("  export-enhanced [count]  - Export props with clustering & contradictions (default: 50)")
+        print("  chat                     - Launch natural language chat interface")
         print("  week <number>            - Change week (1-18)")
         print("\n  💰 BANKROLL & SIZING:")
         print("  bankroll <amount>        - Set betting bankroll (e.g., 'bankroll 5000')")
@@ -68,6 +71,7 @@ class BettingAnalyzerCLI:
         print("  log-parlay <index>       - Mark parlay N as one you're betting on")
         print("  log-result <id> <hits>   - Log results (e.g., 'log-result parlay_001 2/3')")
         print("  log-legs <id> <W/L>...   - Log per-leg results (e.g., 'log-legs parlay_001 W W L')")
+        print("  score-week <week> [opts] - Auto-score parlays from CSV (e.g., 'score-week 10 --dry-run')")
         print("  calibrate [week]         - Show calibration report (all weeks or specific)")
         print("  calibrate-agents [week]  - Show agent accuracy & weight recommendations")
         print("  recent [limit]           - Show recent logged parlays (default: 10)")
@@ -88,6 +92,7 @@ class BettingAnalyzerCLI:
         print("  top-team <team> [cnt]  | Example: top-team SEA 15 (default count: 20)")
         print("  export-props [count]   | Example: export-props 50 (default: 50)")
         print("  export-enhanced [cnt]  | Example: export-enhanced 50 (default: 50)")
+        print("  chat                   | Launch natural language query interface")
         print("  parlays [confidence]   | Example: parlays 65 (default: 65)")
         print("  opt-parlays [quality]  | Example: opt-parlays 75 (default: 65)")
         print("  week <number>          | Example: week 10")
@@ -96,6 +101,7 @@ class BettingAnalyzerCLI:
         print("  log-parlay <index>     | Example: log-parlay 0 (mark parlay as bet)")
         print("  log-result <id> <hits> | Example: log-result parlay_001 3/3")
         print("  log-legs <id> <W/L>... | Example: log-legs parlay_001 W W L")
+        print("  score-week <wk> [opts] | Example: score-week 10 --dry-run (or --force)")
         print("  calibrate [week]       | Example: calibrate 9 (or calibrate for all)")
         print("  calibrate-agents [w]   | Example: calibrate-agents 9 (or all weeks)")
         print("="*70 + "\n")
@@ -843,7 +849,43 @@ class BettingAnalyzerCLI:
             self.tracker.week_summary(week=week)
         except ValueError:
             print("❌ Invalid week number\n")
-    
+
+    def score_week_command(self, arg_str):
+        """Auto-score parlays from CSV files"""
+        try:
+            # Parse arguments
+            args = arg_str.split()
+
+            if not args:
+                print("❌ Usage: score-week <week> [--dry-run] [--force]\n")
+                print("   Examples:")
+                print("     score-week 10 --dry-run    (preview scoring)")
+                print("     score-week 10              (execute scoring)")
+                print("     score-week 10 --force      (re-score already scored parlays)\n")
+                return
+
+            week = int(args[0])
+            dry_run = '--dry-run' in args
+            force = '--force' in args
+
+            # Call auto_scorer module
+            output = auto_scorer.score_week(
+                week=week,
+                db_path=project_root / "bets.db",
+                data_dir=project_root / "data",
+                dry_run=dry_run,
+                force=force
+            )
+
+            print(output)
+
+        except ValueError:
+            print("❌ Invalid week number\n")
+        except Exception as e:
+            print(f"❌ Error scoring week: {e}\n")
+            import traceback
+            traceback.print_exc()
+
     def injury_diagnostic_command(self, player_name=""):
         """Show injury system diagnostic"""
         print("\n" + "="*80)
@@ -1012,6 +1054,20 @@ class BettingAnalyzerCLI:
             print(f"✅ Bankroll set to ${amount:,.2f}\n")
         except ValueError:
             print("❌ Invalid amount\n")
+
+    def launch_chat_interface(self):
+        """Launch natural language chat interface"""
+        print("\n🚀 Launching Natural Language Chat Interface...")
+        print("   Type 'exit' in chat to return to main CLI\n")
+        try:
+            data_dir = str(project_root / "data")
+            run_chat_interface(data_dir=data_dir)
+            print("\n✅ Chat interface closed. Back to main CLI\n")
+        except KeyboardInterrupt:
+            print("\n✅ Chat interface closed. Back to main CLI\n")
+        except Exception as e:
+            print(f"\n❌ Error launching chat: {e}\n")
+            print("   Make sure ANTHROPIC_API_KEY is set in .env\n")
     
     def run(self):
         """Main CLI loop"""
@@ -1044,6 +1100,8 @@ class BettingAnalyzerCLI:
                     self.export_props_command(arg)
                 elif command == 'export-enhanced':
                     self.export_enhanced_command(arg)
+                elif command == 'chat':
+                    self.launch_chat_interface()
                 elif command == 'parlays':
                     self.generate_parlays(arg)
                 elif command == 'opt-parlays':
@@ -1060,6 +1118,8 @@ class BettingAnalyzerCLI:
                     self.log_results_command(arg)
                 elif command == 'log-legs':
                     self.log_legs_command(arg)
+                elif command == 'score-week':
+                    self.score_week_command(arg)
                 elif command == 'calibrate':
                     self.calibrate_command(arg)
                 elif command == 'calibrate-agents':
