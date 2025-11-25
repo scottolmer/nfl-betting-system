@@ -160,9 +160,9 @@ if page == "🏠 Dashboard":
         st.markdown("---")
 
         # Top props preview
-        st.subheader("🔥 Top 10 Props")
+        st.subheader("🔥 Top 25 Props")
 
-        sorted_props = sorted(props, key=lambda x: x.final_confidence, reverse=True)[:10]
+        sorted_props = sorted(props, key=lambda x: x.final_confidence, reverse=True)[:25]
 
         for i, analysis in enumerate(sorted_props, 1):
             prop = analysis.prop
