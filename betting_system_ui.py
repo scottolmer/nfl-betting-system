@@ -346,27 +346,48 @@ elif page == "📊 Performance":
     try:
         tracker = PerformanceTracker(db_path="bets.db")
 
-        # Get recent parlays
-        recent = tracker.get_recent_parlays(limit=20)
+        # Get all completed parlays
+        results = tracker.get_all_results()
 
-        if recent:
-            st.markdown("### Recent Parlays")
+        if results:
+            st.markdown("### Completed Parlays")
 
+            # Summary metrics
+            total_parlays = len(results)
+            hits = len([r for r in results if r['result'] == 'HIT'])
+            misses = len([r for r in results if r['result'] == 'MISS'])
+            win_rate = (hits / total_parlays * 100) if total_parlays > 0 else 0
+
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("Total Parlays", total_parlays)
+            col2.metric("Hits", hits)
+            col3.metric("Misses", misses)
+            col4.metric("Win Rate", f"{win_rate:.1f}%")
+
+            st.markdown("---")
+
+            # Recent results table
             data = []
-            for parlay in recent:
+            for parlay in results[:20]:  # Show last 20
                 data.append({
                     'ID': parlay.get('parlay_id', 'N/A'),
                     'Week': parlay.get('week', 'N/A'),
-                    'Type': parlay.get('parlay_type', 'N/A'),
+                    'Legs': parlay.get('leg_count', 'N/A'),
                     'Confidence': f"{parlay.get('confidence_score', 0)}%",
-                    'Status': parlay.get('status', 'pending'),
-                    'Date': parlay.get('created_date', 'N/A')
+                    'Result': parlay.get('result', 'N/A')
                 })
 
             df = pd.DataFrame(data)
             st.dataframe(df, use_container_width=True)
         else:
-            st.info("No tracked parlays yet")
+            st.info("No completed parlays yet. Score some parlays to see performance data!")
+            st.markdown("""
+            **To track performance:**
+            1. Generate parlays
+            2. Place bets
+            3. Use CLI to score results: `score-week <week>`
+            4. Return here to see stats
+            """)
 
         st.markdown("---")
 
@@ -375,13 +396,18 @@ elif page == "📊 Performance":
 
         try:
             calibrator = AgentCalibrator(db_path="bets.db")
-            # Add calibration display here if methods are available
-            st.info("Calibration data available in CLI: `calibrate-agents`")
-        except:
+            st.info("📊 For detailed calibration analysis, use CLI: `calibrate-agents`")
+
+            # Show if there's calibration data
+            if results:
+                st.caption(f"Calibration available for {total_parlays} completed parlays")
+        except Exception as e:
             st.info("No calibration data yet")
 
     except Exception as e:
         st.error(f"Error loading performance data: {e}")
+        import traceback
+        st.code(traceback.format_exc())
 
 elif page == "⚙️ Settings":
     st.title("⚙️ Settings")
