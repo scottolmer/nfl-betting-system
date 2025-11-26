@@ -200,27 +200,49 @@ elif page == "🎯 Prop Analysis":
         props = st.session_state.analyzed_props
 
         # Filters
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5 = st.columns(5)
 
         with col1:
             positions = ['All'] + sorted(list(set(p.prop.position for p in props)))
             position_filter = st.selectbox("Position", positions)
 
         with col2:
+            # Team filter with multi-select
+            all_teams = sorted(list(set(p.prop.team for p in props)))
+            team_filter = st.multiselect("Teams (multi-select)", all_teams, default=[])
+
+        with col3:
             bet_types = ['All', 'OVER', 'UNDER']
             bet_type_filter = st.selectbox("Bet Type", bet_types)
 
-        with col3:
+        with col4:
             min_conf = st.slider("Min Confidence", 0, 100, 60)
 
-        with col4:
+        with col5:
             sort_by = st.selectbox("Sort By", ["Confidence", "Player", "Team"])
+
+        # Quick filter buttons for Thursday games
+        st.markdown("**Quick Filters:**")
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            if st.button("Thursday Games Only", use_container_width=True):
+                team_filter = ['GB', 'DET', 'KC', 'DAL', 'CIN', 'BAL']
+                st.rerun()
+
+        with col2:
+            if st.button("Clear Team Filter", use_container_width=True):
+                team_filter = []
+                st.rerun()
 
         # Apply filters
         filtered = props
 
         if position_filter != 'All':
             filtered = [p for p in filtered if p.prop.position == position_filter]
+
+        if team_filter:
+            filtered = [p for p in filtered if p.prop.team in team_filter]
 
         if bet_type_filter != 'All':
             filtered = [p for p in filtered if getattr(p.prop, 'bet_type', 'OVER') == bet_type_filter]
@@ -263,19 +285,40 @@ elif page == "🎲 Parlay Builder":
     if not st.session_state.data_loaded:
         st.info("👈 Load data first")
     else:
-        col1, col2 = st.columns([3, 1])
+        st.markdown("### Settings")
+
+        col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("### Settings")
+            min_confidence = st.number_input("Min Confidence", 40, 100, 58)
 
         with col2:
-            min_confidence = st.number_input("Min Confidence", 40, 100, 58)
+            # Team filter for parlays
+            all_teams = sorted(list(set(p.prop.team for p in st.session_state.analyzed_props)))
+            filter_teams = st.multiselect("Filter to Teams (optional)", all_teams, default=[])
+
+        # Quick filter for Thursday games
+        col1, col2 = st.columns(2)
+
+        with col1:
+            thursday_filter = st.checkbox("Thursday Games Only (GB, DET, KC, DAL, CIN, BAL)")
+
+        with col2:
+            if thursday_filter:
+                filter_teams = ['GB', 'DET', 'KC', 'DAL', 'CIN', 'BAL']
+                st.info(f"Filtering to: {', '.join(filter_teams)}")
 
         if st.button("🎲 Generate Parlays", type="primary"):
             with st.spinner("Building parlays..."):
+                # Filter props if teams selected
+                props_to_use = st.session_state.analyzed_props
+                if filter_teams:
+                    props_to_use = [p for p in props_to_use if p.prop.team in filter_teams]
+                    st.info(f"Building from {len(props_to_use)} props (filtered by teams)")
+
                 builder = ParlayBuilder()
                 parlays = builder.build_parlays(
-                    st.session_state.analyzed_props,
+                    props_to_use,
                     min_confidence=min_confidence
                 )
                 st.session_state.parlays = parlays
