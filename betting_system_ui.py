@@ -363,17 +363,36 @@ elif page == "🎲 Parlay Builder":
                         st.subheader(f"📊 {parlay_type.upper()} Parlays ({len(parlay_list)})")
 
                         for i, parlay in enumerate(parlay_list, 1):
-                            with st.expander(f"Parlay #{i} - Confidence: {parlay.combined_confidence}%"):
+                            # Show correlation penalty if exists
+                        conf_display = f"{parlay.combined_confidence}%"
+                        if hasattr(parlay, 'correlation_penalty') and parlay.correlation_penalty < 0:
+                            original = int(parlay.combined_confidence - parlay.correlation_penalty)
+                            conf_display = f"{parlay.combined_confidence}% (was {original}%, {int(parlay.correlation_penalty)}% correlation penalty)"
+
+                        with st.expander(f"Parlay #{i} - Confidence: {conf_display}"):
                                 st.markdown(f"**{parlay.rationale}**")
                                 st.caption(f"Risk: {parlay.risk_level}")
+
+                                # Show correlation warnings if any
+                                if hasattr(parlay, 'correlation_warnings') and parlay.correlation_warnings:
+                                    st.warning("⚠️ **Correlation Risks Detected:**")
+                                    for warning in parlay.correlation_warnings:
+                                        st.caption(f"• {warning}")
 
                                 st.markdown("#### Legs:")
                                 for j, leg in enumerate(parlay.legs, 1):
                                     bet_type = getattr(leg.prop, 'bet_type', 'OVER')
+
+                                    # Show top agents driving this prop
+                                    agents_info = ""
+                                    if hasattr(leg, 'top_contributing_agents') and leg.top_contributing_agents:
+                                        top_agents = [agent[0] for agent in leg.top_contributing_agents[:2]]
+                                        agents_info = f"\n      *Driven by: {', '.join(top_agents)}*"
+
                                     st.markdown(f"""
                                     **{j}. {leg.prop.player_name}** ({leg.prop.team})
                                     - {leg.prop.stat_type} {bet_type} {leg.prop.line}
-                                    - vs {leg.prop.opponent} | Confidence: {leg.final_confidence}%
+                                    - vs {leg.prop.opponent} | Confidence: {leg.final_confidence}%{agents_info}
                                     """)
 
 elif page == "✅ Validation":
