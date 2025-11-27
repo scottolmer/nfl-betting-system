@@ -27,6 +27,8 @@ from scripts.utils.props_json_exporter import PropsJSONExporter
 from scripts.utils.enhanced_props_exporter import EnhancedPropsExporter
 from scripts.analysis.chat_interface import run_chat_interface
 import auto_scorer
+import prop_logger
+import props_scorer
 import logging
 
 logging.basicConfig(level=logging.WARNING)
@@ -53,6 +55,7 @@ class BettingAnalyzerCLI:
         print("  pull-lines               - Refresh DraftKings betting lines")
         print("  analyze <query>          - Analyze prop (e.g., 'Love 250 pass yards')")
         print("  parlays [conf]           - Generate standard parlays (default: 58)")
+        print("  parlays-teams <teams>    - Generate parlays for specific teams (e.g., 'parlays-teams GB,DET,KC')")
         print("  opt-parlays [quality]    - Generate optimized low-correlation parlays")
         print("  top-props [count]        - Show top N props by confidence (default: 20)")
         print("  top-overs [count]        - Show top N OVER props only (default: 20)")
@@ -72,6 +75,11 @@ class BettingAnalyzerCLI:
         print("  log-result <id> <hits>   - Log results (e.g., 'log-result parlay_001 2/3')")
         print("  log-legs <id> <W/L>...   - Log per-leg results (e.g., 'log-legs parlay_001 W W L')")
         print("  score-week <week> [opts] - Auto-score parlays from CSV (e.g., 'score-week 10 --dry-run')")
+        print("\n  📈 COMPREHENSIVE PROP TRACKING:")
+        print("  analyze-week <wk> [opts] - Log ALL analyzed props for scoring (e.g., 'analyze-week 10 --top 100')")
+        print("  score-props <week>       - Score all logged props from CSV (e.g., 'score-props 10')")
+        print("  calibrate-props [week]   - Show detailed calibration for all props")
+        print("\n  📊 CALIBRATION & REPORTS:")
         print("  calibrate [week]         - Show calibration report (all weeks or specific)")
         print("  calibrate-agents [week]  - Show agent accuracy & weight recommendations")
         print("  recent [limit]           - Show recent logged parlays (default: 10)")
@@ -513,21 +521,31 @@ class BettingAnalyzerCLI:
             print("   pip install pyperclip")
             print("\n   Or manually copy the JSON above and paste into Claude\n")
     
-    def generate_parlays(self, min_conf_str="58"):
-        """Generate standard parlay combinations WITH CORRELATION DETECTION (PROJECT 3)"""
+    def generate_parlays(self, min_conf_str="58", teams=None):
+        """Generate standard parlay combinations WITH CORRELATION DETECTION (PROJECT 3)
+
+        Args:
+            min_conf_str: Minimum confidence threshold
+            teams: Optional list of team abbreviations to filter to (e.g., ['GB', 'DET', 'KC'])
+        """
         try:
             min_conf = int(min_conf_str)
         except ValueError:
             min_conf = 58
-        
+
         print(f"\n🔄 Loading data for Week {self.week}...")
         context = self.loader.load_all_data(week=self.week)
-        
+
         props_list = context.get('props', [])
         betting_source = context.get('betting_lines_source', 'UNKNOWN')
         print(f"📊 Analyzing {len(props_list)} props (OVER + UNDER)...")
-        
+
         all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+
+        # Filter by teams if specified
+        if teams:
+            all_analyses = [a for a in all_analyses if a.prop.team in teams]
+            print(f"📌 Filtered to teams: {', '.join(teams)} ({len(all_analyses)} props)")
         
         print(f"✅ Analyzed {len(all_analyses)} props (OVER + UNDER)")
         
@@ -886,6 +904,124 @@ class BettingAnalyzerCLI:
             import traceback
             traceback.print_exc()
 
+    def analyze_week_command(self, arg_str):
+        """Analyze and log all props for comprehensive scoring"""
+        try:
+            args = arg_str.split()
+
+            if not args:
+                print("[ERROR] Usage: analyze-week <week> [--top N] [--all]\n")
+                print("   Examples:")
+                print("     analyze-week 10 --top 100    (log top 100 props)")
+                print("     analyze-week 10 --top 200    (log top 200 props)")
+                print("     analyze-week 10 --all        (log all analyzed props)\n")
+                return
+
+            week = int(args[0])
+            top_n = None
+
+            if '--all' in args:
+                top_n = None
+            elif '--top' in args:
+                try:
+                    top_idx = args.index('--top')
+                    top_n = int(args[top_idx + 1])
+                except (ValueError, IndexError):
+                    print("[ERROR] Invalid --top value. Using default (top 100)\n")
+                    top_n = 100
+            else:
+                top_n = 100  # Default
+
+            print(f"\n[LOADING] Loading data for Week {week}...")
+            context = self.loader.load_all_data(week=week)
+
+            print(f"[ANALYZING] Analyzing props...")
+            all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+
+            print(f"[OK] Analyzed {len(all_analyses)} props\n")
+
+            # Log to database
+            logged, skipped = prop_logger.log_analyzed_props(
+                all_analyses,
+                week=week,
+                db_path=project_root / "bets.db",
+                top_n=top_n
+            )
+
+            print(f"[OK] Logged {logged} props to database")
+            if skipped > 0:
+                print(f"     (Skipped {skipped} duplicates)")
+
+            print(f"\n[OK] Week {week} props logged!")
+            print(f"     Next step: Run 'score-props {week}' to score them\n")
+
+        except ValueError:
+            print("[ERROR] Invalid week number\n")
+        except Exception as e:
+            print(f"[ERROR] Error analyzing week: {e}\n")
+            import traceback
+            traceback.print_exc()
+
+    def score_props_command(self, arg_str):
+        """Score all logged props from CSV files"""
+        try:
+            args = arg_str.split()
+
+            if not args:
+                print("[ERROR] Usage: score-props <week> [--dry-run]\n")
+                print("   Examples:")
+                print("     score-props 10 --dry-run    (preview scoring)")
+                print("     score-props 10              (execute scoring)\n")
+                return
+
+            week = int(args[0])
+            dry_run = '--dry-run' in args
+
+            output = props_scorer.score_props_for_week(
+                week=week,
+                db_path=project_root / "bets.db",
+                data_dir=project_root / "data",
+                dry_run=dry_run
+            )
+
+            print(output)
+
+        except ValueError:
+            print("[ERROR] Invalid week number\n")
+        except Exception as e:
+            print(f"[ERROR] Error scoring props: {e}\n")
+            import traceback
+            traceback.print_exc()
+
+    def calibrate_props_command(self, week_str=""):
+        """Show comprehensive prop calibration report"""
+        try:
+            week = int(week_str) if week_str else None
+
+            summary = prop_logger.get_props_summary(week, db_path=project_root / "bets.db")
+
+            print("\n" + "="*70)
+            if week:
+                print(f"PROPS CALIBRATION SUMMARY - WEEK {week}")
+            else:
+                print("PROPS CALIBRATION SUMMARY - ALL WEEKS")
+            print("="*70)
+
+            print(f"\nTotal Props Analyzed: {summary['total']}")
+            print(f"Props Scored: {summary['scored']}")
+            print(f"Props Pending: {summary['pending']}")
+            print(f"Hit Rate: {summary['hit_rate']:.1f}%")
+
+            print("\n" + "="*70)
+            print("\n💡 For detailed breakdown, props were scored with 'score-props' command")
+            week_str = week if week else "<week>"
+            print(f"   Run 'score-props {week_str}' to see full analysis\n")
+
+        except ValueError:
+            print("❌ Invalid week number\n")
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
+
     def injury_diagnostic_command(self, player_name=""):
         """Show injury system diagnostic"""
         print("\n" + "="*80)
@@ -1104,6 +1240,13 @@ class BettingAnalyzerCLI:
                     self.launch_chat_interface()
                 elif command == 'parlays':
                     self.generate_parlays(arg)
+                elif command == 'parlays-teams':
+                    # Parse teams from comma-separated list
+                    if not arg:
+                        print("❌ Please specify teams: parlays-teams GB,DET,KC")
+                        continue
+                    teams = [t.strip().upper() for t in arg.split(',')]
+                    self.generate_parlays("58", teams=teams)
                 elif command == 'opt-parlays':
                     self.generate_optimized_parlays(arg)
                 elif command == 'week':
@@ -1120,10 +1263,16 @@ class BettingAnalyzerCLI:
                     self.log_legs_command(arg)
                 elif command == 'score-week':
                     self.score_week_command(arg)
+                elif command == 'analyze-week':
+                    self.analyze_week_command(arg)
+                elif command == 'score-props':
+                    self.score_props_command(arg)
                 elif command == 'calibrate':
                     self.calibrate_command(arg)
                 elif command == 'calibrate-agents':
                     self.calibrate_agents_command(arg)
+                elif command == 'calibrate-props':
+                    self.calibrate_props_command(arg)
                 elif command == 'recent':
                     self.recent_command(arg)
                 elif command == 'summary':
