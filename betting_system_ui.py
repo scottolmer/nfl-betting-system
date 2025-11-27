@@ -328,10 +328,9 @@ elif page == "🎲 Parlay Builder":
                 # Choose builder based on type
                 if parlay_type == "Optimized (Low Correlation)":
                     builder = EnhancedParlayBuilder()
-                    parlays = builder.build_low_correlation_parlays(
+                    parlays = builder.build_parlays_with_correlation(
                         props_to_use,
-                        min_confidence=min_confidence,
-                        min_quality=min_confidence
+                        min_confidence=min_confidence
                     )
                 else:
                     builder = ParlayBuilder()
