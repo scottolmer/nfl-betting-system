@@ -364,12 +364,12 @@ elif page == "🎲 Parlay Builder":
 
                         for i, parlay in enumerate(parlay_list, 1):
                             # Show correlation penalty if exists
-                        conf_display = f"{parlay.combined_confidence}%"
-                        if hasattr(parlay, 'correlation_penalty') and parlay.correlation_penalty < 0:
-                            original = int(parlay.combined_confidence - parlay.correlation_penalty)
-                            conf_display = f"{parlay.combined_confidence}% (was {original}%, {int(parlay.correlation_penalty)}% correlation penalty)"
+                            conf_display = f"{parlay.combined_confidence}%"
+                            if hasattr(parlay, 'correlation_penalty') and parlay.correlation_penalty < 0:
+                                original = int(parlay.combined_confidence - parlay.correlation_penalty)
+                                conf_display = f"{parlay.combined_confidence}% (was {original}%, {int(parlay.correlation_penalty)}% correlation penalty)"
 
-                        with st.expander(f"Parlay #{i} - Confidence: {conf_display}"):
+                            with st.expander(f"Parlay #{i} - Confidence: {conf_display}"):
                                 st.markdown(f"**{parlay.rationale}**")
                                 st.caption(f"Risk: {parlay.risk_level}")
 
