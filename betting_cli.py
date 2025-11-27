@@ -102,6 +102,7 @@ class BettingAnalyzerCLI:
         print("  export-enhanced [cnt]  | Example: export-enhanced 50 (default: 50)")
         print("  chat                   | Launch natural language query interface")
         print("  parlays [confidence]   | Example: parlays 65 (default: 65)")
+        print("  parlays-teams <teams>  | Example: parlays-teams GB,DET,KC,DAL,CIN,BAL")
         print("  opt-parlays [quality]  | Example: opt-parlays 75 (default: 65)")
         print("  week <number>          | Example: week 10")
         print("  bankroll <amount>      | Example: bankroll 5000")
