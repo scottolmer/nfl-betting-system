@@ -16,6 +16,7 @@ sys.path.insert(0, str(project_root))
 from scripts.analysis.data_loader import NFLDataLoader
 from scripts.analysis.orchestrator import PropAnalyzer
 from scripts.analysis.parlay_builder import ParlayBuilder
+from scripts.analysis.correlation_detector import EnhancedParlayBuilder
 from scripts.analysis.prop_availability_validator import PropAvailabilityValidator
 from scripts.analysis.parlay_rebuilder import ParlayRebuilder
 from scripts.analysis.performance_tracker import PerformanceTracker
@@ -287,15 +288,23 @@ elif page == "🎲 Parlay Builder":
     else:
         st.markdown("### Settings")
 
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
 
         with col1:
             min_confidence = st.number_input("Min Confidence", 40, 100, 58)
 
         with col2:
+            # Parlay type selection
+            parlay_type = st.radio(
+                "Parlay Type",
+                ["Standard", "Optimized (Low Correlation)"],
+                help="Standard: Traditional parlays\nOptimized: Detects correlation risk and penalizes overlapping agent signals"
+            )
+
+        with col3:
             # Team filter for parlays
             all_teams = sorted(list(set(p.prop.team for p in st.session_state.analyzed_props)))
-            filter_teams = st.multiselect("Filter to Teams (optional)", all_teams, default=[])
+            filter_teams = st.multiselect("Filter to Teams", all_teams, default=[])
 
         # Quick filter for Thursday games
         col1, col2 = st.columns(2)
@@ -316,17 +325,35 @@ elif page == "🎲 Parlay Builder":
                     props_to_use = [p for p in props_to_use if p.prop.team in filter_teams]
                     st.info(f"Building from {len(props_to_use)} props (filtered by teams)")
 
-                builder = ParlayBuilder()
-                parlays = builder.build_parlays(
-                    props_to_use,
-                    min_confidence=min_confidence
-                )
+                # Choose builder based on type
+                if parlay_type == "Optimized (Low Correlation)":
+                    builder = EnhancedParlayBuilder()
+                    parlays = builder.build_low_correlation_parlays(
+                        props_to_use,
+                        min_confidence=min_confidence,
+                        min_quality=min_confidence
+                    )
+                else:
+                    builder = ParlayBuilder()
+                    parlays = builder.build_parlays(
+                        props_to_use,
+                        min_confidence=min_confidence
+                    )
+
                 st.session_state.parlays = parlays
-                st.success(f"✅ Built {sum(len(p) for p in parlays.values())} parlays")
+                st.session_state.parlay_type_used = parlay_type
+                st.success(f"✅ Built {sum(len(p) for p in parlays.values())} {parlay_type.lower()} parlays")
                 st.rerun()
 
         if st.session_state.parlays:
             st.markdown("---")
+
+            # Show which type of parlays these are
+            if hasattr(st.session_state, 'parlay_type_used'):
+                if st.session_state.parlay_type_used == "Optimized (Low Correlation)":
+                    st.info("📊 These are **Optimized Parlays** with correlation risk detection and penalties for overlapping agent signals")
+                else:
+                    st.info("📊 These are **Standard Parlays** with player diversity optimization")
 
             # Display parlays by type
             for parlay_type in ['2-leg', '3-leg', '4-leg', '5-leg']:
