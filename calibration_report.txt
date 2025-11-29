@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "c:\Users\scott\Desktop\nfl-betting-systemv2\scripts\analysis\agent_calibrator.py", line 228, in <module>
+    calibrate_agents_interactive(db_path, week)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "c:\Users\scott\Desktop\nfl-betting-systemv2\scripts\analysis\agent_calibrator.py", line 196, in calibrate_agents_interactive
+    print(cal.generate_recalibration_report(week))
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\scott\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f52c' in position 84: character maps to <undefined>

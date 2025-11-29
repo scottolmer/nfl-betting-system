@@ -105,7 +105,9 @@ You: show me the DVOA agent's opinion on this
 ```
 You: export parlays for week 12
 You: preview export for week 11
-You: build a custom parlay (coming soon)
+You: create a 2-leg, 3-leg, and 4-leg parlay
+You: build a 3-leg QB parlay for week 12
+You: make me two parlays: one 2-leg and one 4-leg
 ```
 
 ### Follow-up Questions
@@ -191,7 +193,8 @@ The interface can:
 4. **explain_parlay()** - Detailed parlay breakdown
 5. **show_agent_breakdown()** - Agent scores for a player
 6. **export_parlays()** - Export to CSV
-7. **help()** - Show help and examples
+7. **build_parlay()** - Build custom parlays with specified leg counts
+8. **help()** - Show help and examples
 
 ## Cost & Performance
 
@@ -345,14 +348,12 @@ The interface will parse complex multi-condition queries.
 ## Limitations
 
 Current version does NOT support:
-- ❌ Building custom parlays (use `python scripts/run_custom_parlay_builder.py` instead)
 - ❌ Placing actual bets
 - ❌ Real-time odds fetching
 - ❌ Multi-week comparisons
 - ❌ Backtesting queries
 
 Coming soon:
-- ⏳ Custom parlay builder integration
 - ⏳ Historical performance queries
 - ⏳ Agent calibration queries
 - ⏳ Visual charts/graphs

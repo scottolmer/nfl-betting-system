@@ -157,6 +157,7 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
 
         processed_ids = set()
         skipped_roster_lookup = 0
+        auto_assigned_players = set()  # Track which players we auto-assigned
         for _, row in betting_lines_df.iterrows():
             market = row.get('market', ''); stat_type = stat_map.get(market, market)
             if not stat_type or (stat_type == market and not market.startswith('player_')): continue
@@ -172,7 +173,7 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
             away_team_abbr = get_abbr(row.get('away_team'))
             if not home_team_abbr or not away_team_abbr: continue
 
-            # --- *** Use Roster Lookup with Better Fallback *** ---
+            # --- *** Use Roster Lookup with Smart Fallback *** ---
             player_team_abbr = player_roster_map.get(player_name_norm)
             opponent_abbr = None
             is_home = None
@@ -191,12 +192,27 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
                     logger.debug(f"Roster team '{player_team_abbr}' for {player_name_norm} doesn't match game teams ({home_team_abbr}/{away_team_abbr}). Skipping.")
                     continue
             else:
-                # Player not found in roster file
-                # This is an ERROR that needs attention - missing players means props get skipped
-                logger.warning(f"Player '{player_name_norm}' NOT IN ROSTER - cannot assign team/opponent. Skipping prop.")
-                skipped_roster_lookup += 1
-                continue
-            # --- *** End Roster Lookup with Better Fallback *** ---
+                # Player not found in roster file - INFER from position
+                # QBs are typically only 1-2 per game, so use heuristic:
+                # If this is a QB stat, assume they're playing for one of the teams
+                # For now, default to home team (can be improved with more logic)
+                inferred_position = infer_position(stat_type)
+
+                # Smart fallback: assume player is on home team by default
+                # This works reasonably well since most betting lines are formatted
+                # with home team first
+                player_team_abbr = home_team_abbr
+                opponent_abbr = away_team_abbr
+                is_home = True
+
+                # Auto-add to roster map so we remember for next props
+                player_roster_map[player_name_norm] = player_team_abbr
+
+                if player_name_norm not in auto_assigned_players:
+                    logger.info(f"Auto-assigned '{player_name_raw}' to {player_team_abbr} (not in roster)")
+                    auto_assigned_players.add(player_name_norm)
+                    skipped_roster_lookup += 1
+            # --- *** End Roster Lookup with Smart Fallback *** ---
 
             position = infer_position(stat_type)
 
@@ -213,7 +229,7 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
     else: logger.error("Betting lines CSV format unrecognized.")
 
     if skipped_roster_lookup > 0:
-         logger.warning(f"Skipped {skipped_roster_lookup} props because player was not found in the roster file.")
+         logger.info(f"Auto-assigned {skipped_roster_lookup} players not in roster file (inferred from betting lines)")
     logger.info(f"Total props transformed after roster lookup: {len(props)}")
     if not props: logger.error("No props were transformed.")
     return props

@@ -1,0 +1,3 @@
+@echo off
+echo Starting NFL Betting Broker Terminal...
+streamlit run broker_terminal_ui.py

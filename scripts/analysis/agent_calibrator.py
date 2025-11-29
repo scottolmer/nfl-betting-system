@@ -23,27 +23,28 @@ class AgentCalibrator:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        
+
         if week:
             query = """
-                SELECT pl.parlay_id, pl.leg_index, pl.result, 
-                       p.confidence, p.agent_scores, p.week
-                FROM parlay_legs pl
-                JOIN parlays p ON pl.parlay_id = p.id
-                WHERE p.week = ?
-                ORDER BY p.created_at DESC
+                SELECT l.leg_id, l.parlay_id, l.result, l.agent_scores,
+                       p.confidence_score, p.week
+                FROM legs l
+                JOIN parlays p ON l.parlay_id = p.parlay_id
+                WHERE p.week = ? AND l.result IS NOT NULL
+                ORDER BY p.created_timestamp DESC
             """
             cursor.execute(query, (week,))
         else:
             query = """
-                SELECT pl.parlay_id, pl.leg_index, pl.result, 
-                       p.confidence, p.agent_scores, p.week
-                FROM parlay_legs pl
-                JOIN parlays p ON pl.parlay_id = p.id
-                ORDER BY p.created_at DESC
+                SELECT l.leg_id, l.parlay_id, l.result, l.agent_scores,
+                       p.confidence_score, p.week
+                FROM legs l
+                JOIN parlays p ON l.parlay_id = p.parlay_id
+                WHERE l.result IS NOT NULL
+                ORDER BY p.created_timestamp DESC
             """
             cursor.execute(query)
-        
+
         results = [dict(row) for row in cursor.fetchall()]
         conn.close()
         return results
@@ -62,9 +63,13 @@ class AgentCalibrator:
         for leg in legs:
             if not leg['agent_scores']:
                 continue
-            
-            actual = leg['result']  # True if W, False if L
-            agent_scores = eval(leg['agent_scores']) if isinstance(leg['agent_scores'], str) else leg['agent_scores']
+
+            actual = leg['result']  # 1 if hit, 0 if miss
+            try:
+                import json
+                agent_scores = json.loads(leg['agent_scores']) if isinstance(leg['agent_scores'], str) else leg['agent_scores']
+            except (json.JSONDecodeError, TypeError):
+                continue
             
             for agent_name, score in agent_scores.items():
                 # Convert agent score (0-100) to confidence (0-1)

@@ -1,0 +1,3 @@
+@echo off
+echo Starting NFL Betting Terminal...
+timeout 5 streamlit run terminal_ui.py

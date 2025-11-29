@@ -104,9 +104,9 @@ class ParlayBuilder:
             for prop_analysis in sorted_props:
                 prop_id = get_prop_analysis_id(prop_analysis)
                 player_name = prop_analysis.prop.player_name
-                
-                if (prop_id not in used_prop_ids and 
-                    player_usage_count[player_name] < max_player_uses and 
+
+                if (prop_id not in used_prop_ids and
+                    player_usage_count.get(player_name, 0) < max_player_uses and
                     player_name not in players_in_current_parlay):
                     
                     current_legs.append(prop_analysis)
@@ -120,7 +120,7 @@ class ParlayBuilder:
                 for leg in current_legs:
                     used_prop_ids.add(get_prop_analysis_id(leg))
                     player_name = leg.prop.player_name
-                    player_usage_count[player_name] += 1
+                    player_usage_count[player_name] = player_usage_count.get(player_name, 0) + 1
                     all_used_players.add(player_name)  # Add to all-time used set (never cleared)
                 
                 unique_positions = set(leg.prop.position for leg in current_legs)

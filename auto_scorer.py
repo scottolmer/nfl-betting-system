@@ -146,15 +146,81 @@ def load_csv_with_conflict_handling(file_path: Path) -> pd.DataFrame:
 # CSV DATA LOADING
 # ============================================================================
 
+def _sum_single_game_weeks(single_game_dfs: List[pd.DataFrame], stat_type: str) -> pd.DataFrame:
+    """
+    Sum stats from multiple single-game week dataframes to create a cumulative dataframe.
+
+    Args:
+        single_game_dfs: List of dataframes, each containing single-game stats
+        stat_type: 'passing', 'rushing', or 'receiving'
+
+    Returns:
+        Dataframe with cumulative stats across all provided weeks
+    """
+    if not single_game_dfs:
+        return None
+
+    # Stat columns to sum
+    stat_columns = {
+        'passing': ['YDS', 'TD', 'COM', 'ATT'],
+        'rushing': ['YDS', 'TD', 'ATT'],
+        'receiving': ['YDS', 'TD', 'REC']
+    }
+
+    cols_to_sum = stat_columns.get(stat_type, [])
+
+    # Build cumulative stats by player using a dictionary
+    player_stats = {}
+
+    for df in single_game_dfs:
+        for _, row in df.iterrows():
+            player_name = row.get('Player_Normalized', '')
+            if not player_name:
+                continue
+
+            # Initialize player if first time seeing them
+            if player_name not in player_stats:
+                player_stats[player_name] = {
+                    'Player': row.get('Player', ''),
+                    'Player_Normalized': player_name,
+                    'Tm': row.get('Tm', ''),
+                    'Pos': row.get('Pos', ''),
+                }
+                # Initialize stat columns to 0
+                for col in cols_to_sum:
+                    player_stats[player_name][col] = 0
+
+            # Add this week's stats
+            for col in cols_to_sum:
+                if col in row:
+                    val = row.get(col, 0)
+                    if pd.notna(val):
+                        try:
+                            add_val = float(str(val).replace(',', ''))
+                            player_stats[player_name][col] += add_val
+                        except (ValueError, TypeError):
+                            pass
+
+    # Convert back to dataframe
+    if player_stats:
+        cumulative_df = pd.DataFrame(list(player_stats.values()))
+        return cumulative_df
+    else:
+        return None
+
+
 def load_week_stats(week: int, data_dir: Path = None) -> Dict[str, pd.DataFrame]:
     """
-    Load all stat CSVs for a given week.
+    Load all stat CSVs for a given week and calculate week-over-week deltas.
+
+    Since CSV files contain cumulative season totals, we subtract previous week's
+    totals to get individual game performance.
 
     Returns:
         {
-            'passing': DataFrame,
-            'rushing': DataFrame,
-            'receiving': DataFrame
+            'passing': DataFrame (with weekly stats, not cumulative),
+            'rushing': DataFrame (with weekly stats, not cumulative),
+            'receiving': DataFrame (with weekly stats, not cumulative)
         }
     """
     if data_dir is None:
@@ -166,24 +232,172 @@ def load_week_stats(week: int, data_dir: Path = None) -> Dict[str, pd.DataFrame]
     print(f"\n[LOADING] Loading Week {week} CSV files...")
 
     for stat_type in stat_types:
-        file_name = f"wk{week}_{stat_type}_base.csv"
-        file_path = data_dir / file_name
+        # Load current week (cumulative through this week)
+        current_file = f"wk{week}_{stat_type}_base.csv"
+        current_path = data_dir / current_file
+        current_df = load_csv_with_conflict_handling(current_path)
 
-        df = load_csv_with_conflict_handling(file_path)
+        if current_df is None:
+            print(f"  [WARNING] Could not load {current_file}")
+            continue
 
-        if df is not None:
-            # Normalize player names for matching
-            if 'Player' in df.columns:
-                df['Player_Normalized'] = df['Player'].apply(normalize_name)
+        # Normalize player names for matching
+        if 'Player' in current_df.columns:
+            current_df['Player_Normalized'] = current_df['Player'].apply(normalize_name)
 
-            # Normalize team abbreviations
-            if 'Tm' in df.columns:
-                df['Tm'] = df['Tm'].apply(normalize_team_abbr)
+        # Normalize team abbreviations
+        if 'Tm' in current_df.columns:
+            current_df['Tm'] = current_df['Tm'].apply(normalize_team_abbr)
 
-            week_stats[stat_type] = df
-            print(f"  [OK] Loaded {file_name}: {len(df)} players")
+        # Check if this file contains single-game stats (G=1) vs cumulative season stats
+        # Strategy:
+        # - If G ≈ 1 for most players → single-game stats for this week
+        # - If G ≈ week number → cumulative stats through this week
+        # - Need to distinguish between "cumulative through week N" vs "single game for week N"
+        is_single_game = False
+        is_cumulative_through_current_week = False
+
+        if 'G' in current_df.columns:
+            # Sample the first 20 rows to determine format
+            sample_games = current_df['G'].head(20).apply(lambda x: int(x) if pd.notna(x) else 0)
+            avg_games = sample_games.mean()
+
+            if avg_games <= 1.5:
+                # G ≈ 1 → single-game stats for this specific week
+                is_single_game = True
+            elif avg_games >= week - 2:
+                # G ≈ week number → cumulative stats through current week
+                # (Allow some variance for players who missed games)
+                is_cumulative_through_current_week = True
+
+        if is_single_game:
+            # File already contains single-game stats, no delta needed
+            week_stats[stat_type] = current_df
+            print(f"  [OK] Loaded {current_file}: {len(current_df)} players (single-game stats)")
+            continue
+
+        # File is cumulative - need to find previous cumulative week to subtract
+        # Strategy:
+        # 1. If current file is cumulative through week N, look for cumulative through week N-1
+        # 2. If we can't find week N-1 cumulative, synthesize it from single-game weeks
+
+        prev_cumulative_df = None
+        prev_week = week - 1
+
+        if is_cumulative_through_current_week:
+            # Current file is cumulative through THIS week
+            # Look for cumulative file from previous week
+            prev_file = f"wk{prev_week}_{stat_type}_base.csv"
+            prev_path = data_dir / prev_file
+            temp_df = load_csv_with_conflict_handling(prev_path)
+
+            if temp_df is not None and 'G' in temp_df.columns:
+                # Check if previous week file is also cumulative
+                avg_g = temp_df['G'].head(20).apply(lambda x: int(x) if pd.notna(x) else 0).mean()
+                if avg_g >= prev_week - 2:  # Cumulative through previous week
+                    prev_cumulative_df = temp_df
+                    print(f"  [INFO] Using wk{prev_week} cumulative as baseline")
         else:
-            print(f"  [WARNING] Could not load {file_name}")
+            # Current file is cumulative but not through this week (unexpected format)
+            # Try to find any previous cumulative week file
+            for check_week in range(prev_week, max(0, prev_week - 5), -1):
+                check_file = f"wk{check_week}_{stat_type}_base.csv"
+                check_path = data_dir / check_file
+                temp_df = load_csv_with_conflict_handling(check_path)
+
+                if temp_df is not None and 'G' in temp_df.columns:
+                    avg_g = temp_df['G'].head(20).apply(lambda x: int(x) if pd.notna(x) else 0).mean()
+                    if avg_g > 1.5:  # Found a cumulative week
+                        prev_cumulative_df = temp_df
+                        prev_week = check_week
+                        break
+
+        if prev_cumulative_df is None:
+            # No cumulative week found - need to sum all single-game weeks
+            # and create a synthetic "cumulative through week N-1" dataframe
+            single_game_weeks = []
+            for check_week in range(1, week):
+                check_file = f"wk{check_week}_{stat_type}_base.csv"
+                check_path = data_dir / check_file
+                temp_df = load_csv_with_conflict_handling(check_path)
+
+                if temp_df is not None:
+                    if 'Player' in temp_df.columns:
+                        temp_df['Player_Normalized'] = temp_df['Player'].apply(normalize_name)
+                    single_game_weeks.append(temp_df)
+
+            if single_game_weeks:
+                # Sum all previous weeks' stats by player
+                prev_cumulative_df = _sum_single_game_weeks(single_game_weeks, stat_type)
+                print(f"  [INFO] Synthesized cumulative stats from {len(single_game_weeks)} single-game weeks")
+
+        if prev_cumulative_df is not None:
+            # Previous week data exists - calculate deltas
+            if 'Player' in prev_cumulative_df.columns:
+                prev_cumulative_df['Player_Normalized'] = prev_cumulative_df['Player'].apply(normalize_name)
+
+            # Create a dictionary for quick lookup of previous week stats
+            prev_stats = {}
+            for _, row in prev_cumulative_df.iterrows():
+                player_name = normalize_name(row.get('Player', ''))
+                if player_name:
+                    prev_stats[player_name] = row
+
+            # Calculate weekly performance by subtracting previous week
+            weekly_df = current_df.copy()
+
+            # Stat columns that need delta calculation
+            stat_columns = {
+                'passing': ['YDS', 'TD', 'COM', 'ATT'],
+                'rushing': ['YDS', 'TD', 'ATT'],
+                'receiving': ['YDS', 'TD', 'REC']
+            }
+
+            cols_to_delta = stat_columns.get(stat_type, [])
+
+            for col in cols_to_delta:
+                if col in weekly_df.columns:
+                    # Create new column with weekly stats
+                    weekly_values = []
+
+                    for _, row in weekly_df.iterrows():
+                        player_name = row.get('Player_Normalized', '')
+                        current_value = row.get(col, 0)
+
+                        # Try to parse current value (might have commas like "1,313")
+                        try:
+                            if isinstance(current_value, str):
+                                current_value = float(current_value.replace(',', ''))
+                            else:
+                                current_value = float(current_value) if current_value else 0
+                        except (ValueError, AttributeError):
+                            current_value = 0
+
+                        # Get previous week value
+                        prev_value = 0
+                        if player_name in prev_stats:
+                            prev_row_value = prev_stats[player_name].get(col, 0)
+                            try:
+                                if isinstance(prev_row_value, str):
+                                    prev_value = float(prev_row_value.replace(',', ''))
+                                else:
+                                    prev_value = float(prev_row_value) if prev_row_value else 0
+                            except (ValueError, AttributeError):
+                                prev_value = 0
+
+                        # Calculate weekly stat (current - previous)
+                        weekly_stat = max(0, current_value - prev_value)  # Don't allow negative
+                        weekly_values.append(weekly_stat)
+
+                    # Replace column with weekly values
+                    weekly_df[col] = weekly_values
+
+            week_stats[stat_type] = weekly_df
+            print(f"  [OK] Loaded {current_file}: {len(weekly_df)} players (calculated weekly deltas)")
+        else:
+            # No previous week data - assume Week 1 or missing data, use current as-is
+            week_stats[stat_type] = current_df
+            print(f"  [OK] Loaded {current_file}: {len(current_df)} players (no previous week data, using cumulative)")
 
     return week_stats
 
@@ -368,14 +582,19 @@ def score_leg(
     """
     Score a single parlay leg.
 
+    DraftKings Pick6 Rules:
+    - If player not found (didn't play, injured, etc.), treat as 0 stats
+    - OVER bet with 0 actual = MISS
+    - UNDER bet with 0 actual = HIT
+
     Args:
         leg: Leg dictionary with player, prop_type, bet_type, line
         week_stats: Loaded CSV data
 
     Returns:
         (result, actual_value, debug_info)
-        - result: 1 (hit), 0 (miss), None (unable to score)
-        - actual_value: Actual stat value achieved
+        - result: 1 (hit), 0 (miss), None (unable to score - only for unknown prop types)
+        - actual_value: Actual stat value achieved (0 if player not found)
         - debug_info: List of debug strings
     """
     player = leg['player']
@@ -392,8 +611,10 @@ def score_leg(
     # Find player's actual stat value
     actual_value, debug_info = find_player_stat(player, stat_config, week_stats)
 
+    # DraftKings Pick6 rule: If player not found, treat as 0 stats
     if actual_value is None:
-        return None, None, debug_info
+        actual_value = 0.0
+        debug_info.append(f"  [DNP] Player not found - treating as 0 stats (DNP/injured)")
 
     # Determine hit/miss
     if bet_type == 'OVER':
@@ -495,9 +716,17 @@ def format_scoring_results(results: List[Dict], dry_run: bool = False) -> str:
             hit = leg['result']
 
             if hit is None:
-                # Unable to score
+                # Unable to score (unknown prop type only)
                 lines.append(f"  [!] {player}: {prop} {bet} {line_val}")
-                lines.append(f"      Player not found in CSV files")
+                lines.append(f"      Unable to score - unknown prop type")
+            elif actual == 0.0 and '[DNP]' in str(leg.get('debug_info', [])):
+                # Player didn't play - show DNP status
+                if hit == 1:
+                    lines.append(f"  [HIT] {player}: {prop} {bet} {line_val}")
+                    lines.append(f"      Actual: 0.0 (DNP) -> HIT")
+                else:
+                    lines.append(f"  [MISS] {player}: {prop} {bet} {line_val}")
+                    lines.append(f"      Actual: 0.0 (DNP) -> MISS")
             elif hit == 1:
                 # Hit
                 lines.append(f"  [HIT] {player}: {prop} {bet} {line_val}")

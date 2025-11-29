@@ -20,6 +20,8 @@ from .export_parlays import export_weekly_parlays, preview_weekly_parlays
 from .data_loader import NFLDataLoader
 from .orchestrator import PropAnalyzer
 from .models import PropAnalysis
+from .parlay_builder import ParlayBuilder
+from .correlation_detector import EnhancedParlayBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +68,23 @@ Available functions and their parameters:
    - preview: bool (optional, default False) - preview without saving
    Returns: Export status or preview
 
-7. help() - Show available commands and examples
+7. build_parlay(week, leg_counts, min_confidence, position, exclude_teams)
+   - week: int (required)
+   - leg_counts: list of int (required) - e.g., [2, 3, 4] for one 2-leg, one 3-leg, one 4-leg parlay
+   - min_confidence: int (optional, default 58) - minimum prop confidence to consider
+   - position: str (optional) - filter to specific position (QB, RB, WR, TE)
+   - exclude_teams: list of str (optional) - exclude specific teams (e.g., ["BUF", "HOU"])
+   Returns: Built parlays with correlation analysis
+
+8. build_optimized_parlays(week, leg_counts, min_confidence, position, exclude_teams)
+   - week: int (required)
+   - leg_counts: list of int (required) - e.g., [2, 3, 4] for one 2-leg, one 3-leg, one 4-leg parlay
+   - min_confidence: int (optional, default 58) - minimum prop confidence to consider
+   - position: str (optional) - filter to specific position (QB, RB, WR, TE)
+   - exclude_teams: list of str (optional) - exclude specific teams (e.g., ["BUF", "HOU"])
+   Returns: Optimized parlays with correlation detection and penalties for overlapping agent signals
+
+9. help() - Show available commands and examples
    Returns: Help text
 
 System context:
@@ -94,6 +112,11 @@ Example responses:
 {"function": "get_all_props", "params": {"week": 12, "min_confidence": 70}}
 {"function": "get_all_props", "params": {"week": 12, "direction": "UNDER", "min_confidence": 60}}
 {"function": "get_all_props", "params": {"week": 12, "position": "QB", "direction": "OVER"}}
+{"function": "build_parlay", "params": {"week": 12, "leg_counts": [2, 3, 4]}}
+{"function": "build_parlay", "params": {"week": 12, "leg_counts": [3], "min_confidence": 65, "position": "QB"}}
+{"function": "build_parlay", "params": {"week": 12, "leg_counts": [2, 3], "exclude_teams": ["BUF", "HOU"]}}
+{"function": "build_optimized_parlays", "params": {"week": 12, "leg_counts": [2, 3, 4]}}
+{"function": "build_optimized_parlays", "params": {"week": 12, "leg_counts": [3], "min_confidence": 62}}
 {"function": "explain_parlay", "params": {"parlay_id": "TRAD_W12_abc123_v1"}}
 {"clarification": "Which week would you like to see parlays for? (1-18)"}
 {"function": "help", "params": {}}
@@ -203,6 +226,10 @@ class NLQueryInterface:
                 return self._show_agent_breakdown(**params)
             elif function == "export_parlays":
                 return self._export_parlays(**params)
+            elif function == "build_parlay":
+                return self._build_parlay(**params)
+            elif function == "build_optimized_parlays":
+                return self._build_optimized_parlays(**params)
             elif function == "help":
                 return self._show_help()
             else:
@@ -452,6 +479,208 @@ class NLQueryInterface:
             else:
                 return "[ERROR] Export failed"
 
+    def _build_parlay(
+        self,
+        week: int,
+        leg_counts: List[int],
+        min_confidence: int = 58,
+        position: Optional[str] = None,
+        exclude_teams: Optional[List[str]] = None
+    ) -> str:
+        """Build parlays with specified leg counts"""
+        if not leg_counts:
+            return "[ERROR] Please specify leg_counts, e.g., [2, 3, 4]"
+
+        # Validate leg counts
+        for count in leg_counts:
+            if count < 2 or count > 6:
+                return f"[ERROR] Leg count must be between 2-6, got {count}"
+
+        print(f"Loading and analyzing props for week {week}...")
+
+        # Load data
+        context = self.data_loader.load_all_data(week=week)
+        analyzer = PropAnalyzer()
+        all_analyses = analyzer.analyze_all_props(context, min_confidence=40)
+
+        # Apply team exclusions if specified
+        if exclude_teams:
+            excluded_upper = [team.upper() for team in exclude_teams]
+            before_count = len(all_analyses)
+            all_analyses = [a for a in all_analyses if a.prop.team.upper() not in excluded_upper]
+            print(f"Excluded teams {exclude_teams}: {before_count} -> {len(all_analyses)} props")
+
+        # Apply position filter if specified
+        if position:
+            all_analyses = [a for a in all_analyses if a.prop.position.upper() == position.upper()]
+            print(f"Filtered to {len(all_analyses)} {position} props")
+
+        # Build parlays using ParlayBuilder
+        builder = ParlayBuilder()
+
+        # Build individual parlays for each requested leg count
+        built_parlays = {}
+        for leg_count in leg_counts:
+            print(f"\nBuilding {leg_count}-leg parlay...")
+
+            # Use build_n_leg_parlays to build just 1 parlay of this size
+            used_prop_ids = set()
+            player_usage_count = {}
+            all_used_players = set()
+
+            parlays = builder.build_n_leg_parlays(
+                num_legs=leg_count,
+                max_parlays=1,  # Build only 1 parlay
+                eligible_props=all_analyses,
+                used_prop_ids=used_prop_ids,
+                player_usage_count=player_usage_count,
+                all_used_players=all_used_players,
+                max_player_uses=3
+            )
+
+            if parlays:
+                built_parlays[f"{leg_count}-leg"] = parlays
+
+        # Format output
+        if not built_parlays:
+            return f"[ERROR] Could not build parlays. Try lowering min_confidence or removing position filter."
+
+        lines = [f"\nBuilt {len(built_parlays)} parlay(s) for week {week}:\n"]
+        lines.append("=" * 80)
+
+        parlay_num = 1
+        for ptype, parlays in built_parlays.items():
+            for parlay in parlays:
+                avg_conf = sum(leg.final_confidence for leg in parlay.legs) / len(parlay.legs)
+
+                lines.append(f"\n{parlay_num}. {ptype.upper()} PARLAY")
+                lines.append(f"   Type: {parlay.parlay_type} | {len(parlay.legs)} legs | Avg Confidence: {avg_conf:.1f}%")
+                lines.append(f"   Rationale: {parlay.rationale}")
+
+                # Show all legs
+                for i, leg in enumerate(parlay.legs, 1):
+                    prop = leg.prop
+                    lines.append(f"   Leg {i}: {prop.player_name} ({prop.position}) - {prop.team} vs {prop.opponent}")
+                    lines.append(f"          {prop.stat_type} {prop.direction} {prop.line} | Confidence: {leg.final_confidence:.1f}%")
+
+                parlay_num += 1
+
+        lines.append("\n" + "=" * 80)
+        lines.append(f"\nNote: These parlays are built from props with {min_confidence}%+ confidence")
+        if position:
+            lines.append(f"Filtered to position: {position}")
+
+        return "\n".join(lines)
+
+    def _build_optimized_parlays(
+        self,
+        week: int,
+        leg_counts: List[int],
+        min_confidence: int = 58,
+        position: Optional[str] = None,
+        exclude_teams: Optional[List[str]] = None
+    ) -> str:
+        """Build optimized parlays with correlation detection"""
+        if not leg_counts:
+            return "[ERROR] Please specify leg_counts, e.g., [2, 3, 4]"
+
+        # Validate leg counts
+        for count in leg_counts:
+            if count < 2 or count > 6:
+                return f"[ERROR] Leg count must be between 2-6, got {count}"
+
+        print(f"Loading and analyzing props for week {week}...")
+
+        # Load data
+        context = self.data_loader.load_all_data(week=week)
+        analyzer = PropAnalyzer()
+        all_analyses = analyzer.analyze_all_props(context, min_confidence=40)
+
+        # Apply team exclusions if specified
+        if exclude_teams:
+            excluded_upper = [team.upper() for team in exclude_teams]
+            before_count = len(all_analyses)
+            all_analyses = [a for a in all_analyses if a.prop.team.upper() not in excluded_upper]
+            print(f"Excluded teams {exclude_teams}: {before_count} -> {len(all_analyses)} props")
+
+        # Apply position filter if specified
+        if position:
+            all_analyses = [a for a in all_analyses if a.prop.position.upper() == position.upper()]
+            print(f"Filtered to {len(all_analyses)} {position} props")
+
+        # Build optimized parlays using EnhancedParlayBuilder
+        print("Building optimized parlays with correlation detection...")
+        builder = EnhancedParlayBuilder()
+        parlays = builder.build_parlays_with_correlation(
+            all_analyses,
+            min_confidence=min_confidence
+        )
+
+        # Format output
+        if not parlays or sum(len(p) for p in parlays.values()) == 0:
+            return f"[ERROR] Could not build parlays. Try lowering min_confidence or removing position filter."
+
+        lines = [f"\nBuilt {sum(len(p) for p in parlays.values())} OPTIMIZED parlay(s) for week {week}:\n"]
+        lines.append("=" * 80)
+        lines.append("[OPTIMIZED] These parlays use correlation detection and penalize overlapping agent signals")
+        lines.append("=" * 80)
+
+        parlay_num = 1
+        for ptype in ['2-leg', '3-leg', '4-leg', '5-leg']:
+            if ptype not in parlays:
+                continue
+
+            parlay_list = parlays[ptype]
+
+            # Filter to requested leg counts
+            requested_leg_count = int(ptype.split('-')[0])
+            if requested_leg_count not in leg_counts:
+                continue
+
+            for parlay in parlay_list[:1]:  # Show 1 parlay per type
+                conf = parlay.combined_confidence
+
+                # Show correlation penalty if exists
+                penalty_info = ""
+                if hasattr(parlay, 'correlation_penalty') and parlay.correlation_penalty < 0:
+                    original = int(conf - parlay.correlation_penalty)
+                    penalty_info = f" (was {original}%, {int(parlay.correlation_penalty)}% penalty applied)"
+
+                lines.append(f"\n{parlay_num}. {ptype.upper()} OPTIMIZED PARLAY")
+                lines.append(f"   Confidence: {conf:.1f}%{penalty_info}")
+                lines.append(f"   Rationale: {parlay.rationale}")
+                lines.append(f"   Risk: {parlay.risk_level}")
+
+                # Show correlation warnings if any
+                if hasattr(parlay, 'correlation_warnings') and parlay.correlation_warnings:
+                    lines.append(f"\n   ⚠️  CORRELATION WARNINGS:")
+                    for warning in parlay.correlation_warnings:
+                        lines.append(f"      • {warning}")
+
+                # Show all legs
+                lines.append(f"\n   LEGS:")
+                for i, leg in enumerate(parlay.legs, 1):
+                    prop = leg.prop
+
+                    # Show top agents driving this prop
+                    agents_info = ""
+                    if hasattr(leg, 'top_contributing_agents') and leg.top_contributing_agents:
+                        top_agents = [agent[0] for agent in leg.top_contributing_agents[:2]]
+                        agents_info = f"\n      Driven by: {', '.join(top_agents)}"
+
+                    lines.append(f"   Leg {i}: {prop.player_name} ({prop.position}) - {prop.team} vs {prop.opponent}")
+                    lines.append(f"          {prop.stat_type} {prop.direction} {prop.line} | Confidence: {leg.final_confidence:.1f}%{agents_info}")
+
+                parlay_num += 1
+
+        lines.append("\n" + "=" * 80)
+        lines.append(f"\nNote: Optimized parlays detect correlation risks and penalize overlapping agent signals")
+        lines.append(f"Built from props with {min_confidence}%+ confidence")
+        if position:
+            lines.append(f"Filtered to position: {position}")
+
+        return "\n".join(lines)
+
     def _show_help(self) -> str:
         """Show help text"""
         help_text = """
@@ -486,6 +715,12 @@ ACTIONS:
   - "Export parlays for week 12"
   - "Preview export for week 11"
   - "List available weeks"
+  - "Create a 2-leg, 3-leg, and 4-leg parlay"
+  - "Build a 3-leg QB parlay for week 12"
+  - "Make me two parlays: one 2-leg and one 4-leg"
+  - "Build optimized parlays for week 12"
+  - "Create optimized 2-leg and 3-leg parlays"
+  - "Generate optimized parlays with low correlation"
 
 FOLLOW-UP QUESTIONS:
   - "Now filter to only UNDER bets"
