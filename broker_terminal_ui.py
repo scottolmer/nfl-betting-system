@@ -734,6 +734,12 @@ with left_col:
             else:
                 score_class = "negative"
 
+            # Pre-calculate colors for differentials
+            away_pass_color = "#00ff88" if away_pass_diff > 10 else "#ffaa00" if away_pass_diff > 0 else "#ff4444"
+            away_rush_color = "#00ff88" if away_rush_diff > 10 else "#ffaa00" if away_rush_diff > 0 else "#ff4444"
+            home_pass_color = "#00ff88" if home_pass_diff > 10 else "#ffaa00" if home_pass_diff > 0 else "#ff4444"
+            home_rush_color = "#00ff88" if home_rush_diff > 10 else "#ffaa00" if home_rush_diff > 0 else "#ff4444"
+
             st.markdown(f"""
             <div style='background: rgba(0, 212, 255, 0.03); border: 1px solid #2d3548; border-radius: 3px; padding: 10px; margin: 8px 0;'>
                 <div style='display: flex; justify-content: space-between; margin-bottom: 8px;'>
@@ -748,10 +754,10 @@ with left_col:
                         {matchup['away_team']} OFFENSE
                     </div>
                     <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>
-                        Pass: {matchup['away_team']} ({matchup['away_pass_off']:.1f}) vs {matchup['home_team']} ({matchup['home_pass_def']:.1f}) → <span style='color: {"#00ff88" if away_pass_diff > 10 else "#ffaa00" if away_pass_diff > 0 else "#ff4444"};'>{away_pass_diff:+.1f}</span>
+                        Pass: {matchup['away_team']} ({matchup['away_pass_off']:.1f}) vs {matchup['home_team']} ({matchup['home_pass_def']:.1f}) → <span style='color: {away_pass_color};'>{away_pass_diff:+.1f}</span>
                     </div>
                     <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>
-                        Rush: {matchup['away_team']} ({matchup['away_rush_off']:.1f}) vs {matchup['home_team']} ({matchup['home_rush_def']:.1f}) → <span style='color: {"#00ff88" if away_rush_diff > 10 else "#ffaa00" if away_rush_diff > 0 else "#ff4444"};'>{away_rush_diff:+.1f}</span>
+                        Rush: {matchup['away_team']} ({matchup['away_rush_off']:.1f}) vs {matchup['home_team']} ({matchup['home_rush_def']:.1f}) → <span style='color: {away_rush_color};'>{away_rush_diff:+.1f}</span>
                     </div>
                 </div>
 
@@ -760,10 +766,10 @@ with left_col:
                         {matchup['home_team']} OFFENSE
                     </div>
                     <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>
-                        Pass: {matchup['home_team']} ({matchup['home_pass_off']:.1f}) vs {matchup['away_team']} ({matchup['away_pass_def']:.1f}) → <span style='color: {"#00ff88" if home_pass_diff > 10 else "#ffaa00" if home_pass_diff > 0 else "#ff4444"};'>{home_pass_diff:+.1f}</span>
+                        Pass: {matchup['home_team']} ({matchup['home_pass_off']:.1f}) vs {matchup['away_team']} ({matchup['away_pass_def']:.1f}) → <span style='color: {home_pass_color};'>{home_pass_diff:+.1f}</span>
                     </div>
                     <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>
-                        Rush: {matchup['home_team']} ({matchup['home_rush_off']:.1f}) vs {matchup['away_team']} ({matchup['away_rush_def']:.1f}) → <span style='color: {"#00ff88" if home_rush_diff > 10 else "#ffaa00" if home_rush_diff > 0 else "#ff4444"};'>{home_rush_diff:+.1f}</span>
+                        Rush: {matchup['home_team']} ({matchup['home_rush_off']:.1f}) vs {matchup['away_team']} ({matchup['away_rush_def']:.1f}) → <span style='color: {home_rush_color};'>{home_rush_diff:+.1f}</span>
                     </div>
                 </div>
             </div>
