@@ -261,6 +261,83 @@ if 'last_update' not in st.session_state:
     st.session_state.last_update = datetime.now()
 if 'selected_teams' not in st.session_state:
     st.session_state.selected_teams = NFL_TEAMS.copy()  # All teams selected by default
+if 'matchup_data' not in st.session_state:
+    st.session_state.matchup_data = []
+
+# Helper function to extract and score matchups
+def analyze_matchups(context):
+    """Extract matchup data from context and calculate scores"""
+    dvoa_off = context.get('dvoa_offensive', {})
+    dvoa_def = context.get('dvoa_defensive', {})
+    props = context.get('props', [])
+
+    if not props:
+        return []
+
+    # Extract unique matchups from props
+    matchups = {}
+    for prop in props:
+        team = prop.get('team')
+        opponent = prop.get('opponent')
+        is_home = prop.get('is_home', False)
+
+        if team and opponent:
+            # Create matchup key (always away @ home format)
+            if is_home:
+                key = f"{opponent} @ {team}"
+                away_team, home_team = opponent, team
+            else:
+                key = f"{team} @ {opponent}"
+                away_team, home_team = team, opponent
+
+            if key not in matchups:
+                matchups[key] = {
+                    'away_team': away_team,
+                    'home_team': home_team,
+                    'key': key
+                }
+
+    # Calculate scores for each matchup
+    scored_matchups = []
+    for matchup in matchups.values():
+        away = matchup['away_team']
+        home = matchup['home_team']
+
+        # Get DVOA data
+        away_off = dvoa_off.get(away, {})
+        home_def = dvoa_def.get(home, {})
+
+        # Pass matchup: away offense vs home defense
+        away_pass_off = away_off.get('passing_dvoa', 0)
+        home_pass_def = home_def.get('pass_defense_dvoa', 0)
+        pass_diff = away_pass_off - home_pass_def
+
+        # Rush matchup: away offense vs home defense
+        away_rush_off = away_off.get('rushing_dvoa', 0)
+        home_rush_def = home_def.get('rush_defense_dvoa', 0)
+        rush_diff = away_rush_off - home_rush_def
+
+        # Overall matchup score (average of pass and rush differentials, normalized to 0-100)
+        overall_score = 50 + ((pass_diff + rush_diff) / 4)  # Normalize around 50
+        overall_score = max(0, min(100, overall_score))  # Clamp to 0-100
+
+        scored_matchups.append({
+            'matchup': f"{away} @ {home}",
+            'away_team': away,
+            'home_team': home,
+            'pass_diff': pass_diff,
+            'away_pass_off': away_pass_off,
+            'home_pass_def': home_pass_def,
+            'rush_diff': rush_diff,
+            'away_rush_off': away_rush_off,
+            'home_rush_def': home_rush_def,
+            'score': overall_score
+        })
+
+    # Sort by overall score (highest first)
+    scored_matchups.sort(key=lambda x: x['score'], reverse=True)
+
+    return scored_matchups
 
 # Initialize components
 @st.cache_resource
@@ -304,12 +381,16 @@ with col2:
                 context = components['loader'].load_all_data(week=st.session_state.week)
                 all_props = components['analyzer'].analyze_all_props(context, min_confidence=40)
 
+                # Analyze matchups
+                matchup_data = analyze_matchups(context)
+
                 # Store in session state
                 st.session_state.analyzed_props = all_props
+                st.session_state.matchup_data = matchup_data
                 st.session_state.data_loaded = True
                 st.session_state.last_update = datetime.now()
 
-                st.success(f"✅ Loaded {len(all_props)} props for Week {st.session_state.week}")
+                st.success(f"✅ Loaded {len(all_props)} props and {len(matchup_data)} matchups for Week {st.session_state.week}")
 
             # Auto-calculate top props - deduplicate by player + stat type
             if all_props:
@@ -602,6 +683,52 @@ with left_col:
             """, unsafe_allow_html=True)
     else:
         st.markdown("<div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; text-align: center; padding: 20px;'>Load data to see top props</div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
+
+    # Matchup Analysis panel
+    st.markdown("""
+    <div class='terminal-panel'>
+        <div class='panel-header'>🏟️ MATCHUP ANALYSIS</div>
+        <div class='panel-subheader'>DVOA-Based Game Analysis</div>
+    """, unsafe_allow_html=True)
+
+    if st.session_state.matchup_data:
+        for matchup in st.session_state.matchup_data:
+            score = matchup['score']
+            pass_diff = matchup['pass_diff']
+            rush_diff = matchup['rush_diff']
+
+            # Determine score color
+            if score >= 65:
+                score_class = "positive"
+            elif score >= 45:
+                score_class = ""
+            else:
+                score_class = "negative"
+
+            st.markdown(f"""
+            <div style='background: rgba(0, 212, 255, 0.03); border: 1px solid #2d3548; border-radius: 3px; padding: 10px; margin: 8px 0;'>
+                <div style='display: flex; justify-content: space-between; margin-bottom: 6px;'>
+                    <span style='color: #ffffff; font-family: Consolas; font-size: 13px; font-weight: 600;'>
+                        {matchup['matchup']}
+                    </span>
+                    <span class='data-value {score_class}' style='font-size: 13px;'>{score:.0f}</span>
+                </div>
+                <div style='padding-left: 8px; border-left: 2px solid #2d3548;'>
+                    <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>
+                        Pass: {matchup['away_team']} Off ({matchup['away_pass_off']:.1f}) vs {matchup['home_team']} Def ({matchup['home_pass_def']:.1f}) → <span style='color: {"#00ff88" if pass_diff > 10 else "#ffaa00" if pass_diff > 0 else "#ff4444"};'>{pass_diff:+.1f}</span>
+                    </div>
+                    <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>
+                        Rush: {matchup['away_team']} Off ({matchup['away_rush_off']:.1f}) vs {matchup['home_team']} Def ({matchup['home_rush_def']:.1f}) → <span style='color: {"#00ff88" if rush_diff > 10 else "#ffaa00" if rush_diff > 0 else "#ff4444"};'>{rush_diff:+.1f}</span>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.markdown("<div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; text-align: center; padding: 20px;'>Load data to see matchup analysis</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
