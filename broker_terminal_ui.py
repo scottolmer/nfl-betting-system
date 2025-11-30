@@ -424,7 +424,7 @@ with col2:
                     if key not in seen:
                         seen.add(key)
                         unique_props.append(prop_analysis)
-                    if len(unique_props) >= 20:
+                    if len(unique_props) >= 30:
                         break
 
                 st.session_state.top_props = unique_props
@@ -680,7 +680,7 @@ with left_col:
     """, unsafe_allow_html=True)
 
     if st.session_state.top_props:
-        for i, analysis in enumerate(st.session_state.top_props[:10], 1):
+        for i, analysis in enumerate(st.session_state.top_props[:30], 1):
             prop = analysis.prop
             conf = analysis.final_confidence
 
@@ -702,65 +702,6 @@ with left_col:
             """, unsafe_allow_html=True)
     else:
         st.markdown("<div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; text-align: center; padding: 20px;'>Load data to see top props</div>", unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
-
-    # Matchup Analysis panel
-    st.markdown("""
-    <div class='terminal-panel'>
-        <div class='panel-header'>🏟️ MATCHUP ANALYSIS</div>
-        <div class='panel-subheader'>DVOA-Based Game Analysis</div>
-    """, unsafe_allow_html=True)
-
-    if st.session_state.matchup_data:
-        for matchup in st.session_state.matchup_data:
-            score = matchup['score']
-
-            # Away team differentials
-            away_pass_diff = matchup['away_pass_diff']
-            away_rush_diff = matchup['away_rush_diff']
-
-            # Home team differentials
-            home_pass_diff = matchup['home_pass_diff']
-            home_rush_diff = matchup['home_rush_diff']
-
-            # Determine score color
-            if score >= 65:
-                score_class = "positive"
-            elif score >= 45:
-                score_class = ""
-            else:
-                score_class = "negative"
-
-            # Pre-calculate colors for differentials
-            away_pass_color = "#00ff88" if away_pass_diff > 10 else "#ffaa00" if away_pass_diff > 0 else "#ff4444"
-            away_rush_color = "#00ff88" if away_rush_diff > 10 else "#ffaa00" if away_rush_diff > 0 else "#ff4444"
-            home_pass_color = "#00ff88" if home_pass_diff > 10 else "#ffaa00" if home_pass_diff > 0 else "#ff4444"
-            home_rush_color = "#00ff88" if home_rush_diff > 10 else "#ffaa00" if home_rush_diff > 0 else "#ff4444"
-
-            html = f"""
-<div style='background: rgba(0, 212, 255, 0.03); border: 1px solid #2d3548; border-radius: 3px; padding: 10px; margin: 8px 0;'>
-    <div style='display: flex; justify-content: space-between; margin-bottom: 8px;'>
-        <span style='color: #ffffff; font-family: Consolas; font-size: 13px; font-weight: 600;'>{matchup['matchup']}</span>
-        <span class='data-value {score_class}' style='font-size: 13px;'>{score:.0f}</span>
-    </div>
-    <div style='padding-left: 8px; border-left: 2px solid #2d3548; margin-bottom: 8px;'>
-        <div style='color: #00d4ff; font-family: Consolas; font-size: 10px; font-weight: 600; margin-bottom: 4px;'>{matchup['away_team']} OFFENSE</div>
-        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Pass: {matchup['away_team']} ({matchup['away_pass_off']:.1f}) vs {matchup['home_team']} ({matchup['home_pass_def']:.1f}) → <span style='color: {away_pass_color};'>{away_pass_diff:+.1f}</span></div>
-        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Rush: {matchup['away_team']} ({matchup['away_rush_off']:.1f}) vs {matchup['home_team']} ({matchup['home_rush_def']:.1f}) → <span style='color: {away_rush_color};'>{away_rush_diff:+.1f}</span></div>
-    </div>
-    <div style='padding-left: 8px; border-left: 2px solid #2d3548;'>
-        <div style='color: #00d4ff; font-family: Consolas; font-size: 10px; font-weight: 600; margin-bottom: 4px;'>{matchup['home_team']} OFFENSE</div>
-        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Pass: {matchup['home_team']} ({matchup['home_pass_off']:.1f}) vs {matchup['away_team']} ({matchup['away_pass_def']:.1f}) → <span style='color: {home_pass_color};'>{home_pass_diff:+.1f}</span></div>
-        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Rush: {matchup['home_team']} ({matchup['home_rush_off']:.1f}) vs {matchup['away_team']} ({matchup['home_rush_def']:.1f}) → <span style='color: {home_rush_color};'>{home_rush_diff:+.1f}</span></div>
-    </div>
-</div>
-"""
-            st.markdown(html, unsafe_allow_html=True)
-    else:
-        st.markdown("<div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; text-align: center; padding: 20px;'>Load data to see matchup analysis</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -870,65 +811,61 @@ with middle_col:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# RIGHT PANEL - Props Table & Filters
+# RIGHT PANEL - Matchup Analysis
 with right_col:
     st.markdown("""
     <div class='terminal-panel'>
-        <div class='panel-header'>📋 PROPS TABLE</div>
-        <div class='panel-subheader'>Filtered View</div>
+        <div class='panel-header'>🏟️ MATCHUP ANALYSIS</div>
+        <div class='panel-subheader'>DVOA-Based Game Analysis</div>
     """, unsafe_allow_html=True)
 
-    if st.session_state.data_loaded and st.session_state.analyzed_props:
-        # Filter props
-        filtered = st.session_state.analyzed_props
-        filtered = [p for p in filtered if p.final_confidence >= min_conf_filter]
-        if position_filter != "ALL":
-            filtered = [p for p in filtered if p.prop.position == position_filter]
+    if st.session_state.matchup_data:
+        for matchup in st.session_state.matchup_data:
+            score = matchup['score']
 
-        # Sort by confidence
-        filtered = sorted(filtered, key=lambda x: x.final_confidence, reverse=True)
+            # Away team differentials
+            away_pass_diff = matchup['away_pass_diff']
+            away_rush_diff = matchup['away_rush_diff']
 
-        # Deduplicate: keep only best prop per player-stat-direction combo
-        seen_combos = set()
-        unique_filtered = []
-        for prop_analysis in filtered:
-            prop = prop_analysis.prop
-            combo_key = (prop.player_name, prop.stat_type, prop.direction)
-            if combo_key not in seen_combos:
-                seen_combos.add(combo_key)
-                unique_filtered.append(prop_analysis)
+            # Home team differentials
+            home_pass_diff = matchup['home_pass_diff']
+            home_rush_diff = matchup['home_rush_diff']
 
-        filtered = unique_filtered
+            # Determine score color
+            if score >= 65:
+                score_class = "positive"
+            elif score >= 45:
+                score_class = ""
+            else:
+                score_class = "negative"
 
-        # Create table data
-        if filtered:
-            data = []
-            for analysis in filtered[:30]:  # Show top 30
-                prop = analysis.prop
-                data.append({
-                    'Player': prop.player_name[:15],
-                    'Pos': prop.position,
-                    'Stat': prop.stat_type[:12],
-                    'Dir': prop.direction,
-                    'Line': f"{prop.line:.1f}",
-                    'Conf': f"{analysis.final_confidence:.0f}%",
-                    'Team': prop.team
-                })
+            # Pre-calculate colors for differentials
+            away_pass_color = "#00ff88" if away_pass_diff > 10 else "#ffaa00" if away_pass_diff > 0 else "#ff4444"
+            away_rush_color = "#00ff88" if away_rush_diff > 10 else "#ffaa00" if away_rush_diff > 0 else "#ff4444"
+            home_pass_color = "#00ff88" if home_pass_diff > 10 else "#ffaa00" if home_pass_diff > 0 else "#ff4444"
+            home_rush_color = "#00ff88" if home_rush_diff > 10 else "#ffaa00" if home_rush_diff > 0 else "#ff4444"
 
-            df = pd.DataFrame(data)
-            st.dataframe(df, use_container_width=True, height=600, hide_index=True)
-
-            st.markdown(f"""
-            <div style='margin-top: 10px; text-align: center;'>
-                <span style='color: #7a8ba0; font-family: Consolas; font-size: 9px;'>
-                    SHOWING {len(data)} OF {len(filtered)} PROPS
-                </span>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("<div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; text-align: center; padding: 20px;'>No props match filters</div>", unsafe_allow_html=True)
+            html = f"""
+<div style='background: rgba(0, 212, 255, 0.03); border: 1px solid #2d3548; border-radius: 3px; padding: 10px; margin: 8px 0;'>
+    <div style='display: flex; justify-content: space-between; margin-bottom: 8px;'>
+        <span style='color: #ffffff; font-family: Consolas; font-size: 13px; font-weight: 600;'>{matchup['matchup']}</span>
+        <span class='data-value {score_class}' style='font-size: 13px;'>{score:.0f}</span>
+    </div>
+    <div style='padding-left: 8px; border-left: 2px solid #2d3548; margin-bottom: 8px;'>
+        <div style='color: #00d4ff; font-family: Consolas; font-size: 10px; font-weight: 600; margin-bottom: 4px;'>{matchup['away_team']} OFFENSE</div>
+        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Pass: {matchup['away_team']} ({matchup['away_pass_off']:.1f}) vs {matchup['home_team']} ({matchup['home_pass_def']:.1f}) → <span style='color: {away_pass_color};'>{away_pass_diff:+.1f}</span></div>
+        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Rush: {matchup['away_team']} ({matchup['away_rush_off']:.1f}) vs {matchup['home_team']} ({matchup['home_rush_def']:.1f}) → <span style='color: {away_rush_color};'>{away_rush_diff:+.1f}</span></div>
+    </div>
+    <div style='padding-left: 8px; border-left: 2px solid #2d3548;'>
+        <div style='color: #00d4ff; font-family: Consolas; font-size: 10px; font-weight: 600; margin-bottom: 4px;'>{matchup['home_team']} OFFENSE</div>
+        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Pass: {matchup['home_team']} ({matchup['home_pass_off']:.1f}) vs {matchup['away_team']} ({matchup['away_pass_def']:.1f}) → <span style='color: {home_pass_color};'>{home_pass_diff:+.1f}</span></div>
+        <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; line-height: 1.6;'>Rush: {matchup['home_team']} ({matchup['home_rush_off']:.1f}) vs {matchup['away_team']} ({matchup['home_rush_def']:.1f}) → <span style='color: {home_rush_color};'>{home_rush_diff:+.1f}</span></div>
+    </div>
+</div>
+"""
+            st.markdown(html, unsafe_allow_html=True)
     else:
-        st.markdown("<div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; text-align: center; padding: 20px;'>Load data to view props</div>", unsafe_allow_html=True)
+        st.markdown("<div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; text-align: center; padding: 20px;'>Load data to see matchup analysis</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
