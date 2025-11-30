@@ -299,14 +299,17 @@ with col1:
 with col2:
     if st.button("⚡ LOAD DATA", use_container_width=True, type="primary"):
         try:
-            # Load data
-            context = components['loader'].load_all_data(week=st.session_state.week)
-            all_props = components['analyzer'].analyze_all_props(context, min_confidence=40)
+            with st.spinner(f"Loading Week {st.session_state.week} data..."):
+                # Load data
+                context = components['loader'].load_all_data(week=st.session_state.week)
+                all_props = components['analyzer'].analyze_all_props(context, min_confidence=40)
 
-            # Store in session state
-            st.session_state.analyzed_props = all_props
-            st.session_state.data_loaded = True
-            st.session_state.last_update = datetime.now()
+                # Store in session state
+                st.session_state.analyzed_props = all_props
+                st.session_state.data_loaded = True
+                st.session_state.last_update = datetime.now()
+
+                st.success(f"✅ Loaded {len(all_props)} props for Week {st.session_state.week}")
 
             # Auto-calculate top props - deduplicate by player + stat type
             if all_props:
@@ -331,9 +334,11 @@ with col2:
             st.rerun()
 
         except Exception as e:
-            st.error(f"❌ Error: {e}")
+            st.error(f"❌ Error loading data: {str(e)}")
             import traceback
-            st.code(traceback.format_exc())
+            with st.expander("Show Error Details"):
+                st.code(traceback.format_exc())
+            st.warning("💡 Make sure data files exist for the selected week")
 
 with col3:
     if st.button("🎲 BUILD PARLAYS", use_container_width=True):
