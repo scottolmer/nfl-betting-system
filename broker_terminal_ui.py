@@ -21,6 +21,8 @@ from scripts.analysis.chat_interface import NLQueryInterface
 from scripts.analysis.data_loader import NFLDataLoader
 from scripts.analysis.orchestrator import PropAnalyzer
 from scripts.analysis.correlation_detector import EnhancedParlayBuilder
+from scripts.analysis.parlay_optimizer import ParlayOptimizer
+from scripts.analysis.dependency_analyzer import DependencyAnalyzer
 
 # Page config - wide layout for multi-panel
 st.set_page_config(
@@ -236,6 +238,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# NFL Teams constant
+NFL_TEAMS = [
+    'ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE',
+    'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC',
+    'LAC', 'LAR', 'LV', 'MIA', 'MIN', 'NE', 'NO', 'NYG',
+    'NYJ', 'PHI', 'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS'
+]
+
 # Initialize session state
 if 'week' not in st.session_state:
     st.session_state.week = 12
@@ -249,6 +259,8 @@ if 'data_loaded' not in st.session_state:
     st.session_state.data_loaded = False
 if 'last_update' not in st.session_state:
     st.session_state.last_update = datetime.now()
+if 'selected_teams' not in st.session_state:
+    st.session_state.selected_teams = NFL_TEAMS.copy()  # All teams selected by default
 
 # Initialize components
 @st.cache_resource
@@ -326,16 +338,75 @@ with col2:
 with col3:
     if st.button("🎲 BUILD PARLAYS", use_container_width=True):
         if st.session_state.analyzed_props:
-            with st.spinner("Building optimized parlays..."):
-                try:
-                    parlays = components['builder'].build_parlays_with_correlation(
-                        st.session_state.analyzed_props,
-                        min_confidence=58
-                    )
-                    st.session_state.optimized_parlays = parlays
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Error: {e}")
+            if not st.session_state.selected_teams:
+                st.warning("⚠️ Please select at least one team in the Team Filter section")
+            else:
+                with st.spinner("Building optimized parlays with low correlation..."):
+                    try:
+                        # Get API key for optimizer
+                        api_key = os.environ.get('ANTHROPIC_API_KEY')
+                        if not api_key:
+                            st.error("❌ ANTHROPIC_API_KEY not set in environment")
+                        else:
+                            # Use ParlayOptimizer for low-correlation parlays
+                            optimizer = ParlayOptimizer(api_key=api_key)
+
+                            # Filter to selected teams
+                            filtered_analyses = [
+                                a for a in st.session_state.analyzed_props
+                                if a.prop.team in st.session_state.selected_teams
+                            ]
+
+                            # Show info message
+                            st.info(f"🔍 Building parlays from {len(filtered_analyses)} props across {len(st.session_state.selected_teams)} teams: {', '.join(st.session_state.selected_teams[:5])}{'...' if len(st.session_state.selected_teams) > 5 else ''}")
+
+                            # Build optimized parlays
+                            optimized_parlays = optimizer.rebuild_parlays_low_correlation(
+                                filtered_analyses,
+                                target_parlays=10,
+                                min_confidence=50,
+                                max_player_exposure=0.30,
+                                teams=st.session_state.selected_teams
+                            )
+
+                            # Validate dependencies
+                            dep_analyzer = DependencyAnalyzer(api_key=api_key)
+
+                            best = []
+                            for ptype in ['2-leg', '3-leg', '4-leg', '5-leg']:
+                                for parlay in optimized_parlays.get(ptype, []):
+                                    analysis = dep_analyzer.analyze_parlay_dependencies(parlay)
+                                    rec = analysis.get('recommendation')
+                                    adj_conf = analysis.get('adjusted_confidence')
+
+                                    if rec != "AVOID":
+                                        best.append({
+                                            'parlay': parlay,
+                                            'adjusted_confidence': adj_conf,
+                                            'recommendation': rec,
+                                            'adjustment': analysis.get('correlation_adjustment', {}).get('adjustment_value', 0)
+                                        })
+
+                            # Sort by confidence
+                            best.sort(key=lambda x: x['adjusted_confidence'], reverse=True)
+
+                            # Convert to display format
+                            display_parlays = {}
+                            for item in best:
+                                parlay = item['parlay']
+                                ptype = f"{len(parlay.legs)}-leg"
+                                if ptype not in display_parlays:
+                                    display_parlays[ptype] = []
+                                display_parlays[ptype].append(parlay)
+
+                            st.session_state.optimized_parlays = display_parlays
+                            st.success(f"✅ Built {len(best)} optimized parlays!")
+                            st.rerun()
+
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+                        import traceback
+                        st.code(traceback.format_exc())
         else:
             st.warning("Load data first")
 
@@ -348,6 +419,55 @@ with col5:
 with col6:
     if st.button("🔄 REFRESH", use_container_width=True):
         st.rerun()
+
+st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
+
+# Team Filter Section - Collapsible
+with st.expander("🏈 TEAM FILTER - Select teams for optimized parlays", expanded=False):
+    st.markdown("""
+    <div style='color: #7a8ba0; font-family: Consolas; font-size: 11px; margin-bottom: 10px;'>
+        Select which teams to include when building optimized parlays. All teams are selected by default.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Quick select buttons
+    col_select1, col_select2, col_select3 = st.columns(3)
+    with col_select1:
+        if st.button("✅ SELECT ALL", use_container_width=True):
+            st.session_state.selected_teams = NFL_TEAMS.copy()
+            st.rerun()
+    with col_select2:
+        if st.button("❌ CLEAR ALL", use_container_width=True):
+            st.session_state.selected_teams = []
+            st.rerun()
+    with col_select3:
+        if st.button("🔄 RESET", use_container_width=True):
+            st.session_state.selected_teams = NFL_TEAMS.copy()
+            st.rerun()
+
+    st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
+
+    # Team multiselect
+    st.session_state.selected_teams = st.multiselect(
+        "Selected Teams",
+        options=NFL_TEAMS,
+        default=st.session_state.selected_teams,
+        key="team_multiselect",
+        help="Select teams to filter props for parlay generation"
+    )
+
+    # Show selection summary
+    st.markdown(f"""
+    <div style='margin-top: 10px; padding: 10px; background: rgba(0, 212, 255, 0.1); border: 1px solid #2d3548; border-radius: 3px;'>
+        <span style='color: #00d4ff; font-family: Consolas; font-size: 11px; font-weight: 600;'>
+            {len(st.session_state.selected_teams)} of {len(NFL_TEAMS)} teams selected
+        </span>
+        <br/>
+        <span style='color: #7a8ba0; font-family: Consolas; font-size: 10px;'>
+            {', '.join(st.session_state.selected_teams) if st.session_state.selected_teams else 'No teams selected'}
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("<div style='margin: 15px 0;'></div>", unsafe_allow_html=True)
 
