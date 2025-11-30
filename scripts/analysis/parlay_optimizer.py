@@ -14,33 +14,46 @@ class ParlayOptimizer:
         self.dep_analyzer = DependencyAnalyzer(api_key=api_key)
 
     def rebuild_parlays_low_correlation(
-        self, 
+        self,
         all_analyses: List[PropAnalysis],
         target_parlays: int = 10,
         min_confidence: int = 65,
-        max_player_exposure: float = 1.0
+        max_player_exposure: float = 1.0,
+        teams: List[str] = None
     ) -> Dict[str, List[Parlay]]:
         """
         Rebuild parlays optimizing for low dependency risk
-        
+
         Strategy:
         1. Score each prop for "independence" - how uncorrelated it is from others
         2. Build parlays preferring independent props
         3. Validate each parlay's dependency score
         4. Stop when target is reached
+
+        Args:
+            all_analyses: List of prop analyses
+            target_parlays: Number of parlays to generate
+            min_confidence: Minimum confidence threshold
+            max_player_exposure: Maximum player exposure (0.0-1.0)
+            teams: Optional list of team abbreviations to filter to (e.g., ['GB', 'DET', 'KC'])
         """
-        
+
         print("\n" + "="*70)
         print("🔄 REBUILDING PARLAYS - LOW CORRELATION OPTIMIZATION")
         print("="*70)
-        
+
+        # Filter by teams if specified
+        if teams:
+            all_analyses = [a for a in all_analyses if a.prop.team in teams]
+            print(f"\n📌 Filtered to teams: {', '.join(teams)} ({len(all_analyses)} props)")
+
         # Filter eligible props
         eligible = sorted(
             [p for p in all_analyses if p.final_confidence >= min_confidence],
             key=lambda x: x.final_confidence,
             reverse=True
         )
-        
+
         print(f"\n📊 Starting with {len(eligible)} props (confidence {min_confidence}+)")
         
         # Score props for independence

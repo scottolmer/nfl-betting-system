@@ -57,6 +57,7 @@ class BettingAnalyzerCLI:
         print("  parlays [conf]           - Generate standard parlays (default: 58)")
         print("  parlays-teams <teams>    - Generate parlays for specific teams (e.g., 'parlays-teams GB,DET,KC')")
         print("  opt-parlays [quality]    - Generate optimized low-correlation parlays")
+        print("  opt-parlays-teams <tms>  - Generate optimized parlays for specific teams")
         print("  top-props [count]        - Show top N props by confidence (default: 20)")
         print("  top-overs [count]        - Show top N OVER props only (default: 20)")
         print("  top-unders [count]       - Show top N UNDER props only (default: 20)")
@@ -104,6 +105,7 @@ class BettingAnalyzerCLI:
         print("  parlays [confidence]   | Example: parlays 65 (default: 65)")
         print("  parlays-teams <teams>  | Example: parlays-teams GB,DET,KC,DAL,CIN,BAL")
         print("  opt-parlays [quality]  | Example: opt-parlays 75 (default: 65)")
+        print("  opt-parlays-teams <tm> | Example: opt-parlays-teams GB,DET,KC")
         print("  week <number>          | Example: week 10")
         print("  bankroll <amount>      | Example: bankroll 5000")
         print("  kelly [bankroll]       | Example: kelly 3000 (uses stored if not provided)")
@@ -585,40 +587,51 @@ class BettingAnalyzerCLI:
             print(f"⚠️ GUI not available: {e}")
             print("✓ Parlays displayed in terminal above\n")
     
-    def generate_optimized_parlays(self, quality_str=None):
-        """Generate optimized low-correlation parlays with dependency analysis"""
+    def generate_optimized_parlays(self, quality_str=None, teams=None):
+        """Generate optimized low-correlation parlays with dependency analysis
+
+        Args:
+            quality_str: Minimum quality threshold
+            teams: Optional list of team abbreviations to filter to (e.g., ['GB', 'DET', 'KC'])
+        """
         api_key = os.environ.get('ANTHROPIC_API_KEY')
         if not api_key:
             print("❌ ERROR: ANTHROPIC_API_KEY not set in .env\n")
             return
-        
+
         quality_threshold = None
         if quality_str:
             try:
                 quality_threshold = int(quality_str)
             except ValueError:
                 quality_threshold = 65
-        
+
         print(f"\n🔄 Loading data for Week {self.week}...")
         context = self.loader.load_all_data(week=self.week)
-        
+
         props_list = context.get('props', [])
         print(f"📊 Analyzing {len(props_list)} props (OVER + UNDER)...")
-        
+
         all_analyses = self.analyzer.analyze_all_props(context, min_confidence=50)
-        
+
+        # Filter by teams if specified
+        if teams:
+            all_analyses = [a for a in all_analyses if a.prop.team in teams]
+            print(f"📌 Filtered to teams: {', '.join(teams)} ({len(all_analyses)} props)")
+
         print(f"✅ Analyzed {len(all_analyses)} high-confidence props (OVER + UNDER)")
-        
+
         print("\n" + "="*70)
         print("🔄 REBUILDING PARLAYS - LOW CORRELATION OPTIMIZATION")
         print("="*70)
-        
+
         optimizer = ParlayOptimizer(api_key=api_key)
         optimized_parlays = optimizer.rebuild_parlays_low_correlation(
             all_analyses,
             target_parlays=10,
             min_confidence=50,
-            max_player_exposure=0.30
+            max_player_exposure=0.30,
+            teams=teams
         )
         
         print("\n🔍 Validating dependencies...\n")
@@ -1250,6 +1263,13 @@ class BettingAnalyzerCLI:
                     self.generate_parlays("58", teams=teams)
                 elif command == 'opt-parlays':
                     self.generate_optimized_parlays(arg)
+                elif command == 'opt-parlays-teams':
+                    # Parse teams from comma-separated list
+                    if not arg:
+                        print("❌ Please specify teams: opt-parlays-teams GB,DET,KC")
+                        continue
+                    teams = [t.strip().upper() for t in arg.split(',')]
+                    self.generate_optimized_parlays(quality_str=None, teams=teams)
                 elif command == 'week':
                     self.change_week(arg)
                 elif command == 'bankroll':
