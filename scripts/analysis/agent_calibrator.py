@@ -1,12 +1,13 @@
 """
 Agent Calibration System
-Analyzes historical agent performance and recommends weight adjustments
+Analyzes historical agent performance and automatically adjusts weights
 """
 
 import sqlite3
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
+from agent_weight_manager import AgentWeightManager
 
 
 class AgentCalibrator:
@@ -57,7 +58,8 @@ class AgentCalibrator:
             'hits': 0,
             'total': 0,
             'accuracy': 0,
-            'calibration_error': 0
+            'calibration_error': 0,
+            'sample_size': 0
         })
         
         for leg in legs:
@@ -84,21 +86,24 @@ class AgentCalibrator:
         # Calculate metrics
         for agent_name, stats in agent_stats.items():
             if stats['total'] > 0:
+                # Sample size
+                stats['sample_size'] = stats['total']
+
                 # Actual accuracy
                 stats['accuracy'] = stats['hits'] / stats['total']
-                
+
                 # Calibration error (predicted vs actual)
                 total_error = sum(
-                    abs(pred - actual) 
+                    abs(pred - actual)
                     for pred, actual in zip(stats['predictions'], stats['actuals'])
                 )
                 stats['calibration_error'] = total_error / stats['total']
-                
+
                 # Overconfidence: predicted higher than actual
                 stats['overconfidence'] = (
                     sum(stats['predictions']) / len(stats['predictions']) - stats['accuracy']
                 )
-        
+
         return dict(agent_stats)
     
     def generate_recalibration_report(self, week: int = None) -> str:
@@ -190,34 +195,58 @@ class AgentCalibrator:
         return new_weight, reasoning
 
 
-def calibrate_agents_interactive(db_path: str, week: int = None):
-    """Interactive calibration interface"""
+def calibrate_agents_interactive(db_path: str, week: int = None, auto_apply: bool = False):
+    """Interactive calibration interface with optional auto-apply"""
     cal = AgentCalibrator(db_path)
+    weight_manager = AgentWeightManager(db_path)
+
+    # Show current weights
+    print("\n📊 CURRENT WEIGHTS:")
+    weight_manager.print_current_weights()
+
+    # Generate calibration report
     print(cal.generate_recalibration_report(week))
-    
-    # Get all agent recommendations
-    print("\nWEIGHT ADJUSTMENT RECOMMENDATIONS:\n")
-    
-    # Default weights (from orchestrator)
-    default_weights = {
-        'DVOA': 2.5,
-        'Matchup': 2.0,
-        'Volume': 2.0,
-        'Injury': 4.0,
-        'Trend': 1.5,
-        'GameScript': 2.0,
-        'Variance': 1.0,
-        'Weather': 1.5
-    }
-    
-    for agent_name, current_weight in sorted(default_weights.items()):
-        new_weight, reasoning = cal.get_agent_recommendation(agent_name, current_weight, week)
-        
-        if new_weight != current_weight:
-            print(f"📊 {agent_name:15}")
-            print(f"   Current:  {current_weight:.2f}")
-            print(f"   Proposed: {new_weight:.2f}")
-            print(f"   Reason:   {reasoning}\n")
+
+    # Get agent performance
+    legs = cal.get_logged_legs(week)
+    agent_performance = cal.calculate_agent_accuracy(legs)
+
+    # Check if auto-learning is enabled
+    auto_learning_enabled = weight_manager.is_auto_learning_enabled()
+
+    if auto_apply or auto_learning_enabled:
+        print("\n🤖 AUTO-LEARNING ENABLED - Applying weight adjustments...\n")
+
+        # Auto-adjust weights
+        adjustments = weight_manager.auto_adjust_weights(
+            agent_performance=agent_performance,
+            week=week,
+            dry_run=False
+        )
+
+        # Print adjustment summary
+        weight_manager.print_adjustment_summary(adjustments)
+
+        # Show updated weights
+        print("\n✅ UPDATED WEIGHTS:")
+        weight_manager.print_current_weights()
+
+    else:
+        print("\n📋 WEIGHT ADJUSTMENT RECOMMENDATIONS (dry run):\n")
+
+        # Show what would be adjusted (dry run)
+        adjustments = weight_manager.auto_adjust_weights(
+            agent_performance=agent_performance,
+            week=week,
+            dry_run=True
+        )
+
+        weight_manager.print_adjustment_summary(adjustments)
+
+        print("\n💡 To enable automatic weight adjustments:")
+        print("   Run: calibrate-agents --auto-apply")
+        print("   Or enable globally: from agent_weight_manager import AgentWeightManager")
+        print("                       AgentWeightManager().enable_auto_learning()\n")
 
 
 if __name__ == "__main__":

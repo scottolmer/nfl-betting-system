@@ -1,10 +1,12 @@
 """
-Prop Analyzer Orchestrator - Combines all agents
+Prop Analyzer Orchestrator - Combines all agents with dynamic weight loading
 """
 
 from typing import Dict, List
 import logging
 import numpy as np
+import sys
+from pathlib import Path
 
 from .models import PlayerProp, PropAnalysis
 from .props_validator import PropsValidator
@@ -20,25 +22,58 @@ from .agents import (
     AgentConfig,
 )
 
+# Import AgentWeightManager for dynamic weight loading
+sys.path.insert(0, str(Path(__file__).parent))
+from agent_weight_manager import AgentWeightManager
+
 
 class PropAnalyzer:
-    """Main analysis orchestrator"""
+    """Main analysis orchestrator with dynamic weight loading"""
 
-    def __init__(self):
+    def __init__(self, db_path: str = "bets.db", use_dynamic_weights: bool = True):
         self.logger = logging.getLogger(__name__)
+        self.db_path = db_path
+        self.use_dynamic_weights = use_dynamic_weights
 
+        # Initialize weight manager
+        if self.use_dynamic_weights:
+            self.weight_manager = AgentWeightManager(db_path)
+            # Ensure weights are initialized
+            self.weight_manager.initialize_default_weights(force=False)
+            weights = self.weight_manager.get_current_weights()
+            self.logger.info("🔄 Loading agent weights from database...")
+        else:
+            self.weight_manager = None
+            # Fallback to hardcoded weights from AgentConfig
+            weights = {
+                'DVOA': 2.0,
+                'Matchup': 1.5,
+                'Volume': 1.5,
+                'Injury': 3.0,
+                'Trend': 1.0,
+                'GameScript': 2.2,
+                'Variance': 1.2,
+                'Weather': 1.3,
+            }
+            self.logger.info("⚙️  Using static agent weights...")
+
+        # Initialize agents with dynamic weights
         self.agents = {
-            'DVOA': DVOAAgent(),
-            'Matchup': MatchupAgent(),
-            'Injury': InjuryAgent(),
-            'GameScript': GameScriptAgent(),
-            'Volume': VolumeAgent(),
-            'Trend': TrendAgent(),
-            'Variance': VarianceAgent(),
-            'Weather': WeatherAgent(),
+            'DVOA': DVOAAgent(weight=weights.get('DVOA', 2.0)),
+            'Matchup': MatchupAgent(weight=weights.get('Matchup', 1.5)),
+            'Injury': InjuryAgent(weight=weights.get('Injury', 3.0)),
+            'GameScript': GameScriptAgent(weight=weights.get('GameScript', 2.2)),
+            'Volume': VolumeAgent(weight=weights.get('Volume', 1.5)),
+            'Trend': TrendAgent(weight=weights.get('Trend', 1.0)),
+            'Variance': VarianceAgent(weight=weights.get('Variance', 1.2)),
+            'Weather': WeatherAgent(weight=weights.get('Weather', 1.3)),
         }
 
-        self.logger.info("🧠 PropAnalyzer initialized with 8 agents (including Injury, Matchup, Weather)")
+        # Log weights
+        for agent_name, agent in self.agents.items():
+            self.logger.info(f"  {agent_name:12s} weight: {agent.weight:.2f}")
+
+        self.logger.info("🧠 PropAnalyzer initialized with 8 agents")
 
     def analyze_prop(self, prop_data: Dict, context: Dict) -> PropAnalysis:
         """Analyze a single prop bet - forcing OVER analysis then inverting for UNDER"""
@@ -82,17 +117,26 @@ class PropAnalyzer:
         if skipped_agents:
             self.logger.info(f"⏭️  Skipped agents: {', '.join(skipped_agents)}")
 
-        # Invert agent scores if analyzing UNDER bet
-        if original_bet_type == 'UNDER':
-            for agent_name in agent_results:
-                agent_results[agent_name]['raw_score'] = 100 - agent_results[agent_name]['raw_score']
+        # DON'T invert agent scores - keep them in OVER perspective for consistent interpretation
+        # This way, agent scores always mean "confidence that OVER will hit"
 
         final_confidence = self._calculate_final_confidence(agent_results)
-        
-        # Restore original bet type (no longer need to invert final_confidence since agents are already inverted)
+
+        # Restore original bet type
         prop.bet_type = original_bet_type
-        
-        final_direction = "OVER" if final_confidence >= 50 else "UNDER"
+
+        # Determine direction from OVER perspective: >50 = OVER likely, <50 = UNDER likely
+        agents_favor_over = final_confidence >= 50
+
+        # For the recommendation, we want it to be relative to the BET we're analyzing
+        # If analyzing OVER bet and agents favor OVER → recommend OVER
+        # If analyzing OVER bet and agents favor UNDER → recommend UNDER (avoid the OVER)
+        # If analyzing UNDER bet and agents favor UNDER → recommend UNDER
+        # If analyzing UNDER bet and agents favor OVER → recommend OVER (avoid the UNDER)
+        #
+        # In other words: recommendation direction = agent prediction, always
+        final_direction = "OVER" if agents_favor_over else "UNDER"
+
         recommendation = AgentConfig.get_recommendation(final_confidence, final_direction)
         edge_explanation = self._build_edge_explanation(prop, final_confidence, agent_results)
         
@@ -107,23 +151,39 @@ class PropAnalyzer:
         return analysis
 
     def analyze_all_props(self, context: Dict, min_confidence: int = 50) -> List[PropAnalysis]:
-        """Analyze all props with proper directional inversion"""
+        """Analyze all props and filter based on whether we should take the bet
+
+        With the new system:
+        - confidence represents OVER probability (always)
+        - For OVER bets: confidence >= 50 means take it
+        - For UNDER bets: confidence <= 50 means take it
+        """
         props = context.get('props', [])
         if not props:
             self.logger.error("No props found in context!"); return []
 
         self.logger.info(f"📊 Analyzing {len(props)} props...")
         results = []
-        
+
         for prop_data in props:
             try:
                 if not prop_data.get('player_name') or not prop_data.get('stat_type'):
                     continue
-                
+
                 analysis = self.analyze_prop(prop_data, context)
                 if analysis and hasattr(analysis, 'final_confidence'):
                     analysis = PropsValidator.validate_prop_analysis(analysis)
-                    if analysis.final_confidence >= min_confidence:
+
+                    # Filter based on whether we should take the bet
+                    # For OVER: keep if confidence >= min_confidence (agents favor OVER)
+                    # For UNDER: keep if confidence <= (100 - min_confidence) (agents favor UNDER)
+                    should_include = False
+                    if analysis.prop.bet_type == 'OVER':
+                        should_include = analysis.final_confidence >= min_confidence
+                    else:  # UNDER
+                        should_include = analysis.final_confidence <= (100 - min_confidence)
+
+                    if should_include:
                         results.append(analysis)
                         
             except Exception as e:

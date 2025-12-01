@@ -19,9 +19,9 @@ def normalize_player_name(name: str) -> str:
 
 class VolumeAgent(BaseAgent):
     """Analyzes player usage patterns"""
-    
-    def __init__(self):
-        super().__init__(weight=1.2)
+
+    def __init__(self, weight: float = 1.2):
+        super().__init__(weight=weight)
     
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []

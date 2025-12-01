@@ -9,9 +9,9 @@ from .base_agent import BaseAgent
 
 class DVOAAgent(BaseAgent):
     """Analyzes matchups using DVOA"""
-    
-    def __init__(self):
-        super().__init__(weight=2.0)
+
+    def __init__(self, weight: float = 2.0):
+        super().__init__(weight=weight)
     
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []

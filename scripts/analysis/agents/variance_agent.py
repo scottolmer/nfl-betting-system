@@ -8,9 +8,9 @@ from .base_agent import BaseAgent
 
 class VarianceAgent(BaseAgent):
     """Evaluates prop type reliability"""
-    
-    def __init__(self):
-        super().__init__(weight=1.5)
+
+    def __init__(self, weight: float = 1.5):
+        super().__init__(weight=weight)
     
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []

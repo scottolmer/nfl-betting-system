@@ -8,9 +8,9 @@ from .base_agent import BaseAgent
 
 class GameScriptAgent(BaseAgent):
     """Analyzes game script implications"""
-    
-    def __init__(self):
-        super().__init__(weight=1.3)
+
+    def __init__(self, weight: float = 1.3):
+        super().__init__(weight=weight)
     
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []

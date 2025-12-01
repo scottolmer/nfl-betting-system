@@ -22,8 +22,8 @@ def normalize_player_name(name: str) -> str:
 class InjuryAgent(BaseAgent):
     """Analyzes player injury status from a CSV report"""
 
-    def __init__(self):
-        super().__init__(weight=3.0)  # CRITICAL: High weight ensures injuries override other signals
+    def __init__(self, weight: float = 3.0):
+        super().__init__(weight=weight)  # CRITICAL: High weight ensures injuries override other signals
         # Ensure logger exists, unconditionally initialize if needed
         if not hasattr(self, 'logger') or self.logger is None:
              self.logger = logging.getLogger(self.__class__.__name__)

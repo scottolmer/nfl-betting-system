@@ -18,9 +18,9 @@ def normalize_player_name(name: str) -> str:
 
 class MatchupAgent(BaseAgent):
     """Analyzes defensive matchups with position-specific DVOA"""
-    
-    def __init__(self):
-        super().__init__(weight=1.8)
+
+    def __init__(self, weight: float = 1.8):
+        super().__init__(weight=weight)
     
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []

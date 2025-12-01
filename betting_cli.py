@@ -81,10 +81,14 @@ class BettingAnalyzerCLI:
         print("  score-props <week>       - Score all logged props from CSV (e.g., 'score-props 10')")
         print("  calibrate-props [week]   - Show detailed calibration for all props")
         print("\n  📊 CALIBRATION & REPORTS:")
-        print("  calibrate [week]         - Show calibration report (all weeks or specific)")
-        print("  calibrate-agents [week]  - Show agent accuracy & weight recommendations")
-        print("  recent [limit]           - Show recent logged parlays (default: 10)")
-        print("  summary <week>           - Show week summary stats")
+        print("  auto-learn <week>             - Score props + calibrate agents (one command!)")
+        print("  calibrate [week]              - Show calibration report (all weeks or specific)")
+        print("  calibrate-agents [week] [opt] - Agent calibration (add --auto-apply to adjust weights)")
+        print("  enable-auto-learning          - Enable automatic weight adjustments after each calibration")
+        print("  disable-auto-learning         - Disable automatic weight adjustments")
+        print("  show-weights                  - Display current agent weights")
+        print("  recent [limit]                - Show recent logged parlays (default: 10)")
+        print("  summary <week>                - Show week summary stats")
         print("\n  help                     - Show this message")
         print("  exit/quit                - Exit")
         print("="*70 + "\n")
@@ -855,16 +859,27 @@ class BettingAnalyzerCLI:
         except ValueError:
             print("❌ Invalid week number\n")
     
-    def calibrate_agents_command(self, week_str=""):
-        """Show agent accuracy & recalibration recommendations"""
+    def calibrate_agents_command(self, arg_str=""):
+        """Show agent accuracy & apply weight adjustments (optionally)"""
         try:
+            args = arg_str.split()
             week = None
-            if week_str:
-                week = int(week_str)
-            
-            print(self.calibrator.generate_recalibration_report(week=week))
+            auto_apply = '--auto-apply' in args or '--auto' in args
+
+            # Extract week number if present
+            for arg in args:
+                if arg.isdigit():
+                    week = int(arg)
+                    break
+
+            # Import and run calibration
+            from scripts.analysis.agent_calibrator import calibrate_agents_interactive
+            calibrate_agents_interactive(db_path=str(self.db_path), week=week, auto_apply=auto_apply)
+
         except Exception as e:
             print(f"❌ Error: {e}\n")
+            import traceback
+            traceback.print_exc()
     
     def recent_command(self, limit_str="10"):
         """Show recent parlays"""
@@ -881,6 +896,77 @@ class BettingAnalyzerCLI:
             self.tracker.week_summary(week=week)
         except ValueError:
             print("❌ Invalid week number\n")
+
+    def enable_auto_learning_command(self):
+        """Enable automatic weight adjustments"""
+        try:
+            from scripts.analysis.agent_weight_manager import AgentWeightManager
+            manager = AgentWeightManager(str(self.db_path))
+            manager.enable_auto_learning()
+            print("\n✅ Auto-learning ENABLED")
+            print("   Agent weights will be automatically adjusted after each calibration.\n")
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
+
+    def disable_auto_learning_command(self):
+        """Disable automatic weight adjustments"""
+        try:
+            from scripts.analysis.agent_weight_manager import AgentWeightManager
+            manager = AgentWeightManager(str(self.db_path))
+            manager.disable_auto_learning()
+            print("\n⏸️  Auto-learning DISABLED")
+            print("   Agent weights will NOT be automatically adjusted.")
+            print("   Use 'calibrate-agents --auto-apply' to manually apply adjustments.\n")
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
+
+    def show_weights_command(self):
+        """Display current agent weights"""
+        try:
+            from scripts.analysis.agent_weight_manager import AgentWeightManager
+            manager = AgentWeightManager(str(self.db_path))
+            manager.print_current_weights()
+        except Exception as e:
+            print(f"❌ Error: {e}\n")
+
+    def auto_learn_command(self, week_str):
+        """Auto-learn: Score props + calibrate agents in one command"""
+        try:
+            if not week_str:
+                print("❌ Usage: auto-learn <week>\n")
+                print("   Example: auto-learn 12\n")
+                return
+
+            week = int(week_str)
+
+            print("\n" + "="*70)
+            print(f"🤖 AUTO-LEARN WEEK {week}")
+            print("="*70 + "\n")
+
+            # Step 1: Score props
+            print("📊 Step 1/2: Scoring props from CSV files...\n")
+            self.score_props_command(str(week))
+
+            print("\n" + "-"*70 + "\n")
+
+            # Step 2: Calibrate agents with auto-apply
+            print("🎯 Step 2/2: Calibrating agents and adjusting weights...\n")
+            self.calibrate_agents_command(f"{week} --auto-apply")
+
+            print("\n" + "="*70)
+            print(f"✅ AUTO-LEARN COMPLETE FOR WEEK {week}")
+            print("="*70 + "\n")
+            print("💡 Next steps:")
+            print(f"   - Weights have been automatically adjusted")
+            print(f"   - Run 'show-weights' to see updated values")
+            print(f"   - Run 'analyze-week {week+1} --top 100' to analyze next week\n")
+
+        except ValueError:
+            print("❌ Invalid week number\n")
+        except Exception as e:
+            print(f"❌ Error in auto-learn: {e}\n")
+            import traceback
+            traceback.print_exc()
 
     def score_week_command(self, arg_str):
         """Auto-score parlays from CSV files"""
@@ -1288,12 +1374,20 @@ class BettingAnalyzerCLI:
                     self.analyze_week_command(arg)
                 elif command == 'score-props':
                     self.score_props_command(arg)
+                elif command == 'auto-learn':
+                    self.auto_learn_command(arg)
                 elif command == 'calibrate':
                     self.calibrate_command(arg)
                 elif command == 'calibrate-agents':
                     self.calibrate_agents_command(arg)
                 elif command == 'calibrate-props':
                     self.calibrate_props_command(arg)
+                elif command == 'enable-auto-learning':
+                    self.enable_auto_learning_command()
+                elif command == 'disable-auto-learning':
+                    self.disable_auto_learning_command()
+                elif command == 'show-weights':
+                    self.show_weights_command()
                 elif command == 'recent':
                     self.recent_command(arg)
                 elif command == 'summary':
