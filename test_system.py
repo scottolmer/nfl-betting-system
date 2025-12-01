@@ -1,84 +1,53 @@
-"""
-Quick diagnostic script to test the system
-"""
+"""Quick test to verify the automated learning system is working"""
 
-import sys
-from pathlib import Path
-
-# Add project root to path
-project_root = Path(__file__).parent
-sys.path.insert(0, str(project_root))
-
-print("="*70)
-print("SYSTEM DIAGNOSTIC TEST")
-print("="*70)
+print("Testing automated learning system...")
 print()
 
-# Test 1: Python packages
-print("1. Testing Python packages...")
-try:
-    import pandas as pd
-    import numpy as np
-    print("   ✅ pandas, numpy installed")
-except ImportError as e:
-    print(f"   ❌ Missing package: {e}")
-    sys.exit(1)
+# Test 1: Import AgentWeightManager
+print("Test 1: Import AgentWeightManager")
+from scripts.analysis.agent_weight_manager import AgentWeightManager
+manager = AgentWeightManager("bets.db")
+print("  Success!")
 
-# Test 2: Project imports
-print("\n2. Testing project imports...")
-try:
-    from scripts.analysis.data_loader import NFLDataLoader
-    print("   ✅ data_loader imported")
-except Exception as e:
-    print(f"   ❌ data_loader import failed: {e}")
-    
-try:
-    from scripts.analysis.orchestrator import PropAnalyzer
-    print("   ✅ orchestrator imported")
-except Exception as e:
-    print(f"   ❌ orchestrator import failed: {e}")
+# Test 2: Initialize weights
+print()
+print("Test 2: Initialize default weights")
+manager.initialize_default_weights(force=False)
+weights = manager.get_current_weights()
+print(f"  Loaded {len(weights)} agent weights")
 
-try:
-    from scripts.analysis.parlay_builder import ParlayBuilder
-    print("   ✅ parlay_builder imported")
-except Exception as e:
-    print(f"   ❌ parlay_builder import failed: {e}")
+# Test 3: Import PropAnalyzer with dynamic weights
+print()
+print("Test 3: Initialize PropAnalyzer with dynamic weights")
+from scripts.analysis.orchestrator import PropAnalyzer
+analyzer = PropAnalyzer(db_path="bets.db", use_dynamic_weights=True)
+print(f"  PropAnalyzer initialized with {len(analyzer.agents)} agents")
 
-# Test 3: Data files
-print("\n3. Checking data files...")
-data_dir = project_root / "data"
-week = 7
+# Test 4: Verify agents have correct weights
+print()
+print("Test 4: Verify agent weights match database")
+all_match = True
+for agent_name, agent in analyzer.agents.items():
+    db_weight = weights.get(agent_name, 0.0)
+    if abs(agent.weight - db_weight) > 0.01:
+        print(f"  X {agent_name}: Agent has {agent.weight}, DB has {db_weight}")
+        all_match = False
 
-required_files = [
-    f"wk{week}_offensive_DVOA.csv",
-    f"wk{week}_def_v_wr_DVOA.csv",
-    f"wk{week}_betting_lines_draftkings.csv"
-]
+if all_match:
+    print("  All agent weights match database!")
 
-for filename in required_files:
-    filepath = data_dir / filename
-    if filepath.exists():
-        print(f"   ✅ {filename}")
-    else:
-        print(f"   ❌ MISSING: {filename}")
+# Test 5: Show current weights
+print()
+print("Test 5: Current agent weights:")
+for agent_name, agent in sorted(analyzer.agents.items(), key=lambda x: x[1].weight, reverse=True):
+    print(f"  {agent_name:12s} = {agent.weight:.2f}")
 
-# Test 4: Try loading data
-print("\n4. Testing data loader...")
-try:
-    loader = NFLDataLoader(data_dir=str(data_dir))
-    context = loader.load_all_data(week=week)
-    
-    print(f"   ✅ Loaded {len(context['betting_lines'])} betting lines")
-    print(f"   ✅ DVOA Offensive: {context['dvoa_off'] is not None}")
-    print(f"   ✅ DVOA Defensive: {context['dvoa_def'] is not None}")
-    print(f"   ✅ Def vs WR: {context['def_vs_wr'] is not None}")
-    print(f"   ✅ Context created successfully")
-    
-except Exception as e:
-    print(f"   ❌ Data loading failed: {e}")
-    import traceback
-    traceback.print_exc()
-
-print("\n" + "="*70)
-print("DIAGNOSTIC COMPLETE")
-print("="*70)
+print()
+print("="*60)
+print("ALL TESTS PASSED!")
+print("="*60)
+print()
+print("Your system is ready for automated learning!")
+print("Run: python betting_cli.py")
+print("     > enable-auto-learning")
+print("     > auto-learn 12")

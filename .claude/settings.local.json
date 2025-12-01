@@ -1,7 +1,31 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python scripts/export_parlays_cli.py:*)"
+      "Bash(python scripts/export_parlays_cli.py:*)",
+      "Bash(dir /b:*)",
+      "Bash(sqlite3:*)",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(.gitignore)",
+      "Bash(nul)",
+      "Bash(del test_validation.db 2)",
+      "Bash(if exist test_validation.db del test_validation.db)",
+      "Bash(timeout 5 streamlit run:*)",
+      "Bash(calibration_report.txt)",
+      "Bash(cat:*)",
+      "Bash(streamlit run:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout 10 streamlit run:*)",
+      "Bash(for week in 10 11 12)",
+      "Bash(do:*)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(python3:*)",
+      "Bash(timeout 3 python:*)",
+      "Bash(del AGENT_RECALIBRATION_RESULTS.md FINAL_RESULTS.txt OVER_ACCURACY_ANALYSIS.md UNDER_FIX_SUMMARY.md WEEK_12_FIXED_RESULTS.txt check_agent_scores.py diagnose_under_issue.py nul reanalyze_week.py rethink_scoring.py run_simple_test.bat show_optimized_parlays.py simple_analyze_week.py simple_broker_test.py test_auto_learn_command.bat test_broker_ui_data.py test_delta_scorer.py test_fixed_logic.py test_html_render.py test_new_analysis.py test_opt_parlays_teams.py test_optimized_command.py test_week13_load.py trace_direction_bug.py verify_inversion_issue.py)"
     ],
     "deny": [],
     "ask": []
