@@ -161,7 +161,7 @@ class BettingAnalyzerCLI:
         context = self.loader.load_all_data(week=self.week)
         
         print(f"📊 Analyzing props (OVER + UNDER)...")
-        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
         
         # Deduplicate: keep only highest confidence for each player+stat_type+bet_type
         seen = {}
@@ -223,7 +223,7 @@ class BettingAnalyzerCLI:
         context = self.loader.load_all_data(week=self.week)
         
         print(f"📊 Analyzing OVER props...")
-        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
         
         # Filter to OVER only
         over_analyses = [a for a in all_analyses if getattr(a.prop, 'bet_type', 'OVER') == 'OVER']
@@ -282,7 +282,7 @@ class BettingAnalyzerCLI:
         context = self.loader.load_all_data(week=self.week)
         
         print(f"📊 Analyzing UNDER props...")
-        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
         
         # Filter to UNDER only
         under_analyses = [a for a in all_analyses if getattr(a.prop, 'bet_type', 'OVER') == 'UNDER']
@@ -349,7 +349,7 @@ class BettingAnalyzerCLI:
         context = self.loader.load_all_data(week=self.week)
         
         print(f"📊 Analyzing props for {team_abbr}...")
-        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
         
         # Filter to team only
         team_analyses = [a for a in all_analyses if a.prop.team.upper() == team_abbr]
@@ -418,7 +418,7 @@ class BettingAnalyzerCLI:
         context = self.loader.load_all_data(week=self.week)
         
         print(f"📊 Analyzing props...")
-        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
         
         # Deduplicate: keep only highest confidence for each player+stat_type+bet_type
         seen = {}
@@ -476,7 +476,7 @@ class BettingAnalyzerCLI:
         context = self.loader.load_all_data(week=self.week)
         
         print(f"📊 Analyzing props...")
-        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
         
         # Deduplicate: keep only highest confidence for each player+stat_type+bet_type
         seen = {}
@@ -547,7 +547,7 @@ class BettingAnalyzerCLI:
         betting_source = context.get('betting_lines_source', 'UNKNOWN')
         print(f"📊 Analyzing {len(props_list)} props (OVER + UNDER)...")
 
-        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+        all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
 
         # Filter by teams if specified
         if teams:
@@ -1036,7 +1036,7 @@ class BettingAnalyzerCLI:
             context = self.loader.load_all_data(week=week)
 
             print(f"[ANALYZING] Analyzing props...")
-            all_analyses = self.analyzer.analyze_all_props(context, min_confidence=40)
+            all_analyses = self.analyzer.analyze_all_props(context, min_confidence=60)
 
             print(f"[OK] Analyzed {len(all_analyses)} props\n")
 
