@@ -120,13 +120,20 @@ class PropAnalyzer:
         # DON'T invert agent scores - keep them in OVER perspective for consistent interpretation
         # This way, agent scores always mean "confidence that OVER will hit"
 
-        final_confidence = self._calculate_final_confidence(agent_results)
+        over_confidence = self._calculate_final_confidence(agent_results)
 
         # Restore original bet type
         prop.bet_type = original_bet_type
 
+        # CRITICAL FIX: Invert confidence for UNDER bets
+        # If agents say 65% OVER will hit, then UNDER bet should show 35% confidence
+        if prop.bet_type == 'UNDER':
+            final_confidence = 100 - over_confidence
+        else:
+            final_confidence = over_confidence
+
         # Determine direction from OVER perspective: >50 = OVER likely, <50 = UNDER likely
-        agents_favor_over = final_confidence >= 50
+        agents_favor_over = over_confidence >= 50
 
         # For the recommendation, we want it to be relative to the BET we're analyzing
         # If analyzing OVER bet and agents favor OVER → recommend OVER
@@ -153,10 +160,10 @@ class PropAnalyzer:
     def analyze_all_props(self, context: Dict, min_confidence: int = 50) -> List[PropAnalysis]:
         """Analyze all props and filter based on whether we should take the bet
 
-        With the new system:
-        - confidence represents OVER probability (always)
-        - For OVER bets: confidence >= 50 means take it
-        - For UNDER bets: confidence <= 50 means take it
+        With the fixed system:
+        - For OVER bets: confidence represents probability OVER hits
+        - For UNDER bets: confidence represents probability UNDER hits (inverted from OVER)
+        - Both are filtered using the same threshold: confidence >= min_confidence
         """
         props = context.get('props', [])
         if not props:
@@ -174,14 +181,9 @@ class PropAnalyzer:
                 if analysis and hasattr(analysis, 'final_confidence'):
                     analysis = PropsValidator.validate_prop_analysis(analysis)
 
-                    # Filter based on whether we should take the bet
-                    # For OVER: keep if confidence >= min_confidence (agents favor OVER)
-                    # For UNDER: keep if confidence <= (100 - min_confidence) (agents favor UNDER)
-                    should_include = False
-                    if analysis.prop.bet_type == 'OVER':
-                        should_include = analysis.final_confidence >= min_confidence
-                    else:  # UNDER
-                        should_include = analysis.final_confidence <= (100 - min_confidence)
+                    # FIXED: Now confidence is already adjusted for bet type
+                    # Both OVER and UNDER use the same threshold
+                    should_include = analysis.final_confidence >= min_confidence
 
                     if should_include:
                         results.append(analysis)
