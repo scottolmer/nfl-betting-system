@@ -77,9 +77,7 @@ class DVOAAgent(BaseAgent):
             if pass_off_dvoa >= 20 and pass_def_dvoa >= 10:
                 score += 15
                 rationale.append("⚡ PREMIUM STACK: Elite O vs weak D")
-            
-            score += 5
-            rationale.append("✅ QB consistency bonus")
+            # REMOVED free +5 bonus - was causing OVER bias
         
         elif prop.position in ['WR', 'TE']:
             # WR/TE: AGGRESSIVE SCORING matching QB
@@ -122,9 +120,7 @@ class DVOAAgent(BaseAgent):
             if pass_off_dvoa >= 20 and pass_def_dvoa >= 10:
                 score += 12
                 rationale.append("⚡ PREMIUM STACK: Elite O vs weak D")
-            
-            score += 3
-            rationale.append("✅ Pass-catching consistency bonus")
+            # REMOVED free +3 bonus - was causing OVER bias
         
         elif prop.position == 'RB':
             if 'Rush' in prop.stat_type:
