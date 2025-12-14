@@ -397,6 +397,64 @@ class PropAvailabilityValidator:
 
         return filtered_props
 
+    def filter_defense_props(self, props: List[PropAnalysis], verbose: bool = True) -> List[PropAnalysis]:
+        """
+        Filter out defense/special teams props
+
+        Args:
+            props: List of PropAnalysis objects
+            verbose: Whether to print filtering information
+
+        Returns:
+            List of props with defense/ST props removed
+        """
+        filtered_props = []
+        defense_count = 0
+        defense_details = []
+
+        # Keywords that indicate defense/ST props
+        defense_keywords = [
+            'd/st', 'defense', 'dst', 'def',
+            'steelers d', 'packers d', 'broncos d',
+            'eagles d', 'ravens d', 'chiefs d',
+            'bills d', 'cowboys d', 'lions d',
+            '49ers d', 'dolphins d', 'seahawks d',
+            'rams d', 'chargers d', 'bengals d',
+            'browns d', 'colts d', 'giants d',
+            'jets d', 'patriots d', 'raiders d',
+            'saints d', 'panthers d', 'bears d',
+            'vikings d', 'titans d', 'jaguars d',
+            'texans d', 'commanders d', 'falcons d',
+            'cardinals d', 'buccaneers d'
+        ]
+
+        for prop_analysis in props:
+            prop = prop_analysis.prop
+            player_name_lower = prop.player_name.lower()
+
+            # Check if player name contains defense keywords
+            is_defense = any(keyword in player_name_lower for keyword in defense_keywords)
+
+            if is_defense:
+                defense_count += 1
+                defense_details.append(
+                    f"  ❌ {prop.player_name} - {prop.stat_type} (defense/ST prop)"
+                )
+                continue  # Skip this prop
+
+            # Not a defense prop - keep it
+            filtered_props.append(prop_analysis)
+
+        if verbose and defense_count > 0:
+            logger.info(f"\n🛡️ Filtered {defense_count} defense/ST props:")
+            for detail in defense_details[:10]:  # Show first 10
+                logger.info(detail)
+            if len(defense_details) > 10:
+                logger.info(f"  ... and {len(defense_details) - 10} more")
+            logger.info(f"✅ {len(filtered_props)} props remaining after defense filter\n")
+
+        return filtered_props
+
     def get_validation_stats(self) -> Dict:
         """Get statistics about validation rules and history"""
         conn = sqlite3.connect(self.db_path)

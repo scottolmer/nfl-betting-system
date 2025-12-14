@@ -72,6 +72,9 @@ class ParlayRebuilder:
         # Filter by minimum thresholds (remove props with lines too small for DraftKings)
         eligible_props = self.validator.filter_by_minimum_thresholds(eligible_props, verbose=True)
 
+        # Filter out defense/ST props
+        eligible_props = self.validator.filter_defense_props(eligible_props, verbose=True)
+
         # Sort by confidence
         eligible_props.sort(key=lambda x: x.final_confidence, reverse=True)
 

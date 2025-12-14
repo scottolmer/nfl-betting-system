@@ -59,6 +59,9 @@ class ParlayOptimizer:
         # Filter by minimum thresholds (remove props with lines too small for DraftKings)
         eligible = self.validator.filter_by_minimum_thresholds(eligible, verbose=True)
 
+        # Filter out defense/ST props
+        eligible = self.validator.filter_defense_props(eligible, verbose=True)
+
         print(f"\n📊 Starting with {len(eligible)} props (confidence {min_confidence}+)")
         
         # Score props for independence
