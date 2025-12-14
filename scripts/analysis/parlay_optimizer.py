@@ -3,6 +3,7 @@ import logging
 from typing import List, Dict, Tuple, Set
 from .models import PropAnalysis, Parlay
 from .dependency_analyzer import DependencyAnalyzer
+from .prop_availability_validator import PropAvailabilityValidator
 
 logger = logging.getLogger(__name__)
 
@@ -10,8 +11,9 @@ logger = logging.getLogger(__name__)
 class ParlayOptimizer:
     """Optimizes parlay construction to minimize correlations"""
 
-    def __init__(self, api_key: str = None):
+    def __init__(self, api_key: str = None, db_path: str = "bets.db"):
         self.dep_analyzer = DependencyAnalyzer(api_key=api_key)
+        self.validator = PropAvailabilityValidator(db_path=db_path)
 
     def rebuild_parlays_low_correlation(
         self,
@@ -53,6 +55,9 @@ class ParlayOptimizer:
             key=lambda x: x.final_confidence,
             reverse=True
         )
+
+        # Filter by minimum thresholds (remove props with lines too small for DraftKings)
+        eligible = self.validator.filter_by_minimum_thresholds(eligible, verbose=True)
 
         print(f"\n📊 Starting with {len(eligible)} props (confidence {min_confidence}+)")
         

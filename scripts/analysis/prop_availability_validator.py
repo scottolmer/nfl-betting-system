@@ -31,10 +31,27 @@ class PropAvailabilityValidator:
     1. Rule-based filtering (e.g., same player can't have UNDER completions + UNDER receptions)
     2. Learning from manual validations
     3. Interactive validation workflow
+    4. Minimum threshold filtering (e.g., receptions must be > 2.5)
     """
 
-    def __init__(self, db_path: str = "bets.db"):
+    # Minimum thresholds for prop types (DraftKings typically doesn't offer props below these values)
+    MINIMUM_THRESHOLDS = {
+        "Receptions": 2.5,
+        "Rush Att": 3.5,
+        "Completions": 14.5,
+        "Pass Att": 19.5,
+        "Rec Yds": 19.5,
+        "Rush Yds": 19.5,
+        "Pass Yds": 149.5,
+    }
+
+    def __init__(self, db_path: str = "bets.db", min_thresholds: Dict[str, float] = None):
         self.db_path = db_path
+        # Allow custom thresholds to be passed in, otherwise use defaults
+        if min_thresholds:
+            self.min_thresholds = {**self.MINIMUM_THRESHOLDS, **min_thresholds}
+        else:
+            self.min_thresholds = self.MINIMUM_THRESHOLDS.copy()
         self._init_database()
         self._load_default_rules()
 
@@ -334,6 +351,51 @@ class PropAvailabilityValidator:
 
         conn.close()
         return available_props
+
+    def filter_by_minimum_thresholds(self, props: List[PropAnalysis], verbose: bool = True) -> List[PropAnalysis]:
+        """
+        Filter props that don't meet minimum thresholds for their stat type
+
+        Args:
+            props: List of PropAnalysis objects
+            verbose: Whether to print filtering information
+
+        Returns:
+            List of props that meet minimum threshold requirements
+        """
+        filtered_props = []
+        filtered_count = 0
+        filtered_details = []
+
+        for prop_analysis in props:
+            prop = prop_analysis.prop
+            stat_type = prop.stat_type
+            line = prop.line
+
+            # Check if this stat type has a minimum threshold
+            if stat_type in self.min_thresholds:
+                min_threshold = self.min_thresholds[stat_type]
+
+                if line < min_threshold:
+                    filtered_count += 1
+                    filtered_details.append(
+                        f"  ❌ {prop.player_name} - {stat_type} {prop.line} "
+                        f"(below minimum {min_threshold})"
+                    )
+                    continue  # Skip this prop
+
+            # Prop meets threshold or has no threshold requirement
+            filtered_props.append(prop_analysis)
+
+        if verbose and filtered_count > 0:
+            logger.info(f"\n🔍 Filtered {filtered_count} props below minimum thresholds:")
+            for detail in filtered_details[:10]:  # Show first 10
+                logger.info(detail)
+            if len(filtered_details) > 10:
+                logger.info(f"  ... and {len(filtered_details) - 10} more")
+            logger.info(f"✅ {len(filtered_props)} props remaining after threshold filter\n")
+
+        return filtered_props
 
     def get_validation_stats(self) -> Dict:
         """Get statistics about validation rules and history"""
