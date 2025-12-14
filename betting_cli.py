@@ -7,6 +7,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
+# Fix Windows console encoding for emoji support
+if sys.platform == "win32":
+    try:
+        # Try to set UTF-8 encoding for Windows console
+        if hasattr(sys.stdout, 'reconfigure'):
+            sys.stdout.reconfigure(encoding='utf-8')
+        if hasattr(sys.stderr, 'reconfigure'):
+            sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        # If reconfigure fails, set environment variable for next run
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+
 project_root = Path.cwd()
 sys.path.insert(0, str(project_root))
 
@@ -35,12 +47,13 @@ logging.basicConfig(level=logging.WARNING)
 
 class BettingAnalyzerCLI:
     def __init__(self):
+        self.db_path = project_root / "bets.db"
         self.handler = ClaudeQueryHandler()
         self.analyzer = PropAnalyzer()
         self.loader = NFLDataLoader(data_dir=str(project_root / "data"))
         self.parlay_builder = ParlayBuilder()
-        self.tracker = PerformanceTracker(db_path=str(project_root / "bets.db"))
-        self.calibrator = AgentCalibrator(db_path=str(project_root / "bets.db"))
+        self.tracker = PerformanceTracker(db_path=str(self.db_path))
+        self.calibrator = AgentCalibrator(db_path=str(self.db_path))
         self.odds_integrator = OddsIntegrator(data_dir=str(project_root / "data"))
         self.week = 9
         self.last_parlays = []
