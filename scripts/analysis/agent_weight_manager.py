@@ -23,7 +23,8 @@ class AgentWeightManager:
         'Trend': 1.2,
         'GameScript': 1.0,
         'Variance': 0.8,
-        'Weather': 0.5
+        'Weather': 0.5,
+        'HitRate': 2.0
     }
 
     # Safety constraints

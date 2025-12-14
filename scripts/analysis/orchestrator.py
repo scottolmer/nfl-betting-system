@@ -19,6 +19,7 @@ from .agents import (
     TrendAgent,
     VarianceAgent,
     WeatherAgent,
+    HitRateAgent,
     AgentConfig,
 )
 
@@ -54,6 +55,7 @@ class PropAnalyzer:
                 'GameScript': 2.2,
                 'Variance': 1.2,
                 'Weather': 1.3,
+                'HitRate': 2.0,
             }
             self.logger.info("⚙️  Using static agent weights...")
 
@@ -67,13 +69,14 @@ class PropAnalyzer:
             'Trend': TrendAgent(weight=weights.get('Trend', 1.0)),
             'Variance': VarianceAgent(weight=weights.get('Variance', 1.2)),
             'Weather': WeatherAgent(weight=weights.get('Weather', 1.3)),
+            'HitRate': HitRateAgent(weight=weights.get('HitRate', 2.0)),
         }
 
         # Log weights
         for agent_name, agent in self.agents.items():
             self.logger.info(f"  {agent_name:12s} weight: {agent.weight:.2f}")
 
-        self.logger.info("🧠 PropAnalyzer initialized with 8 agents")
+        self.logger.info("🧠 PropAnalyzer initialized with 9 agents")
 
     def analyze_prop(self, prop_data: Dict, context: Dict) -> PropAnalysis:
         """Analyze a single prop bet - forcing OVER analysis then inverting for UNDER"""
