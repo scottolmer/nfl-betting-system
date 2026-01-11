@@ -67,3 +67,54 @@ export interface LineAdjustmentResponse {
   adjusted_cushion?: number;
   recommendation: string;
 }
+
+// Saved Parlay types for Parlay Builder
+export type ParlayStatus = 'draft' | 'placed' | 'won' | 'lost' | 'pending';
+
+export type Sportsbook =
+  | 'DraftKings Pick 6'
+  | 'FanDuel Pick 6'
+  | 'Underdog Fantasy'
+  | 'PrizePicks'
+  | 'BetMGM'
+  | 'Caesars'
+  | 'ESPN Bet'
+  | 'Other';
+
+export interface SavedParlayLeg extends ParlayLeg {
+  position: string;
+  original_line?: number;  // For line adjustments
+  adjusted_line?: number;
+  projection?: number;
+  cushion?: number;
+}
+
+export interface SavedParlay {
+  id: string;
+  name: string;
+  week: number;
+  legs: SavedParlayLeg[];
+  combined_confidence: number;
+  risk_level: 'LOW' | 'MEDIUM' | 'HIGH';
+  sportsbook?: Sportsbook;
+  bet_amount?: number;
+  status: ParlayStatus;
+  created_at: string;
+  placed_at?: string;
+  result?: {
+    won: boolean;
+    profit?: number;
+    legs_hit: number;
+    legs_total: number;
+  };
+}
+
+// Filter options for prop selection
+export interface PropFilters {
+  min_confidence?: number;
+  max_confidence?: number;
+  teams?: string[];
+  positions?: string[];
+  stat_types?: string[];
+  bet_type?: 'OVER' | 'UNDER';
+}
