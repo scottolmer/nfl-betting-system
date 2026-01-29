@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { apiService } from '../services/api';
 import { parlayStorage } from '../services/parlayStorage';
@@ -179,7 +180,7 @@ export default function CreateParlayScreen({ onClose, onSaved }: CreateParlayScr
     setAdjustedLine('');
   };
 
-  const handleSave = async () {
+  const handleSave = async () => {
     if (!parlayName.trim()) {
       Alert.alert('Name Required', 'Please enter a parlay name');
       return;
@@ -446,7 +447,7 @@ export default function CreateParlayScreen({ onClose, onSaved }: CreateParlayScr
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#3B82F6" />
+              <ActivityIndicator color="#3B82F6" />
             </View>
           ) : (
             availableProps.map((prop, index) => (
@@ -556,7 +557,6 @@ const styles = StyleSheet.create({
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
   },
   chip: {
     backgroundColor: '#FFFFFF',
@@ -644,7 +644,6 @@ const styles = StyleSheet.create({
   },
   confidenceButtons: {
     flexDirection: 'row',
-    gap: 8,
     marginTop: 8,
   },
   confButton: {
@@ -655,6 +654,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     alignItems: 'center',
+    marginRight: 8,
   },
   confButtonActive: {
     backgroundColor: '#3B82F6',
@@ -804,7 +804,6 @@ const styles = StyleSheet.create({
   },
   modalButtons: {
     flexDirection: 'row',
-    gap: 12,
   },
   modalButton: {
     flex: 1,
@@ -814,6 +813,7 @@ const styles = StyleSheet.create({
   },
   modalButtonCancel: {
     backgroundColor: '#F3F4F6',
+    marginRight: 12,
   },
   modalButtonConfirm: {
     backgroundColor: '#3B82F6',

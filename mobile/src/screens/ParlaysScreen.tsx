@@ -133,7 +133,7 @@ export default function ParlaysScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <ActivityIndicator color="#3B82F6" />
         <Text style={styles.loadingText}>Generating parlays...</Text>
       </View>
     );

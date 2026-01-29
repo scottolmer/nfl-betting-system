@@ -148,6 +148,31 @@ class AnalysisService:
 
         return filtered
 
+    async def get_raw_analyses_for_week(
+        self,
+        week: int,
+        min_confidence: int = 60,
+        team: Optional[str] = None
+    ) -> List[PropAnalysis]:
+        """
+        Get raw PropAnalysis objects (not converted to API responses).
+        Used by parlay generation which needs the full PropAnalysis objects.
+        """
+        logger.info(f"Getting raw analyses for week {week}...")
+
+        # Load data using EXISTING loader
+        context = self.loader.load_all_data(week=week)
+
+        # Analyze using EXISTING analyzer - returns List[PropAnalysis]
+        analyses = self.analyzer.analyze_all_props(context, min_confidence=min_confidence)
+
+        # Apply team filter if provided
+        if team:
+            analyses = [a for a in analyses if a.team.upper() == team.upper()]
+
+        logger.info(f"✓ Returning {len(analyses)} raw PropAnalysis objects")
+        return analyses
+
     async def adjust_line_and_recalculate(
         self,
         week: int,

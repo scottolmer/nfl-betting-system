@@ -97,7 +97,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.reasonsContainer}>
-        {item.top_reasons.slice(0, 2).map((reason, index) => (
+        {(item.top_reasons || []).slice(0, 2).map((reason, index) => (
           <Text key={index} style={styles.reason}>
             • {reason}
           </Text>
@@ -109,7 +109,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <ActivityIndicator color="#3B82F6" />
         <Text style={styles.loadingText}>Loading top props...</Text>
       </View>
     );

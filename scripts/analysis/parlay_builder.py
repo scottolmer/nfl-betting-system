@@ -26,7 +26,7 @@ class ParlayBuilder:
         
         Each player can appear in up to 3 different parlays
         """
-        # ✅ NEW: Validate all analyses have PlayerProp objects (not dicts)
+        # [SUCCESS] NEW: Validate all analyses have PlayerProp objects (not dicts)
         all_analyses = PropsValidator.validate_all_analyses(all_analyses)
 
         eligible_props = sorted(
@@ -35,10 +35,10 @@ class ParlayBuilder:
             reverse=True
         )
 
-        print(f"\n🎯 Building parlays from {len(eligible_props)} props (confidence {min_confidence}+)")
-        print(f"   ✅ Prioritizing PLAYER diversity...")
-        print(f"   ✅ Each player can appear in up to 3 parlays...")
-        print(f"   📊 Target: 10 parlays (3x 2-leg, 3x 3-leg, 3x 4-leg, 1x 5-leg)\n")
+        print(f"\n[PARLAY BUILDER] Building parlays from {len(eligible_props)} props (confidence {min_confidence}+)")
+        print(f"   Prioritizing PLAYER diversity...")
+        print(f"   Each player can appear in up to 3 parlays...")
+        print(f"   Target: 10 parlays (3x 2-leg, 3x 3-leg, 3x 4-leg, 1x 5-leg)\n")
 
         used_prop_ids: Set[Tuple] = set()
         player_usage_count: Dict[str, int] = defaultdict(int)
@@ -51,16 +51,16 @@ class ParlayBuilder:
             '5-leg': [],
         }
 
-        print("  📊 Building up to three 2-leg parlays...")
+        print("  [INFO] Building up to three 2-leg parlays...")
         parlays['2-leg'] = self.build_n_leg_parlays(2, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        print("\n  📊 Building up to three 3-leg parlays...")
+        print("\n  [INFO] Building up to three 3-leg parlays...")
         parlays['3-leg'] = self.build_n_leg_parlays(3, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        print("\n  📊 Building up to three 4-leg parlays...")
+        print("\n  [INFO] Building up to three 4-leg parlays...")
         parlays['4-leg'] = self.build_n_leg_parlays(4, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        print("\n  📊 Building up to one 5-leg parlay...")
+        print("\n  [INFO] Building up to one 5-leg parlay...")
         parlays['5-leg'] = self.build_n_leg_parlays(5, 1, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
         total_2 = len(parlays['2-leg'])
@@ -71,9 +71,9 @@ class ParlayBuilder:
         
         logger.info(f"Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg parlays (Total: {total_all})")
 
-        print(f"\n✅ Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg parlays")
-        print(f"   📊 Total parlays: {total_all}/10")
-        print(f"   📊 Unique players used: {len(player_usage_count)}")
+        print(f"\n[SUCCESS] Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg parlays")
+        print(f"   [INFO] Total parlays: {total_all}/10")
+        print(f"   [INFO] Unique players used: {len(player_usage_count)}")
 
         return parlays
 
@@ -128,7 +128,7 @@ class ParlayBuilder:
                 position_str = "/".join(sorted(unique_positions))
                 
                 risk = "MODERATE"
-                rationale = f"✅ {position_str} stack ({num_legs} legs)"
+                rationale = f"[SUCCESS] {position_str} stack ({num_legs} legs)"
                 bonus = 0
                 
                 if is_same_game:
@@ -138,12 +138,12 @@ class ParlayBuilder:
                         risk = "HIGH"
                     else:
                         risk = "VERY HIGH"
-                    rationale = f"✅ Same-game {position_str} ({current_legs[0].prop.team} vs {current_legs[0].prop.opponent})"
+                    rationale = f"[SUCCESS] Same-game {position_str} ({current_legs[0].prop.team} vs {current_legs[0].prop.opponent})"
                     bonus = 5 if num_legs <= 2 else (4 if num_legs == 3 else (3 if num_legs == 4 else 2))
                 else:
                     num_games = len(set(f"{leg.prop.team}-{leg.prop.opponent}" for leg in current_legs))
                     if num_games == num_legs:
-                        rationale = f"✅ Diversified {position_str} across {num_games} games"
+                        rationale = f"[SUCCESS] Diversified {position_str} across {num_games} games"
                         bonus = 4
 
                 parlay = Parlay(
@@ -154,7 +154,7 @@ class ParlayBuilder:
                     correlation_bonus=bonus
                 )
                 built_parlays.append(parlay)
-                print(f"    ✅ Built {num_legs}-leg parlay #{i+1} (Conf: {parlay.combined_confidence}, Positions: {position_str}, Players now: {len(player_usage_count)})")
+                print(f"    [SUCCESS] Built {num_legs}-leg parlay #{i+1} (Conf: {parlay.combined_confidence}, Positions: {position_str}, Players now: {len(player_usage_count)})")
             else:
                 print(f"    ⚠️  Could not find enough unique props for {num_legs}-leg parlay #{i+1}")
 
@@ -165,7 +165,7 @@ class ParlayBuilder:
         """Format the final parlays into a string card"""
         
         output = ["="*60, "🎯 ACTIONABLE PARLAY RECOMMENDATIONS", "="*60, ""]
-        output.append(f"📊 Betting Lines Source: {betting_source}\n")
+        output.append(f"[INFO] Betting Lines Source: {betting_source}\n")
         total_units = 0
         parlay_counter = {'2': 0, '3': 0, '4': 0, '5': 0}
 
@@ -228,7 +228,7 @@ class ParlayBuilder:
                 continue
                 
             output.append("\n" + "="*60)
-            output.append(f"📊 {leg_count}-LEG PARLAYS")
+            output.append(f"[INFO] {leg_count}-LEG PARLAYS")
             output.append("="*60)
             
             for parlay in parlay_list:
@@ -246,7 +246,7 @@ class ParlayBuilder:
         output.append("• Never bet more than you can afford to lose!")
         
         output.append("\n" + "="*60)
-        output.append("📊 SUMMARY")
+        output.append("[INFO] SUMMARY")
         output.append("="*60)
         output.append(f"Total Parlays: {sum(len(p) for p in parlays.values())}/10")
         output.append(f"Total Units: {total_units:.1f}")

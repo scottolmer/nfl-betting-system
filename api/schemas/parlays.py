@@ -9,6 +9,7 @@ class ParlayLegResponse(BaseModel):
 
     player_name: str
     team: str
+    opponent: str
     stat_type: str
     bet_type: str = Field(..., description="OVER or UNDER")
     line: float
@@ -18,10 +19,13 @@ class ParlayLegResponse(BaseModel):
 class ParlayResponse(BaseModel):
     """Response model for a parlay"""
 
+    id: str = Field(..., description="Unique identifier for this parlay")
+    name: str = Field(..., description="Display name for the parlay")
     parlay_type: str = Field(..., description="Type of parlay (2-leg, 3-leg, etc.)")
     combined_confidence: float = Field(..., ge=0, le=100, description="Combined confidence score")
     risk_level: str = Field(..., description="LOW, MEDIUM, or HIGH")
     rationale: str = Field(..., description="Explanation of why this parlay was built")
+    leg_count: int = Field(..., description="Number of legs in the parlay")
     legs: List[ParlayLegResponse]
 
     model_config = {

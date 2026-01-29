@@ -43,9 +43,9 @@ async def get_prebuilt_parlays(
     Uses existing ParlayBuilder (100% reuse).
     """
     try:
-        # First, analyze all props for the week
+        # First, analyze all props for the week (get raw PropAnalysis objects for parlay builder)
         logger.info(f"Analyzing props for week {week} to generate parlays...")
-        all_analyses = await analysis_service.analyze_props_for_week(
+        all_analyses = await analysis_service.get_raw_analyses_for_week(
             week=week,
             min_confidence=min_confidence,
             team=team

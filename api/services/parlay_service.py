@@ -60,15 +60,28 @@ class ParlayService:
 
     def _to_response(self, parlay: Parlay) -> ParlayResponse:
         """Convert Parlay dataclass to Pydantic response schema"""
+        import hashlib
+
+        # Generate unique ID based on parlay content
+        parlay_content = f"{parlay.parlay_type}_{parlay.combined_confidence}_{len(parlay.legs)}"
+        parlay_id = hashlib.md5(parlay_content.encode()).hexdigest()[:12]
+
+        # Generate name
+        parlay_name = f"{parlay.parlay_type.upper()} ({parlay.risk_level})"
+
         return ParlayResponse(
+            id=parlay_id,
+            name=parlay_name,
             parlay_type=parlay.parlay_type,
             combined_confidence=parlay.combined_confidence,
             risk_level=parlay.risk_level,
             rationale=parlay.rationale,
+            leg_count=len(parlay.legs),
             legs=[
                 ParlayLegResponse(
                     player_name=leg.prop.player_name,
                     team=leg.prop.team,
+                    opponent=leg.prop.opponent,
                     stat_type=leg.prop.stat_type,
                     bet_type=leg.prop.bet_type,
                     line=leg.prop.line,

@@ -80,16 +80,15 @@ export default function BuildScreen() {
   };
 
   const handleMarkAsPlaced = (id: string, name: string) => {
-    Alert.prompt(
+    Alert.alert(
       'Mark as Placed',
-      `Enter bet amount for "${name}" (optional)`,
+      `Mark "${name}" as placed?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Mark Placed',
-          onPress: async (betAmount) => {
-            const amount = betAmount ? parseFloat(betAmount) : undefined;
-            const success = await parlayStorage.markAsPlaced(id, amount);
+          onPress: async () => {
+            const success = await parlayStorage.markAsPlaced(id);
             if (success) {
               loadParlays();
               Alert.alert('Success', 'Parlay marked as placed!');
@@ -98,10 +97,7 @@ export default function BuildScreen() {
             }
           },
         },
-      ],
-      'plain-text',
-      '',
-      'numeric'
+      ]
     );
   };
 

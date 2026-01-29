@@ -8,7 +8,7 @@ import { PropAnalysis, Parlay, LineAdjustmentRequest, LineAdjustmentResponse } f
 
 // API Configuration
 const API_BASE_URL = __DEV__
-  ? 'http://localhost:8000'  // Development (use your local IP for physical device: http://192.168.x.x:8000)
+  ? 'http://192.168.1.207:8000'  // Development - local network IP
   : 'https://your-production-api.com';  // Production
 
 const API_KEY = 'dev_test_key_12345';  // TODO: Store securely in production
