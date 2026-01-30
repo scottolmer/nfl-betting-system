@@ -12,6 +12,8 @@ import {
 import { parlayStorage, FREE_TIER_PARLAY_LIMIT } from '../services/parlayStorage';
 import { SavedParlay } from '../types';
 import CreateParlayScreen from './CreateParlayScreen';
+import InfoTooltip from '../components/common/InfoTooltip';
+import EmptyState from '../components/common/EmptyState';
 
 export default function BuildScreen() {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -245,11 +247,16 @@ export default function BuildScreen() {
       </Modal>
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Parlays</Text>
-        <Text style={styles.headerSubtitle}>
-          {parlays.length} of {FREE_TIER_PARLAY_LIMIT} parlays
-          {remainingSlots > 0 && ` • ${remainingSlots} slots remaining`}
-        </Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.headerTitle}>My Parlays</Text>
+            <Text style={styles.headerSubtitle}>
+              {parlays.length} of {FREE_TIER_PARLAY_LIMIT} parlays
+              {remainingSlots > 0 && ` • ${remainingSlots} slots remaining`}
+            </Text>
+          </View>
+          <InfoTooltip tooltipKey="myParlays" iconSize={20} iconColor="#9CA3AF" />
+        </View>
       </View>
 
       <ScrollView
@@ -276,13 +283,13 @@ export default function BuildScreen() {
         </TouchableOpacity>
 
         {parlays.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyEmoji}>⚡</Text>
-            <Text style={styles.emptyTitle}>No Parlays Yet</Text>
-            <Text style={styles.emptyDescription}>
-              Create your first parlay to get started!
-            </Text>
-          </View>
+          <EmptyState
+            icon="⚡"
+            title="Build Your First Parlay"
+            description="Create custom parlays with filters and get live confidence scoring."
+            actionText="+ Create Your First Parlay"
+            onAction={handleCreateParlay}
+          />
         ) : (
           <View style={styles.parlaysContainer}>
             {parlays.map(renderParlayCard)}
@@ -311,12 +318,17 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#1F2937',
-    padding: 20,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 4,
@@ -497,28 +509,6 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontSize: 13,
     fontWeight: '600',
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 8,
-  },
-  emptyDescription: {
-    fontSize: 15,
-    color: '#6B7280',
-    textAlign: 'center',
   },
   infoBox: {
     backgroundColor: '#EFF6FF',

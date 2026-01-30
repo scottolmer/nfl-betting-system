@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import HomeScreen from '../screens/HomeScreen';
 import ParlaysScreen from '../screens/ParlaysScreen';
 import BuildScreen from '../screens/BuildScreen';
-import MyBetsScreen from '../screens/MyBetsScreen';
+import ResultsScreen from '../screens/ResultsScreen';
 import MoreScreen from '../screens/MoreScreen';
 
 const Tab = createBottomTabNavigator();
@@ -33,35 +33,35 @@ export default function AppNavigator() {
         }}
       >
         <Tab.Screen
-          name="Home"
+          name="Picks"
           component={HomeScreen}
           options={{
-            tabBarLabel: 'Home',
-            tabBarIcon: ({ color }) => <TabIcon icon="🏠" color={color} />,
+            tabBarLabel: 'Picks',
+            tabBarIcon: ({ color }) => <TabIcon icon="🎯" color={color} />,
           }}
         />
         <Tab.Screen
-          name="Parlays"
+          name="Pre-Built"
           component={ParlaysScreen}
           options={{
-            tabBarLabel: 'Parlays',
+            tabBarLabel: 'Pre-Built',
             tabBarIcon: ({ color }) => <TabIcon icon="🎰" color={color} />,
           }}
         />
         <Tab.Screen
-          name="Build"
+          name="My Parlays"
           component={BuildScreen}
           options={{
-            tabBarLabel: 'Build',
+            tabBarLabel: 'My Parlays',
             tabBarIcon: ({ color }) => <TabIcon icon="⚡" color={color} />,
           }}
         />
         <Tab.Screen
-          name="My Bets"
-          component={MyBetsScreen}
+          name="Results"
+          component={ResultsScreen}
           options={{
-            tabBarLabel: 'My Bets',
-            tabBarIcon: ({ color }) => <TabIcon icon="📊" color={color} />,
+            tabBarLabel: 'Results',
+            tabBarIcon: ({ color }) => <TabIcon icon="📈" color={color} />,
           }}
         />
         <Tab.Screen

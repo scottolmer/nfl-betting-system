@@ -11,14 +11,20 @@ import {
 } from 'react-native';
 import { apiService } from '../services/api';
 import { Parlay, ParlayLeg } from '../types';
+import HelpBanner from '../components/common/HelpBanner';
+import InfoTooltip from '../components/common/InfoTooltip';
+import ParlayFilters, { FilterOption } from '../components/parlays/ParlayFilters';
+import Badge from '../components/common/Badge';
 
 export default function ParlaysScreen() {
   const [parlays, setParlays] = useState<Parlay[]>([]);
+  const [filteredParlays, setFilteredParlays] = useState<Parlay[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedParlay, setExpandedParlay] = useState<string | null>(null);
   const [currentWeek] = useState(17); // TODO: Make this dynamic
+  const [selectedFilter, setSelectedFilter] = useState<FilterOption>('all');
 
   useEffect(() => {
     loadParlays();
@@ -32,6 +38,7 @@ export default function ParlaysScreen() {
         min_confidence: 58,
       });
       setParlays(data);
+      setFilteredParlays(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load parlays');
       console.error('Error loading parlays:', err);
@@ -40,6 +47,27 @@ export default function ParlaysScreen() {
       setRefreshing(false);
     }
   };
+
+  const handleFilterChange = (filter: FilterOption) => {
+    setSelectedFilter(filter);
+
+    if (filter === 'all') {
+      setFilteredParlays(parlays);
+    } else if (filter === '2-leg') {
+      setFilteredParlays(parlays.filter(p => p.leg_count === 2));
+    } else if (filter === '3-leg') {
+      setFilteredParlays(parlays.filter(p => p.leg_count === 3));
+    } else if (filter === '4+') {
+      setFilteredParlays(parlays.filter(p => p.leg_count >= 4));
+    }
+  };
+
+  const getFilterCounts = () => ({
+    all: parlays.length,
+    '2-leg': parlays.filter(p => p.leg_count === 2).length,
+    '3-leg': parlays.filter(p => p.leg_count === 3).length,
+    '4+': parlays.filter(p => p.leg_count >= 4).length,
+  });
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -88,22 +116,34 @@ export default function ParlaysScreen() {
     </View>
   );
 
-  const renderParlayCard = ({ item }: { item: Parlay }) => {
+  const renderParlayCard = ({ item, index }: { item: Parlay; index: number }) => {
     const isExpanded = expandedParlay === item.id;
+    const isFeatured = index === 0 && item.combined_confidence >= 75;
 
     return (
       <View style={styles.parlayCard}>
+        {isFeatured && (
+          <View style={styles.featuredBadgeContainer}>
+            <Badge text="FEATURED" variant="featured" size="small" />
+          </View>
+        )}
         <TouchableOpacity onPress={() => toggleExpand(item.id)}>
           <View style={styles.parlayHeader}>
             <View style={styles.parlayTitleContainer}>
               <Text style={styles.parlayTitle}>{item.name}</Text>
-              <Text style={styles.parlaySubtitle}>
-                {item.leg_count} legs • {Math.round(item.combined_confidence)} confidence
-              </Text>
+              <View style={styles.parlayMetaRow}>
+                <Text style={styles.parlaySubtitle}>
+                  {item.leg_count} legs • {Math.round(item.combined_confidence)} confidence
+                </Text>
+                <InfoTooltip tooltipKey="combinedConfidence" iconSize={14} iconColor="#9CA3AF" />
+              </View>
             </View>
             <View style={styles.parlayBadges}>
-              <View style={[styles.riskBadge, { backgroundColor: getRiskColor(item.risk_level) }]}>
-                <Text style={styles.riskBadgeText}>{item.risk_level}</Text>
+              <View style={styles.riskBadgeContainer}>
+                <View style={[styles.riskBadge, { backgroundColor: getRiskColor(item.risk_level) }]}>
+                  <Text style={styles.riskBadgeText}>{item.risk_level}</Text>
+                </View>
+                <InfoTooltip tooltipKey="riskLevel" iconSize={12} iconColor="#9CA3AF" />
               </View>
             </View>
           </View>
@@ -153,23 +193,47 @@ export default function ParlaysScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Pre-Built Parlays</Text>
-        <Text style={styles.headerSubtitle}>
-          Week {currentWeek} • {parlays.length} Parlays
-        </Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.headerTitle}>Pre-Built Parlays</Text>
+            <Text style={styles.headerSubtitle}>
+              Week {currentWeek} • {parlays.length} Parlays
+            </Text>
+          </View>
+          <InfoTooltip tooltipKey="preBuildParlays" iconSize={20} iconColor="#9CA3AF" />
+        </View>
       </View>
 
       <FlatList
-        data={parlays}
+        data={filteredParlays}
         renderItem={renderParlayCard}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        ListHeaderComponent={
+          <>
+            <HelpBanner
+              bannerId="prebuilt-parlays-help"
+              title="How to Use"
+              items={[
+                'Browse combinations below',
+                'Tap to see details',
+                'Copy to your sportsbook',
+                'Save to My Parlays',
+              ]}
+            />
+            <ParlayFilters
+              selectedFilter={selectedFilter}
+              onFilterChange={handleFilterChange}
+              counts={getFilterCounts()}
+            />
+          </>
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No parlays available</Text>
+            <Text style={styles.emptyText}>No parlays match the selected filter</Text>
           </View>
         }
       />
@@ -191,12 +255,17 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#1F2937',
-    padding: 20,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 4,
@@ -206,18 +275,25 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
   listContainer: {
-    padding: 16,
+    paddingBottom: 16,
   },
   parlayCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     marginBottom: 12,
+    marginHorizontal: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
+  },
+  featuredBadgeContainer: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 10,
   },
   parlayHeader: {
     flexDirection: 'row',
@@ -234,12 +310,21 @@ const styles = StyleSheet.create({
     color: '#1F2937',
     marginBottom: 4,
   },
+  parlayMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   parlaySubtitle: {
     fontSize: 14,
     color: '#6B7280',
   },
   parlayBadges: {
     alignItems: 'flex-end',
+  },
+  riskBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   riskBadge: {
     paddingHorizontal: 12,

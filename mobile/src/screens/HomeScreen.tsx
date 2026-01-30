@@ -10,13 +10,17 @@ import {
 } from 'react-native';
 import { apiService } from '../services/api';
 import { PropAnalysis } from '../types';
+import QuickStartSection from '../components/home/QuickStartSection';
+import CollapsiblePropCard from '../components/home/CollapsiblePropCard';
+import InfoTooltip from '../components/common/InfoTooltip';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: any) {
   const [props, setProps] = useState<PropAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentWeek] = useState(17); // TODO: Make this dynamic
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     loadTopProps();
@@ -44,67 +48,17 @@ export default function HomeScreen() {
     loadTopProps();
   };
 
-  const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return '#22C55E'; // Green (🔥)
-    if (confidence >= 75) return '#F59E0B'; // Orange (⭐)
-    if (confidence >= 70) return '#3B82F6'; // Blue (✅)
-    return '#6B7280'; // Gray
-  };
-
-  const getConfidenceEmoji = (confidence: number): string => {
-    if (confidence >= 80) return '🔥';
-    if (confidence >= 75) return '⭐';
-    if (confidence >= 70) return '✅';
-    return '📊';
-  };
-
   const renderPropItem = ({ item }: { item: PropAnalysis }) => (
-    <TouchableOpacity style={styles.propCard}>
-      <View style={styles.propHeader}>
-        <View style={styles.confidenceContainer}>
-          <Text style={styles.confidenceEmoji}>
-            {getConfidenceEmoji(item.confidence)}
-          </Text>
-          <Text
-            style={[
-              styles.confidenceScore,
-              { color: getConfidenceColor(item.confidence) },
-            ]}
-          >
-            {Math.round(item.confidence)}
-          </Text>
-        </View>
-        <View style={styles.playerInfo}>
-          <Text style={styles.playerName}>{item.player_name}</Text>
-          <Text style={styles.teamPosition}>
-            {item.team} {item.position} vs {item.opponent}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.propDetails}>
-        <View style={styles.statRow}>
-          <Text style={styles.statType}>{item.stat_type}</Text>
-          <Text style={styles.betType}>{item.bet_type}</Text>
-          <Text style={styles.line}>{item.line}</Text>
-        </View>
-        {item.projection && (
-          <Text style={styles.projection}>
-            Proj: {item.projection.toFixed(1)}
-            {item.cushion && ` (${item.cushion > 0 ? '+' : ''}${item.cushion.toFixed(1)})`}
-          </Text>
-        )}
-      </View>
-
-      <View style={styles.reasonsContainer}>
-        {(item.top_reasons || []).slice(0, 2).map((reason, index) => (
-          <Text key={index} style={styles.reason}>
-            • {reason}
-          </Text>
-        ))}
-      </View>
-    </TouchableOpacity>
+    <CollapsiblePropCard prop={item} />
   );
+
+  const handleViewPreBuilt = () => {
+    navigation.navigate('Pre-Built');
+  };
+
+  const handleBuildCustom = () => {
+    navigation.navigate('My Parlays');
+  };
 
   if (loading) {
     return (
@@ -129,8 +83,15 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Top Props</Text>
-        <Text style={styles.headerSubtitle}>Week {currentWeek} • Top 10 by Confidence</Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.headerTitle}>🏈 NFL Betting Analysis</Text>
+            <Text style={styles.headerSubtitle}>Week {currentWeek}</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <InfoTooltip tooltipKey="preBuildParlays" iconSize={20} iconColor="#9CA3AF" />
+          </View>
+        </View>
       </View>
 
       <FlatList
@@ -141,9 +102,30 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        ListHeaderComponent={
+          <>
+            <QuickStartSection
+              featuredProp={props[0]}
+              onViewPreBuilt={handleViewPreBuilt}
+              onBuildCustom={handleBuildCustom}
+            />
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Top 10 Props</Text>
+              <InfoTooltip tooltipKey="confidence" iconSize={16} iconColor="#6B7280" />
+            </View>
+          </>
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No props available</Text>
+          </View>
+        }
+        ListFooterComponent={
+          <View style={styles.helpFooter}>
+            <Text style={styles.helpFooterText}>💡 New to betting props?</Text>
+            <TouchableOpacity onPress={() => setShowTutorial(true)}>
+              <Text style={styles.helpFooterLink}>Watch Tutorial</Text>
+            </TouchableOpacity>
           </View>
         }
       />
@@ -165,104 +147,59 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#1F2937',
-    padding: 20,
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   headerSubtitle: {
     fontSize: 14,
     color: '#9CA3AF',
   },
-  listContainer: {
-    padding: 16,
-  },
-  propCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  propHeader: {
+  headerActions: {
     flexDirection: 'row',
-    marginBottom: 12,
+    gap: 12,
   },
-  confidenceContainer: {
+  listContainer: {
+    paddingBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
-    minWidth: 60,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
-  confidenceEmoji: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  confidenceScore: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  playerInfo: {
-    flex: 1,
-  },
-  playerName: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1F2937',
-    marginBottom: 2,
   },
-  teamPosition: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  propDetails: {
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingTop: 12,
-    marginBottom: 8,
-  },
-  statRow: {
-    flexDirection: 'row',
+  helpFooter: {
+    padding: 20,
     alignItems: 'center',
-    marginBottom: 4,
-  },
-  statType: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginRight: 8,
-  },
-  betType: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
-    marginRight: 8,
-  },
-  line: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1F2937',
-  },
-  projection: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  reasonsContainer: {
+    backgroundColor: '#F9FAFB',
     marginTop: 8,
   },
-  reason: {
-    fontSize: 13,
-    color: '#4B5563',
-    marginBottom: 2,
+  helpFooterText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 8,
+  },
+  helpFooterLink: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#3B82F6',
   },
   loadingText: {
     marginTop: 12,
