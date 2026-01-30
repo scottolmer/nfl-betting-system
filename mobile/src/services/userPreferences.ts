@@ -11,6 +11,7 @@ const KEYS = {
   DISMISSED_BANNERS: '@dismissed_banners',
   PREFERRED_SPORTSBOOK: '@preferred_sportsbook',
   TUTORIAL_VIEWED: '@tutorial_viewed',
+  BACKEND_URL: '@backend_url',
 };
 
 /**
@@ -133,6 +134,38 @@ export const tutorialPreferences = {
       await AsyncStorage.removeItem(KEYS.TUTORIAL_VIEWED);
     } catch (error) {
       console.error('Error resetting tutorial:', error);
+    }
+  },
+};
+
+/**
+ * Backend Configuration Preferences
+ */
+export const backendPreferences = {
+  async getBackendUrl(): Promise<string> {
+    try {
+      const url = await AsyncStorage.getItem(KEYS.BACKEND_URL);
+      // Default to localhost for development
+      return url || 'http://localhost:8000';
+    } catch (error) {
+      console.error('Error getting backend URL:', error);
+      return 'http://localhost:8000';
+    }
+  },
+
+  async setBackendUrl(url: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.BACKEND_URL, url);
+    } catch (error) {
+      console.error('Error setting backend URL:', error);
+    }
+  },
+
+  async resetBackendUrl(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(KEYS.BACKEND_URL);
+    } catch (error) {
+      console.error('Error resetting backend URL:', error);
     }
   },
 };

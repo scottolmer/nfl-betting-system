@@ -97,13 +97,12 @@ export interface SavedParlay {
   combined_confidence: number;
   risk_level: 'LOW' | 'MEDIUM' | 'HIGH';
   sportsbook?: Sportsbook;
-  bet_amount?: number;
   status: ParlayStatus;
   created_at: string;
   placed_at?: string;
+  backend_id?: string;  // Backend database parlay_id after sync
   result?: {
     won: boolean;
-    profit?: number;
     legs_hit: number;
     legs_total: number;
   };

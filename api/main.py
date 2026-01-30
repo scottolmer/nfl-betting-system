@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import props, parlays
+from api.routers import props, parlays, results
 from api.config import settings
 import logging
 
@@ -68,6 +68,11 @@ app.include_router(
     parlays.router,
     prefix="/api/parlays",
     tags=["Parlays"]
+)
+app.include_router(
+    results.router,
+    prefix="/api/results",
+    tags=["Results"]
 )
 
 
