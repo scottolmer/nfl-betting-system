@@ -21,6 +21,8 @@ from .agents import (
     WeatherAgent,
     HitRateAgent,
     AgentConfig,
+    MetaAgent,
+    MetaAgentConfig,
 )
 
 # Import AgentWeightManager for dynamic weight loading
@@ -76,9 +78,15 @@ class PropAnalyzer:
         for agent_name, agent in self.agents.items():
             self.logger.info(f"  {agent_name:12s} weight: {agent.weight:.2f}")
 
+        # Initialize meta-agent (optional, enabled by default)
+        meta_config = MetaAgentConfig()
+        self.meta_agent = MetaAgent(meta_config) if meta_config.enabled else None
+        if self.meta_agent:
+            self.logger.info("🔮 Meta-agent initialized (reviews picks >= 65 confidence)")
+
         self.logger.info("🧠 PropAnalyzer initialized with 9 agents")
 
-    def analyze_prop(self, prop_data: Dict, context: Dict) -> PropAnalysis:
+    def analyze_prop(self, prop_data: Dict, context: Dict, use_meta_agent: bool = False) -> PropAnalysis:
         """Analyze a single prop bet - forcing OVER analysis then inverting for UNDER"""
         prop = self._create_prop_object(prop_data)
         bet_indicator = prop.bet_type[0]  # 'O' for OVER, 'U' for UNDER
@@ -158,19 +166,43 @@ class PropAnalyzer:
             rationale=all_rationale, agent_breakdown=agent_results, edge_explanation=edge_explanation,
             top_contributing_agents=top_contributing_agents,
         )
+
+        # Meta-agent review (optional)
+        if use_meta_agent and self.meta_agent and self.meta_agent.should_review(analysis):
+            meta_result = self.meta_agent.review(analysis, context)
+            analysis.final_confidence = meta_result.adjusted_confidence
+            analysis.meta_agent_result = meta_result
+            if meta_result.meta_rationale:
+                analysis.rationale.insert(0, f"[META] {meta_result.meta_rationale}")
+
         return analysis
 
-    def analyze_all_props(self, context: Dict, min_confidence: int = 50) -> List[PropAnalysis]:
+    def analyze_all_props(self, context: Dict, min_confidence: int = 50,
+                          exclude_players: List[str] = None) -> List[PropAnalysis]:
         """Analyze all props and filter based on whether we should take the bet
 
         With the fixed system:
         - For OVER bets: confidence represents probability OVER hits
         - For UNDER bets: confidence represents probability UNDER hits (inverted from OVER)
         - Both are filtered using the same threshold: confidence >= min_confidence
+
+        Args:
+            context: Dict containing props and other context data
+            min_confidence: Minimum confidence threshold for filtering
+            exclude_players: List of player names to exclude (for Pick6/platform filtering)
         """
         props = context.get('props', [])
         if not props:
             self.logger.error("No props found in context!"); return []
+
+        # Filter out excluded players if provided
+        if exclude_players:
+            exclude_players_lower = [p.lower().strip() for p in exclude_players]
+            original_count = len(props)
+            props = [p for p in props if p.get('player_name', '').lower().strip() not in exclude_players_lower]
+            filtered_count = original_count - len(props)
+            if filtered_count > 0:
+                self.logger.info(f"🚫 Excluded {filtered_count} props from {len(exclude_players)} players")
 
         self.logger.info(f"📊 Analyzing {len(props)} props...")
         results = []
@@ -190,12 +222,12 @@ class PropAnalyzer:
 
                     if should_include:
                         results.append(analysis)
-                        
+
             except Exception as e:
                 player = prop_data.get('player_name', '?')
                 stat = prop_data.get('stat_type', '?')
                 self.logger.error(f"❌ Failed: {player} {stat} - {e}", exc_info=False)
-        
+
         results = PropsValidator.validate_all_analyses(results)
         results.sort(key=lambda x: x.final_confidence, reverse=True)
         self.logger.info(f"✅ Analyzed {len(results)} props")
@@ -330,3 +362,23 @@ class PropAnalyzer:
         elif abs(confidence - 50) >= 8: strength = "📊 MODERATE"
         else: strength = "SLIGHT"
         return f"{strength} {direction} edge primarily driven by: {main_drivers}"
+
+    @staticmethod
+    def prop_analysis_to_dict(analysis: PropAnalysis) -> Dict:
+        """Convert PropAnalysis to JSON-serializable dict for assistant interface"""
+        prop = analysis.prop
+        return {
+            'player_name': prop.player_name,
+            'team': prop.team,
+            'opponent': prop.opponent,
+            'position': prop.position,
+            'stat_type': prop.stat_type,
+            'line': prop.line,
+            'bet_type': prop.bet_type,
+            'week': prop.week,
+            'confidence': analysis.final_confidence,
+            'recommendation': analysis.recommendation,
+            'edge_explanation': analysis.edge_explanation,
+            'agent_breakdown': analysis.agent_breakdown,
+            'rationale': analysis.rationale[:3] if analysis.rationale else [],  # Top 3 reasons
+        }

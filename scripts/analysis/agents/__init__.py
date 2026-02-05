@@ -12,6 +12,7 @@ from .trend_agent import TrendAgent
 from .variance_agent import VarianceAgent
 from .weather_agent import WeatherAgent
 from .hit_rate_agent import HitRateAgent
+from .meta_agent import MetaAgent, MetaAgentConfig, MetaAgentResult
 
 __all__ = [
     'BaseAgent',
@@ -25,4 +26,7 @@ __all__ = [
     'VarianceAgent',
     'WeatherAgent',
     'HitRateAgent',
+    'MetaAgent',
+    'MetaAgentConfig',
+    'MetaAgentResult',
 ]

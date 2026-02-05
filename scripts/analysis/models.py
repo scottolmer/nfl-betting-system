@@ -3,10 +3,13 @@ Data models for NFL betting analysis system
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Literal, Tuple
+from typing import List, Optional, Literal, Tuple, TYPE_CHECKING
 from datetime import datetime
 import numpy as np
 import logging # Keep logging import if other parts use it
+
+if TYPE_CHECKING:
+    from .agents.meta_agent import MetaAgentResult
 
 # logger = logging.getLogger(__name__) # REMOVE logger instance if only used for debug
 
@@ -46,6 +49,9 @@ class PropAnalysis:
     
     # PROJECT 3: Track which agents drove the confidence score for correlation detection
     top_contributing_agents: List[Tuple[str, float]] = field(default_factory=list)  # [(agent_name, contribution %), ...]
+
+    # Meta-agent review result (optional, only populated when use_meta_agent=True)
+    meta_agent_result: Optional['MetaAgentResult'] = None
 
 
 @dataclass
