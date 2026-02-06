@@ -1,10 +1,21 @@
 """
 DVOA Agent - Analyzes team efficiency
 UPDATED: QB-friendly scoring with fair WR/TE competition
+UPDATED: Incorporates individual QB EPA/DVOA analytics
 """
 
 from typing import Dict, List, Tuple
+import re
 from .base_agent import BaseAgent
+
+
+def normalize_player_name(name: str) -> str:
+    """Normalize player name for matching"""
+    if not name:
+        return name
+    name = name.replace('.', '')
+    name = re.sub(r'\s+', ' ', name)
+    return name.strip().lower()
 
 
 class DVOAAgent(BaseAgent):
@@ -12,13 +23,14 @@ class DVOAAgent(BaseAgent):
 
     def __init__(self, weight: float = 2.0):
         super().__init__(weight=weight)
-    
+
     def analyze(self, prop, context: Dict) -> Tuple[float, str, List[str]]:
         rationale = []
         score = 50
-        
+
         off_dvoa = context.get('dvoa_offensive', {})
         def_dvoa = context.get('dvoa_defensive', {})
+        qb_analytics = context.get('qb_analytics', {})
         
         team_off = off_dvoa.get(prop.team, {})
         opp_def = def_dvoa.get(prop.opponent, {})
@@ -37,47 +49,85 @@ class DVOAAgent(BaseAgent):
         
         # POSITION-SPECIFIC HANDLING
         if prop.position == 'QB':
-            # QB: AGGRESSIVE SCORING for 80+ elite matchups
+            # First check individual QB analytics (EPA, DVOA per QB)
+            qb_name = normalize_player_name(prop.player_name)
+            qb_data = qb_analytics.get(qb_name, {})
+
+            if qb_data:
+                # Individual QB efficiency metrics
+                qb_epa = qb_data.get('epa_per_dropback', 0)
+                qb_dvoa = qb_data.get('dvoa', 0)
+                qb_rating = qb_data.get('passer_rating', 0)
+                qb_ypa = qb_data.get('yards_per_attempt', 0)
+
+                # EPA per dropback analysis (excellent predictor)
+                if qb_epa >= 0.25:
+                    score += 15
+                    rationale.append(f"🔥 Elite EPA/dropback: {qb_epa:.3f}")
+                elif qb_epa >= 0.10:
+                    score += 10
+                    rationale.append(f"💪 Strong EPA/dropback: {qb_epa:.3f}")
+                elif qb_epa >= 0:
+                    score += 5
+                    rationale.append(f"Positive EPA: {qb_epa:.3f}")
+                elif qb_epa <= -0.10:
+                    score -= 12
+                    rationale.append(f"⚠️ Negative EPA: {qb_epa:.3f}")
+
+                # Individual QB DVOA
+                if qb_dvoa >= 30:
+                    score += 12
+                    rationale.append(f"🔥 Elite QB DVOA: {qb_dvoa:.1f}%")
+                elif qb_dvoa >= 15:
+                    score += 8
+                    rationale.append(f"Strong QB DVOA: {qb_dvoa:.1f}%")
+                elif qb_dvoa <= -15:
+                    score -= 10
+                    rationale.append(f"⚠️ Poor QB DVOA: {qb_dvoa:.1f}%")
+
+                # Yards per attempt (volume indicator)
+                if qb_ypa >= 8.5:
+                    score += 6
+                    rationale.append(f"High YPA: {qb_ypa:.1f}")
+                elif qb_ypa <= 6.0:
+                    score -= 6
+                    rationale.append(f"Low YPA: {qb_ypa:.1f}")
+
+            # Team-level DVOA (still valuable)
             if pass_off_dvoa >= 40:
-                score += 30
-                rationale.append(f"🔥🔥 ELITE O: {prop.team} +{pass_off_dvoa:.1f}%")
+                score += 20  # Reduced since we have individual QB data now
+                rationale.append(f"🔥 ELITE team O: {prop.team} +{pass_off_dvoa:.1f}%")
             elif pass_off_dvoa >= 20:
-                score += 25
+                score += 15
                 rationale.append(f"💪 Elite passing O: {prop.team} +{pass_off_dvoa:.1f}%")
             elif pass_off_dvoa >= 10:
-                score += 18
+                score += 10
                 rationale.append(f"💪 Strong passing O: {prop.team} +{pass_off_dvoa:.1f}%")
             elif pass_off_dvoa >= 5:
-                score += 12
+                score += 6
                 rationale.append(f"Good passing O: +{pass_off_dvoa:.1f}%")
-            elif pass_off_dvoa >= 0:
-                score += 5
-                rationale.append(f"Average passing O: +{pass_off_dvoa:.1f}%")
             elif pass_off_dvoa <= -10:
-                score -= 15
+                score -= 10
                 rationale.append(f"⚠️ Weak passing O: {pass_off_dvoa:.1f}%")
-            
+
+            # Opponent pass defense
             if pass_def_dvoa >= 20:
-                score += 25
+                score += 18
                 rationale.append(f"🎯 ELITE weak D: {prop.opponent} +{pass_def_dvoa:.1f}%")
             elif pass_def_dvoa >= 10:
-                score += 18
+                score += 12
                 rationale.append(f"🎯 Weak pass D: {prop.opponent} +{pass_def_dvoa:.1f}%")
             elif pass_def_dvoa >= 3:
-                score += 12
+                score += 8
                 rationale.append(f"Favorable pass D: +{pass_def_dvoa:.1f}%")
-            elif pass_def_dvoa >= 0:
-                score += 6
-                rationale.append(f"Average pass D: +{pass_def_dvoa:.1f}%")
             elif pass_def_dvoa <= -10:
-                score -= 15
+                score -= 12
                 rationale.append(f"⚠️ ELITE PASS D: {pass_def_dvoa:.1f}%")
-            
+
             # Stack bonus: Elite O vs weak D
             if pass_off_dvoa >= 20 and pass_def_dvoa >= 10:
-                score += 15
+                score += 10
                 rationale.append("⚡ PREMIUM STACK: Elite O vs weak D")
-            # REMOVED free +5 bonus - was causing OVER bias
         
         elif prop.position in ['WR', 'TE']:
             # WR/TE: AGGRESSIVE SCORING matching QB

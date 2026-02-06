@@ -23,6 +23,17 @@ def normalize_name(name):
     name = re.sub(r'\s+', ' ', name)
     return name.lower()
 
+def safe_float(val, default=0):
+    """Convert value to float, handling commas, percentage signs, and dashes"""
+    if pd.isna(val) or val == '' or val == '-':
+        return default
+    val_str = str(val).replace(',', '').replace('%', '').strip()
+    try:
+        return float(val_str)
+    except (ValueError, TypeError):
+        return default
+
+
 def normalize_team_abbr(abbr):
     """Normalize team abbreviations to handle variations"""
     if not abbr: return abbr
@@ -434,35 +445,152 @@ class NFLDataLoader:
         logger.info(f"✓ Loaded historical stats for {loaded_hist_weeks} weeks")
 
         # --- Load Current Week Usage Data (Falls back to previous weeks) ---
+        # Load BOTH receiving_usage AND rushing_usage for complete player data
         try:
-            usage_file = None
-            # Look backwards for usage data (week 10 uses week 9 data)
+            usage_dict = {}
+
+            # 1. Load RECEIVING usage (WR, TE, pass-catching RB)
+            recv_usage_file = None
             for try_week in [week-1, week-2, week-3]:
                 if try_week < 1: break
-                usage_file = self.data_dir / f"wk{try_week}_receiving_usage.csv"
-                if usage_file.exists(): break
-            
-            if usage_file and usage_file.exists():
-                usage_df = pd.read_csv(usage_file, skiprows=1)
-                usage_dict = {}
-                for _, row in usage_df.iterrows():
+                recv_usage_file = self.data_dir / f"wk{try_week}_receiving_usage.csv"
+                if recv_usage_file.exists(): break
+
+            if recv_usage_file and recv_usage_file.exists():
+                recv_df = pd.read_csv(recv_usage_file, skiprows=1)
+                for _, row in recv_df.iterrows():
                     player = normalize_name(row.get('Player', ''))
                     if player:
                         usage_dict[player] = {
-                            'snap_share_pct': float(str(row.get('Snap Share %', 0)).replace('%', '')) if '%' in str(row.get('Snap Share %', '')) else 0,
-                            'target_share_pct': float(str(row.get('Target Share %', 0)).replace('%', '')) if '%' in str(row.get('Target Share %', '')) else 0,
-                            'targets': float(row.get('Tgt', 0)) if pd.notna(row.get('Tgt')) else 0,
-                            'receptions': float(row.get('Rec', 0)) if pd.notna(row.get('Rec')) else 0,
+                            'snap_share_pct': safe_float(row.get('SNP%')),
+                            'target_share_pct': safe_float(row.get('TAR%')),
+                            'targets': safe_float(row.get('TAR')),
+                            'receptions': safe_float(row.get('REC')),
+                            'receiving_yards': safe_float(row.get('YDS')),
                         }
-                context['usage'] = usage_dict
-                context['loaded_files'].append(f"Recent Usage Data: {usage_file.name}")
-                logger.info(f"✓ Loaded usage data: {usage_file.name} ({len(usage_dict)} players)")
-            else:
+                context['loaded_files'].append(f"Receiving Usage: {recv_usage_file.name}")
+                logger.info(f"✓ Loaded receiving usage: {recv_usage_file.name} ({len(usage_dict)} players)")
+
+            # 2. Load RUSHING usage (RB, rushing QB)
+            rush_usage_file = None
+            for try_week in [week-1, week-2, week-3]:
+                if try_week < 1: break
+                rush_usage_file = self.data_dir / f"wk{try_week}_rushing_usage.csv"
+                if rush_usage_file.exists(): break
+
+            if rush_usage_file and rush_usage_file.exists():
+                rush_df = pd.read_csv(rush_usage_file, skiprows=1)
+                rush_count = 0
+                for _, row in rush_df.iterrows():
+                    player = normalize_name(row.get('Player', ''))
+                    if player:
+                        snap_pct = safe_float(row.get('SNP%'))
+                        attempt_pct = safe_float(row.get('ATT%'))
+                        touch_pct = safe_float(row.get('TCH%'))
+
+                        # Merge with existing data or create new entry
+                        if player in usage_dict:
+                            # Player already exists from receiving - add rushing data
+                            usage_dict[player]['rush_attempts'] = safe_float(row.get('ATT'))
+                            usage_dict[player]['rush_attempt_pct'] = attempt_pct
+                            usage_dict[player]['touch_pct'] = touch_pct
+                            usage_dict[player]['rushing_yards'] = safe_float(row.get('YDS'))
+                            # Use higher snap share if rushing data has it
+                            if snap_pct > usage_dict[player].get('snap_share_pct', 0):
+                                usage_dict[player]['snap_share_pct'] = snap_pct
+                        else:
+                            # New player (RB without receiving data)
+                            usage_dict[player] = {
+                                'snap_share_pct': snap_pct,
+                                'rush_attempts': safe_float(row.get('ATT')),
+                                'rush_attempt_pct': attempt_pct,
+                                'touch_pct': touch_pct,
+                                'rushing_yards': safe_float(row.get('YDS')),
+                            }
+                        rush_count += 1
+                context['loaded_files'].append(f"Rushing Usage: {rush_usage_file.name}")
+                logger.info(f"✓ Loaded rushing usage: {rush_usage_file.name} ({rush_count} players)")
+
+            context['usage'] = usage_dict
+            if not usage_dict:
                 logger.info(f"ℹ No usage data found for recent weeks")
-                context['usage'] = {}
+
         except Exception as e:
             logger.error(f"Error loading usage data: {e}")
             context['usage'] = {}
+
+        # --- Load QB Analytics from passing_base ---
+        try:
+            qb_analytics = {}
+            passing_file = None
+            for try_week in [week-1, week-2, week-3]:
+                if try_week < 1: break
+                passing_file = self.data_dir / f"wk{try_week}_passing_base.csv"
+                if passing_file.exists(): break
+
+            if passing_file and passing_file.exists():
+                pass_df = pd.read_csv(passing_file, skiprows=1)
+                for _, row in pass_df.iterrows():
+                    player = normalize_name(row.get('Player', ''))
+                    if player:
+                        qb_analytics[player] = {
+                            'pass_attempts': safe_float(row.get('ATT')),
+                            'completions': safe_float(row.get('COM')),
+                            'completion_pct': safe_float(row.get('COM%')),
+                            'passing_yards': safe_float(row.get('YDS')),
+                            'yards_per_attempt': safe_float(row.get('YPA')),
+                            'passing_tds': safe_float(row.get('TD')),
+                            'interceptions': safe_float(row.get('INT')),
+                            'passer_rating': safe_float(row.get('RTG')),
+                            'epa': safe_float(row.get('EPA')),
+                            'epa_per_dropback': safe_float(row.get('EPA/DB')),
+                            'dvoa': safe_float(row.get('DVOA')),
+                            'dyar': safe_float(row.get('DYAR')),
+                            'snap_pct': safe_float(row.get('SNP%')),
+                        }
+                context['qb_analytics'] = qb_analytics
+                context['loaded_files'].append(f"QB Analytics: {passing_file.name}")
+                logger.info(f"✓ Loaded QB analytics: {passing_file.name} ({len(qb_analytics)} QBs)")
+            else:
+                context['qb_analytics'] = {}
+                logger.info(f"ℹ No QB analytics data found")
+        except Exception as e:
+            logger.error(f"Error loading QB analytics: {e}")
+            context['qb_analytics'] = {}
+
+        # --- Load Receiver Alignment Data ---
+        try:
+            alignment_data = {}
+            align_file = None
+            for try_week in [week-1, week-2, week-3]:
+                if try_week < 1: break
+                align_file = self.data_dir / f"wk{try_week}_receiving_alignment.csv"
+                if align_file.exists(): break
+
+            if align_file and align_file.exists():
+                align_df = pd.read_csv(align_file, skiprows=1)
+                for _, row in align_df.iterrows():
+                    player = normalize_name(row.get('Player', ''))
+                    if player:
+                        wide_pct = safe_float(row.get('OW%'))
+                        slot_pct = safe_float(row.get('SLOT%'))
+
+                        alignment_data[player] = {
+                            'wide_pct': wide_pct,
+                            'slot_pct': slot_pct,
+                            'primary_alignment': 'SLOT' if slot_pct > wide_pct else 'WIDE',
+                            'wide_yards_per_route': safe_float(row.get('WYPR')),
+                            'slot_yards_per_route': safe_float(row.get('SYPR')),
+                        }
+                context['alignment'] = alignment_data
+                context['loaded_files'].append(f"Receiver Alignment: {align_file.name}")
+                logger.info(f"✓ Loaded alignment data: {align_file.name} ({len(alignment_data)} players)")
+            else:
+                context['alignment'] = {}
+                logger.info(f"ℹ No alignment data found")
+        except Exception as e:
+            logger.error(f"Error loading alignment data: {e}")
+            context['alignment'] = {}
 
         # --- Aggregate Historical Stats ---
         try:
@@ -498,6 +626,36 @@ class NFLDataLoader:
         if not context.get('defensive_vs_receiver'): logger.error("ERROR: Def vs Receiver dict empty.")
 
         return context
+
+    def get_validation_status(self, context: Dict) -> Dict:
+        """Get user-friendly validation status for conversational interface"""
+        status = {
+            'success': True,
+            'week': context.get('week'),
+            'files_loaded': context.get('loaded_files', []),
+            'props_count': len(context.get('props', [])),
+            'dvoa_teams': len(context.get('dvoa_offensive', {})),
+            'injuries_loaded': bool(context.get('injuries')),
+            'betting_lines_source': context.get('betting_lines_source', 'Unknown'),
+            'warnings': [],
+            'errors': []
+        }
+
+        # Check for missing data
+        if not context.get('dvoa_off_raw') is not None:
+            status['warnings'].append('DVOA Offensive data missing')
+        if not context.get('dvoa_def_raw') is not None:
+            status['warnings'].append('DVOA Defensive data missing')
+        if not context.get('betting_lines_raw') is not None:
+            status['errors'].append('Betting lines missing - cannot analyze props')
+            status['success'] = False
+        if not context.get('props'):
+            status['errors'].append('No props generated - check betting lines file')
+            status['success'] = False
+        if not context.get('injuries'):
+            status['warnings'].append('No injury report found')
+
+        return status
 
 
 if __name__ == "__main__":

@@ -14,17 +14,16 @@ import json
 class AgentWeightManager:
     """Manages automated agent weight adjustments based on performance."""
 
-    # Default weights (fallback if database is empty)
+    # Default weights based on offseason calibration analysis (weeks 11-16)
+    # Updated 2026-02-05 based on comprehensive agent performance analysis
+    # REMOVED: Trend (68% neutral), Weather (no data), HitRate (no predictive value)
     DEFAULT_WEIGHTS = {
-        'DVOA': 2.5,
-        'Matchup': 2.0,
-        'Volume': 1.8,
-        'Injury': 1.5,
-        'Trend': 1.2,
-        'GameScript': 1.0,
-        'Variance': 0.8,
-        'Weather': 0.5,
-        'HitRate': 2.0
+        'DVOA': 3.2,       # 50.5% accuracy, valuable signal
+        'Matchup': 0.5,    # HEAVILY REDUCED - 38.1% accuracy (HURTS predictions)
+        'Volume': 0.75,    # REDUCED - 44.4% accuracy (hurts predictions)
+        'Injury': 4.7,     # Highly predictive (confirmed in optimization)
+        'GameScript': 0.82,
+        'Variance': 2.4,   # Found valuable in optimization
     }
 
     # Safety constraints

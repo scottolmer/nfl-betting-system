@@ -86,10 +86,13 @@ class VolumeAgent(BaseAgent):
                 rationale.append(f"⚠️ LOW VOLUME: Only {target_share:.1f}% targets")
         
         elif prop.position == 'RB':
-            # RB: Check both snap share and rushing attempts for balance
+            # RB: Check snap share, touch share, and rushing attempts
             snap_share = player_usage.get('snap_share_pct', 0)
             rush_attempts = player_usage.get('rush_attempts', 0)
-            
+            touch_pct = player_usage.get('touch_pct', 0)
+            rush_attempt_pct = player_usage.get('rush_attempt_pct', 0)
+
+            # Snap share analysis
             if snap_share >= 75:
                 score += 22
                 rationale.append(f"🔒 BELLCOW: {snap_share:.1f}% snaps")
@@ -99,11 +102,33 @@ class VolumeAgent(BaseAgent):
             elif snap_share < 35:
                 score -= 18
                 rationale.append(f"⚠️ LIMITED ROLE: {snap_share:.1f}% snaps")
-            
-            # Check rush attempts for rushing props
-            if 'Rush' in prop.stat_type and rush_attempts >= 15:
+
+            # Touch share analysis (very important for RBs)
+            if touch_pct >= 50:
+                score += 10
+                rationale.append(f"🎯 High touch share: {touch_pct:.1f}%")
+            elif touch_pct >= 35:
                 score += 5
-                rationale.append(f"Good rushing volume: {rush_attempts:.0f} attempts")
+                rationale.append(f"Good touch share: {touch_pct:.1f}%")
+            elif touch_pct > 0 and touch_pct < 25:
+                score -= 10
+                rationale.append(f"⚠️ Low touch share: {touch_pct:.1f}%")
+
+            # Rush attempt percentage (team share of carries)
+            if rush_attempt_pct >= 70:
+                score += 8
+                rationale.append(f"Workhorse: {rush_attempt_pct:.1f}% of team carries")
+            elif rush_attempt_pct >= 50:
+                score += 4
+                rationale.append(f"Primary back: {rush_attempt_pct:.1f}% of team carries")
+
+            # Check rush attempts for rushing props
+            if 'Rush' in prop.stat_type and rush_attempts >= 18:
+                score += 8
+                rationale.append(f"Elite volume: {rush_attempts:.0f} attempts/game")
+            elif 'Rush' in prop.stat_type and rush_attempts >= 12:
+                score += 4
+                rationale.append(f"Good volume: {rush_attempts:.0f} attempts/game")
         
         # Trend analysis - same for all positions
         trend = player_usage.get('trend', 'stable')

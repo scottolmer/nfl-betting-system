@@ -58,13 +58,28 @@ class MatchupAgent(BaseAgent):
             return (score, direction, rationale)
         
         wr_role = self._classify_wr_role(prop.player_name, prop.position, context)
-        
+        align_info = self._get_alignment_efficiency(prop.player_name, context)
+
         if wr_role in ['WR1', 'WR2', 'WR3']:
             # Use the keys we mapped in our new transformer
             dvoa_key = f'vs_{wr_role.lower()}_dvoa'
             dvoa = opp_def.get(dvoa_key, 0)
-            
-            # Simplified logic (removed yds_allowed)
+
+            # Add alignment context to rationale
+            if align_info['slot_pct'] >= 60:
+                rationale.append(f"📍 Slot receiver ({align_info['slot_pct']:.0f}% slot routes)")
+            elif align_info['wide_pct'] >= 70:
+                rationale.append(f"📍 Outside receiver ({align_info['wide_pct']:.0f}% wide routes)")
+
+            # Check yards per route efficiency
+            if align_info['slot_pct'] >= 50 and align_info['slot_ypr'] >= 2.0:
+                score += 5
+                rationale.append(f"Efficient from slot: {align_info['slot_ypr']:.1f} yds/route")
+            elif align_info['wide_pct'] >= 50 and align_info['wide_ypr'] >= 2.5:
+                score += 5
+                rationale.append(f"Efficient from outside: {align_info['wide_ypr']:.1f} yds/route")
+
+            # DVOA-based scoring
             if dvoa >= 50:
                 score += 25
                 rationale.append(
@@ -153,49 +168,64 @@ class MatchupAgent(BaseAgent):
                 elif rb_dvoa <= -30:
                     score -= 15
                     rationale.append(f"⚠️ Strong vs RB receiving: {rb_dvoa:.1f}% DVOA")
-# INVERT SCORE FOR UNDER BETS
-        if prop.bet_type == 'UNDER':
-            score = 100 - score
-# INVERT SCORE FOR UNDER BETS
-        if prop.bet_type == 'UNDER':
-            score = 100 - score
-        
         direction = "OVER" if score >= 50 else "UNDER"
-        
+
         if score != 50:
             rationale.insert(0, f"✅ Position matchup {('favors' if score > 50 else 'disfavors')} {direction}")
-        
+
         return (score, direction, rationale)
-    
+
     def _classify_wr_role(self, player_name: str, position: str, context: Dict) -> str:
-        """Classify WR role using NORMALIZED names"""
+        """Classify WR role using NORMALIZED names and alignment data"""
         if position == 'TE':
             return 'TE'
         if position == 'RB':
             return 'RB'
         if position == 'QB':
             return 'QB'
-        
+
         # Normalize the player name
-        normalized_name = normalize_player_name(player_name)
-        
+        normalized_name = normalize_player_name(player_name).lower()
+
         usage = context.get('usage', {})
         alignment = context.get('alignment', {})
-        
+
         # Try normalized name first, then original
-        player_usage = usage.get(normalized_name, usage.get(player_name, {}))
-        player_alignment = alignment.get(normalized_name, alignment.get(player_name, {}))
-        
+        player_usage = usage.get(normalized_name, usage.get(player_name.lower(), {}))
+        player_alignment = alignment.get(normalized_name, alignment.get(player_name.lower(), {}))
+
         target_share = player_usage.get('target_share_pct', 0)
         slot_pct = player_alignment.get('slot_pct', 0)
-        
-        # WR1: High target share + plays outside (not slot)
-        if target_share >= 22 and slot_pct < 40:
-            return 'WR1'
-        # Slot WR = WR3
+        wide_pct = player_alignment.get('wide_pct', 0)
+
+        # Primary classification based on alignment + target share
         if slot_pct >= 60:
+            # Primarily slot receiver -> WR3 matchup (slot coverage)
             return 'WR3'
-        # WR2: Moderate target share
-        if target_share >= 15:
+        elif wide_pct >= 70 and target_share >= 22:
+            # Outside receiver with high target share -> WR1
+            return 'WR1'
+        elif wide_pct >= 50 and target_share >= 15:
+            # Outside receiver with moderate targets -> WR2
             return 'WR2'
+        elif target_share >= 22:
+            # High target share regardless of alignment -> WR1
+            return 'WR1'
+        elif target_share >= 15:
+            return 'WR2'
+
         return 'WR3'
+
+    def _get_alignment_efficiency(self, player_name: str, context: Dict) -> dict:
+        """Get alignment-specific efficiency metrics for a receiver"""
+        normalized_name = normalize_player_name(player_name).lower()
+        alignment = context.get('alignment', {})
+        player_align = alignment.get(normalized_name, alignment.get(player_name.lower(), {}))
+
+        return {
+            'slot_pct': player_align.get('slot_pct', 0),
+            'wide_pct': player_align.get('wide_pct', 0),
+            'primary_alignment': player_align.get('primary_alignment', 'UNKNOWN'),
+            'slot_ypr': player_align.get('slot_yards_per_route', 0),
+            'wide_ypr': player_align.get('wide_yards_per_route', 0),
+        }
