@@ -1,6 +1,6 @@
 """
 Natural Language Query Interface for NFL Betting System
-Uses Claude Haiku to translate natural language queries into system commands.
+Uses Google Gemini to translate natural language queries into system commands.
 """
 
 import os
@@ -9,11 +9,11 @@ import logging
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
+# Gemini Client - optional import to avoid breaking other imports
 try:
-    import anthropic
-    ANTHROPIC_AVAILABLE = True
+    from ..core.gemini_client import GeminiClient
 except ImportError:
-    ANTHROPIC_AVAILABLE = False
+    GeminiClient = None  # Will fail at runtime if chat interface is used without deps
 
 from .parlay_tracker import ParlayTracker
 from .export_parlays import export_weekly_parlays, preview_weekly_parlays
@@ -26,7 +26,7 @@ from .correlation_detector import EnhancedParlayBuilder
 logger = logging.getLogger(__name__)
 
 
-# System prompt for Claude Haiku
+# System prompt for Gemini
 SYSTEM_PROMPT = """You are a query parser for an NFL betting analysis system.
 Your job is to translate natural language queries into structured JSON function calls.
 
@@ -124,7 +124,7 @@ Example responses:
 
 
 class NLQueryInterface:
-    """Natural language query interface using Claude Haiku"""
+    """Natural language query interface using Google Gemini"""
 
     def __init__(self, data_dir: str = "data"):
         """
@@ -133,14 +133,13 @@ class NLQueryInterface:
         Args:
             data_dir: Directory containing NFL data
         """
-        if not ANTHROPIC_AVAILABLE:
-            raise ImportError("anthropic package required. Install with: pip install anthropic")
-
-        api_key = os.environ.get('ANTHROPIC_API_KEY')
-        if not api_key:
-            raise ValueError("ANTHROPIC_API_KEY environment variable not set")
-
-        self.client = anthropic.Anthropic(api_key=api_key)
+        try:
+            self.client = GeminiClient(model_name="gemini-2.0-flash")
+            self.client_available = self.client.is_available
+        except Exception as e:
+            logger.error(f"Failed to initialize Gemini client: {e}")
+            self.client_available = False
+            
         self.conversation_history: List[Dict[str, str]] = []
         self.tracker = ParlayTracker()
         self.data_loader = NFLDataLoader(data_dir=data_dir)
@@ -152,7 +151,7 @@ class NLQueryInterface:
 
     def translate_query(self, user_input: str) -> Dict:
         """
-        Use Claude Haiku to translate natural language to structured command.
+        Use Gemini to translate natural language to structured command.
 
         Args:
             user_input: User's natural language query
@@ -160,34 +159,31 @@ class NLQueryInterface:
         Returns:
             Dict with function name and parameters, or clarification request
         """
-        # Build messages with conversation history
-        messages = self.conversation_history + [
-            {"role": "user", "content": user_input}
-        ]
+        if not self.client_available:
+            return {"error": "Gemini API client is not available. Check your API key."}
+
+        # Build prompt with conversation history context
+        history_str = ""
+        if self.conversation_history:
+            history_str = "Conversation History:\n"
+            for msg in self.conversation_history:
+                history_str += f"{msg['role'].upper()}: {msg['content']}\n"
+            history_str += "\n"
+        
+        full_prompt = f"{history_str}USER: {user_input}\n\nTranslate the above USER request into a JSON command based on the system instructions."
 
         try:
-            response = self.client.messages.create(
-                model="claude-haiku-4-5-20251001",
-                max_tokens=500,
-                system=SYSTEM_PROMPT,
-                messages=messages
+            # Use generate_json directly
+            command = self.client.generate_json(
+                prompt=full_prompt,
+                system_instruction=SYSTEM_PROMPT
             )
-
-            # Parse JSON from response
-            response_text = response.content[0].text.strip()
-
-            # Remove markdown code blocks if present
-            if "```json" in response_text:
-                response_text = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                response_text = response_text.split("```")[1].split("```")[0].strip()
-
-            command = json.loads(response_text)
+            
+            if not command:
+                return {"error": "Failed to understand query (Empty response)."}
+                
             return command
 
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Haiku response: {e}")
-            return {"error": "Failed to understand query. Please rephrase."}
         except Exception as e:
             logger.error(f"Error translating query: {e}")
             return {"error": f"Translation error: {str(e)}"}
@@ -754,7 +750,7 @@ Type 'exit' or 'quit' to end the session.
                     print("\nGoodbye!\n")
                     break
 
-                # Translate query with Haiku
+                # Translate query with Gemini
                 print("Thinking...")
                 command = self.translate_query(user_input)
 

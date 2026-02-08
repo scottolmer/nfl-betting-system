@@ -5,12 +5,13 @@ Supports both SQLite (local) and PostgreSQL (production).
 
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Any
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey, JSON, DateTime, Text
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey, JSON, DateTime, Text, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from api.config import settings
+import uuid
 
 # Determine database URL
 # Prioritize env var, fall back to local sqlite file
@@ -132,9 +133,28 @@ class PropAvailability(Base):
     line = Column(Float)
     is_available = Column(Boolean, default=True)
     last_updated = Column(DateTime, default=datetime.now)
-    validation_source = Column(String, default="manual")
-    notes = Column(Text, nullable=True)
+    validation_source = Column(String, default='auto')  # 'auto' or 'manual'
+    notes = Column(String)
 
+
+class GameDataFile(Base):
+    """
+    Stores raw CSV data files uploaded via Admin UI.
+    Acts as the source of truth for analysis, replacing local file storage.
+    """
+    __tablename__ = "game_data_files"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    week = Column(Integer, nullable=False)
+    file_type = Column(String, nullable=False)  # e.g., 'betting_lines', 'dvoa_offense'
+    filename = Column(String)
+    content = Column(String)  # Storing as Text. For very large files, consider LargeBinary/Blob.
+    uploaded_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    # Composite index for faster lookups
+    __table_args__ = (
+        Index('idx_week_type', 'week', 'file_type'),
+    )
 
 class PropValidationRule(Base):
     """

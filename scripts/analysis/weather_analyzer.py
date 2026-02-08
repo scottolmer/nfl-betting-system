@@ -1,21 +1,24 @@
 """
-Weather Impact Analyzer - Claude API integration for weather analysis
+Weather Impact Analyzer - Gemini API integration for weather analysis
 """
 
 import os
-from anthropic import Anthropic
-from typing import Dict
 import logging
+from typing import Dict
+from ..core.gemini_client import GeminiClient
 
 logger = logging.getLogger(__name__)
 
 
 class WeatherImpactAnalyzer:
-    """Analyzes weather impact on NFL props using Claude API"""
+    """Analyzes weather impact on NFL props using Gemini API"""
     
     def __init__(self):
-        self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
-        self.model = "claude-sonnet-4-20250514"
+        try:
+            self.client = GeminiClient(model_name="gemini-2.0-flash")
+        except Exception as e:
+            logger.error(f"Failed to initialize Gemini client: {e}")
+            self.client = None
     
     def analyze_weather_impact(self, team: str, opponent: str, stat_type: str, 
                               weather_data: Dict) -> Dict:
@@ -31,14 +34,11 @@ class WeatherImpactAnalyzer:
         }
         """
         if not weather_data or not weather_data.get('conditions'):
-            return {
-                'passing_impact': 0,
-                'rushing_impact': 0,
-                'catching_impact': 0,
-                'overall_adjustment': 0,
-                'reasoning': 'No weather data available'
-            }
+            return self._get_neutral_result()
         
+        if not self.client or not self.client.is_available:
+            return self._get_neutral_result("Gemini client unavailable")
+
         weather_str = self._format_weather(weather_data)
         
         prompt = f"""Analyze how weather affects NFL prop betting.
@@ -63,22 +63,14 @@ Consider:
 - Precipitation (snow > rain for rushing benefits)
 - Temperature (extreme cold helps running game)
 - Humidity (high humidity hurts ball flight)
-- Forecast (in-game changes?)
-
-CRITICAL: Respond ONLY with valid JSON."""
+- Forecast (in-game changes?)"""
 
         try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=400,
-                messages=[{"role": "user", "content": prompt}]
-            )
+            # Use generate_json directly
+            result = self.client.generate_json(prompt)
             
-            response_text = response.content[0].text.strip()
-            response_text = response_text.replace('```json', '').replace('```', '').strip()
-            
-            import json
-            result = json.loads(response_text)
+            if not result:
+                raise ValueError("Empty response from Gemini")
             
             # Validate ranges
             result['passing_impact'] = max(-20, min(15, result.get('passing_impact', 0)))
@@ -91,13 +83,16 @@ CRITICAL: Respond ONLY with valid JSON."""
             
         except Exception as e:
             logger.error(f"Weather analysis failed: {e}")
-            return {
-                'passing_impact': 0,
-                'rushing_impact': 0,
-                'catching_impact': 0,
-                'overall_adjustment': 0,
-                'reasoning': f'Could not analyze weather: {str(e)}'
-            }
+            return self._get_neutral_result(f"Analysis failed: {str(e)}")
+
+    def _get_neutral_result(self, reason: str = "No weather data available") -> Dict:
+        return {
+            'passing_impact': 0,
+            'rushing_impact': 0,
+            'catching_impact': 0,
+            'overall_adjustment': 0,
+            'reasoning': reason
+        }
     
     def _format_weather(self, weather_data: Dict) -> str:
         """Format weather data for prompt"""
@@ -124,6 +119,7 @@ CRITICAL: Respond ONLY with valid JSON."""
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
+    # Needs GEMINI_API_KEY env var
     analyzer = WeatherImpactAnalyzer()
     
     # Test

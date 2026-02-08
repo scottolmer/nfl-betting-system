@@ -10,7 +10,8 @@ import logging
 import re
 import csv
 import io
-from typing import Dict # <<< *** ADD THIS IMPORT *** <<<
+from typing import Dict, Optional, Any
+from api.database import SessionLocal, GameDataFile
 
 logger = logging.getLogger(__name__)
 
@@ -334,8 +335,47 @@ class NFLDataLoader:
 
     def __init__(self, data_dir):
         self.data_dir = Path(data_dir)
-        # Load roster data on init
-        self.player_roster_map = _load_roster_data(self.data_dir)
+        # Load roster data on init (Try DB first, then File)
+        self.player_roster_map = self._load_roster_data_smart()
+
+    def _load_from_db(self, week: int, file_type: str) -> Optional[str]:
+        """Try to load file content from database"""
+        session = SessionLocal()
+        try:
+            record = session.query(GameDataFile).filter_by(week=week, file_type=file_type).first()
+            if record:
+                logger.info(f"✓ Loaded {file_type} from Database (Week {week})")
+                return record.content
+            return None
+        except Exception as e:
+            logger.error(f"DB Load Error ({file_type}): {e}")
+            return None
+        finally:
+            session.close()
+
+    def _load_roster_data_smart(self) -> Dict[str, str]:
+        """Load roster from DB or File"""
+        # 1. Try DB
+        content = self._load_from_db(week=0, file_type='roster') # Week 0 for global/roster
+        if content:
+            player_to_team_map = {}
+            try:
+                df_roster = pd.read_csv(io.StringIO(content))
+                # reuse processing logic (copy-paste from _load_roster_data or helper)
+                for _, row in df_roster.iterrows():
+                    player_name_raw = row.get('Player')
+                    team_abbr = row.get('Team')
+                    if player_name_raw and team_abbr and not pd.isna(player_name_raw) and not pd.isna(team_abbr):
+                        # ... verify normalize_name is available in scope or self ...
+                        # It is defined in module scope, good.
+                        normalized_player = normalize_name(player_name_raw)
+                        player_to_team_map[normalized_player] = normalize_team_abbr(team_abbr)
+                return player_to_team_map
+            except Exception as e:
+                logger.error(f"Error parsing roster from DB: {e}")
+
+        # 2. Fallback to File
+        return _load_roster_data(self.data_dir)
 
     def load_all_data(self, week):
         """Load all data needed for analysis"""
@@ -350,67 +390,82 @@ class NFLDataLoader:
         }
 
         # --- Load RAW DataFrames ---
-        # (Loading logic remains same as previous correct version)
-        try: # DVOA Off - Fall back through recent weeks if current week missing
+        
+        # Helper to load CSV from DB or File
+        def load_csv(file_type_key, file_patterns, header=0):
+            # 1. DB Attempt
+            db_content = self._load_from_db(week, file_type_key)
+            if db_content:
+                try:
+                    df = pd.read_csv(io.StringIO(db_content), header=header)
+                    file_name = f"DB:{file_type_key}"
+                    return df, file_name, week # Return actual week found (DB uses exact week)
+                except Exception as e:
+                     logger.error(f"Failed to parse DB content for {file_type_key}: {e}")
+
+            # 2. File Attempt (Fallback)
             fpath = None
+            found_week = week
             for try_week in [week, week-1, week-2, week-3]:
                 if try_week < 1: break
-                fpath = next(self.data_dir.glob(f"wk{try_week}_offensive_DVOA.csv"),
-                           next(self.data_dir.glob(f"wk{try_week}_offensive_dvoa.csv"),
-                           next(self.data_dir.glob(f"wk{try_week}_dvoa_offensive.csv"),
-                           next(self.data_dir.glob(f"DVOA_Off_wk_{try_week}.csv"), None))))
-                if fpath and fpath.exists(): break
-            if fpath and fpath.exists(): 
-                context['dvoa_off_raw'] = pd.read_csv(fpath, header=1)
-                context['loaded_files'].append(f"DVOA Offensive: {fpath.name}")
-                logger.info(f"✓ DVOA Off: {fpath.name} (using week {try_week} data)")
-            else: logger.warning(f"⚠ DVOA Offensive: no data found for weeks {week} through {max(1,week-3)}")
-        except Exception as e: logger.error(f"Error DVOA Off: {e}")
+                for pattern in file_patterns:
+                    fpath = next(self.data_dir.glob(pattern.format(week=try_week)), None)
+                    if fpath: break
+                if fpath: 
+                    found_week = try_week
+                    break
+            
+            if fpath and fpath.exists():
+                return pd.read_csv(fpath, header=header), fpath.name, found_week
+            return None, None, None
 
-        try: # DVOA Def - Fall back through recent weeks if current week missing
-            fpath = None
-            for try_week in [week, week-1, week-2, week-3]:
-                if try_week < 1: break
-                fpath = next(self.data_dir.glob(f"wk{try_week}_defensive_DVOA.csv"),
-                           next(self.data_dir.glob(f"wk{try_week}_dvoa_defensive.csv"),
-                           next(self.data_dir.glob(f"w{try_week}_defensive_DVOA.csv"),
-                           next(self.data_dir.glob(f"DVOA_Def_wk_{try_week}.csv"), None))))
-                if fpath and fpath.exists(): break
-            if fpath and fpath.exists(): 
-                context['dvoa_def_raw'] = pd.read_csv(fpath, header=1)
-                context['loaded_files'].append(f"DVOA Defensive: {fpath.name}")
-                logger.info(f"✓ DVOA Def: {fpath.name} (using week {try_week} data)")
-            else: logger.warning(f"⚠ DVOA Defensive: no data found for weeks {week} through {max(1,week-3)}")
-        except Exception as e: logger.error(f"Error DVOA Def: {e}")
+        # DVOA Offense
+        dvoa_off_df, name, wk = load_csv(
+            'dvoa_offensive', 
+            ["wk{week}_offensive_DVOA.csv", "wk{week}_offensive_dvoa.csv", "DVOA_Off_wk_{week}.csv"], 
+            header=1
+        )
+        if dvoa_off_df is not None:
+             context['dvoa_off_raw'] = dvoa_off_df
+             context['loaded_files'].append(f"DVOA Off: {name}")
+             logger.info(f"✓ DVOA Off: {name}")
+        else: logger.warning(f"⚠ DVOA Off missing")
 
-        try: # Def vs WR - Fall back through recent weeks if current week missing
-            fpath = None
-            for try_week in [week, week-1, week-2, week-3]:
-                if try_week < 1: break
-                fpath = next(self.data_dir.glob(f"wk{try_week}_def_v_wr_DVOA.csv"),
-                           next(self.data_dir.glob(f"wk{try_week}_dvoa_defensive_vs_receiver.csv"),
-                           next(self.data_dir.glob(f"Def_vs_WR_wk_{try_week}.csv"), None)))
-                if fpath and fpath.exists(): break
-            if fpath and fpath.exists(): 
-                context['def_vs_wr_raw'] = pd.read_csv(fpath, header=1)
-                context['loaded_files'].append(f"Def vs WR: {fpath.name}")
-                logger.info(f"✓ Def vs WR: {fpath.name} (using week {try_week} data)")
-            else: logger.warning(f"⚠ Def vs WR: no data found for weeks {week} through {max(1,week-3)}")
-        except Exception as e: logger.error(f"Error Def vs WR: {e}")
+        # DVOA Defense
+        dvoa_def_df, name, wk = load_csv(
+            'dvoa_defensive',
+            ["wk{week}_defensive_DVOA.csv", "wk{week}_dvoa_defensive.csv", "DVOA_Def_wk_{week}.csv"],
+            header=1
+        )
+        if dvoa_def_df is not None:
+             context['dvoa_def_raw'] = dvoa_def_df
+             context['loaded_files'].append(f"DVOA Def: {name}")
+        else: logger.warning(f"⚠ DVOA Def missing")
 
-        try: # Betting Lines
-             fpath = next(self.data_dir.glob(f"wk{week}_betting_lines_draftkings.csv"),
-                       next(self.data_dir.glob(f"wk{week}_betting_lines_TRANSFORMED.csv"),
-                       next(self.data_dir.glob(f"betting_lines_wk_{week}_live.csv"), None)))
-             if fpath and fpath.exists():
-                context['betting_lines_raw'] = pd.read_csv(fpath)
-                context['betting_lines_source'] = f"CSV ({fpath.name})"
-                context['loaded_files'].append(f"Betting Lines: {fpath.name}")
-                logger.info(f"✓ Betting Lines: {fpath.name} ({len(context['betting_lines_raw'])} rows)")
-             else:
-                context['betting_lines_source'] = "NO DATA"
-                logger.warning(f"⚠ Betting lines wk{week} missing.")
-        except Exception as e: logger.error(f"Error Betting Lines: {e}")
+        # Def vs WR
+        def_vs_wr_df, name, wk = load_csv(
+            'def_vs_wr',
+            ["wk{week}_def_v_wr_DVOA.csv", "Def_vs_WR_wk_{week}.csv"],
+            header=1
+        )
+        if def_vs_wr_df is not None:
+             context['def_vs_wr_raw'] = def_vs_wr_df
+             context['loaded_files'].append(f"Def vs WR: {name}")
+        else: logger.warning(f"⚠ Def vs WR missing")
+
+        # Betting Lines
+        lines_df, name, wk = load_csv(
+            'betting_lines',
+            ["wk{week}_betting_lines_draftkings.csv", "betting_lines_wk_{week}_live.csv"],
+            header=0
+        )
+        if lines_df is not None:
+             context['betting_lines_raw'] = lines_df
+             context['betting_lines_source'] = name
+             context['loaded_files'].append(f"Betting Lines: {name}")
+        else:
+             context['betting_lines_source'] = "NO DATA"
+             logger.warning(f"⚠ Betting lines missing")
 
         try: # Injury Report
             user_csv_pattern = self.data_dir / f"wk{week}-injury-report.csv"

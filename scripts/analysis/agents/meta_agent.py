@@ -22,7 +22,7 @@ class MetaAgentConfig:
     """Configuration for Meta-Agent"""
     enabled: bool = True
     min_confidence_threshold: int = 65  # Only review high-value picks
-    model: str = "claude-sonnet-4-20250514"
+    model: str = "gemini-2.0-flash"
     max_tokens: int = 800
     max_adjustment: int = 10  # -10 to +10
 
@@ -52,19 +52,19 @@ class MetaAgent:
     def __init__(self, config: MetaAgentConfig = None):
         self.config = config or MetaAgentConfig()
         self.logger = logging.getLogger(self.__class__.__name__)
-        self._client = None  # Lazy init
+        self._model = None  # Lazy init
 
     @property
     def client(self):
-        """Lazy-initialize Anthropic client"""
-        if self._client is None:
+        """Lazy-initialize Gemini client"""
+        if self._model is None:
             try:
-                from anthropic import Anthropic
-                self._client = Anthropic()
+                from ...core.gemini_client import GeminiClient
+                self._model = GeminiClient(model_name=self.config.model)
             except Exception as e:
-                self.logger.error(f"Failed to initialize Anthropic client: {e}")
-                self._client = None
-        return self._client
+                self.logger.error(f"Failed to initialize Gemini client: {e}")
+                self._model = None
+        return self._model
 
     def should_review(self, analysis: 'PropAnalysis') -> bool:
         """Determine if this analysis warrants meta-agent review"""
@@ -93,8 +93,8 @@ class MetaAgent:
         )
 
         # If no client available, return neutral result with agreement info
-        if self.client is None:
-            self.logger.warning("Anthropic client unavailable - returning neutral result")
+        if self.client is None or not self.client.is_available:
+            self.logger.warning("Gemini client unavailable - returning neutral result")
             return MetaAgentResult(
                 confidence_adjustment=0,
                 adjusted_confidence=original_confidence,
@@ -109,22 +109,23 @@ class MetaAgent:
             system_prompt = self._build_system_prompt()
             review_prompt = self._build_review_prompt(analysis, context, agreement_score, disagreement_flags)
 
-            # Call Claude API
-            response = self.client.messages.create(
-                model=self.config.model,
-                max_tokens=self.config.max_tokens,
-                system=system_prompt,
-                messages=[{"role": "user", "content": review_prompt}]
+            # Call Gemini API
+            # GeminiClient handles JSON parsing internally
+            result_json = self.client.generate_json(
+                prompt=review_prompt,
+                system_instruction=system_prompt
             )
 
-            response_text = response.content[0].text
-            tokens_used = response.usage.input_tokens + response.usage.output_tokens
+            if not result_json:
+                raise ValueError("Empty response from Gemini")
 
-            # Parse response
-            result = self._parse_response(response_text, original_confidence)
+            # Result is already a dict
+            result = self._parse_json_result(result_json, original_confidence)
+            
             result.agent_agreement_score = agreement_score
             result.disagreement_flags = disagreement_flags
-            result.tokens_used = tokens_used
+            # OpenAI/Anthropic usage stats are different/not always available in simple Gemini response
+            # We'll just track that we used it.
             result.model_used = self.config.model
 
             self.logger.info(
@@ -285,20 +286,9 @@ Consider: Are there narrative factors the agents might have missed? Any edge cas
 
         return "\n".join(lines) if lines else "- No additional context available"
 
-    def _parse_response(self, response_text: str, original_confidence: int) -> MetaAgentResult:
-        """Parse Claude's JSON response into MetaAgentResult"""
+    def _parse_json_result(self, data: Dict, original_confidence: int) -> MetaAgentResult:
+        """Parse JSON dictionary into MetaAgentResult"""
         try:
-            # Clean up response - handle markdown code blocks
-            text = response_text.strip()
-            if text.startswith("```"):
-                # Remove markdown code block wrapper
-                text = text.split("```")[1]
-                if text.startswith("json"):
-                    text = text[4:]
-                text = text.strip()
-
-            data = json.loads(text)
-
             # Clamp adjustment to max range
             adjustment = max(-self.config.max_adjustment,
                            min(self.config.max_adjustment,
@@ -315,13 +305,12 @@ Consider: Are there narrative factors the agents might have missed? Any edge cas
                 recommendation_override=data.get('override'),
             )
 
-        except (json.JSONDecodeError, KeyError, TypeError) as e:
-            self.logger.warning(f"Failed to parse meta-agent response: {e}")
-            # Return neutral result on parse failure
+        except (KeyError, TypeError) as e:
+            self.logger.warning(f"Failed to parse meta-agent response data: {e}")
             return MetaAgentResult(
                 confidence_adjustment=0,
                 adjusted_confidence=original_confidence,
-                meta_rationale=f"Parse error - original analysis unchanged. Raw: {response_text[:100]}..."
+                meta_rationale=f"Parse error - original analysis unchanged."
             )
 
     def __repr__(self) -> str:

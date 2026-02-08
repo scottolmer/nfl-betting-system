@@ -31,8 +31,8 @@ def main():
     except ImportError as e:
         print(f"\n[ERROR] Missing dependency: {e}")
         print("\nMake sure you have installed the required packages:")
-        print("  pip install anthropic")
-        print("\nAlso ensure ANTHROPIC_API_KEY is set in your .env file\n")
+        print("  pip install google-generativeai")
+        print("\nAlso ensure GEMINI_API_KEY is set in your .env file\n")
         sys.exit(1)
     except Exception as e:
         print(f"\n[ERROR] {e}\n")

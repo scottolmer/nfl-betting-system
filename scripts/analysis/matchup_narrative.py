@@ -1,43 +1,41 @@
 """
-Matchup Narrative Generator using Claude API
+Matchup Narrative Generator using Gemini API
 """
 
 import os
-from anthropic import Anthropic
-from typing import Dict
 import logging
+from typing import Dict
+from ..core.gemini_client import GeminiClient
 
 logger = logging.getLogger(__name__)
 
 
 class MatchupNarrativeGenerator:
-    """Generates human-readable matchup analysis using Claude API"""
+    """Generates human-readable matchup analysis using Gemini API"""
     
     def __init__(self):
-        self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
-        self.model = "claude-sonnet-4-20250514"
+        # Initialize Gemini instead of Claude
+        try:
+            self.client = GeminiClient(model_name="gemini-2.0-flash")
+        except Exception as e:
+            logger.error(f"Failed to initialize Gemini client: {e}")
+            self.client = None
     
     def generate_prop_narrative(self, prop: Dict, agent_breakdown: Dict, 
                                 confidence: int, context: Dict) -> str:
         """
         Generate compelling narrative for a specific prop
-        
-        Args:
-            prop: Player prop details
-            agent_breakdown: Score breakdown from all agents
-            confidence: Final confidence score
-            context: Full analysis context (DVOA, injuries, etc.)
-        
-        Returns:
-            2-3 paragraph narrative explaining the bet
         """
-        
+        if not self.client or not self.client.is_available:
+             return f"Analysis: {confidence}% confidence on {prop.get('player_name')} {prop.get('stat_type')} {prop.get('bet_type')} {prop.get('line')}"
+
         # Extract key data
         player = prop.get('player_name', 'Unknown')
         team = prop.get('team', '')
         opponent = prop.get('opponent', '')
         stat = prop.get('stat_type', '')
         line = prop.get('line', 0)
+        bet_type = prop.get('bet_type', 'OVER')
         
         # Build context summary
         dvoa_summary = self._summarize_dvoa(team, opponent, context)
@@ -45,7 +43,7 @@ class MatchupNarrativeGenerator:
         
         prompt = f"""Write a 2-3 paragraph betting narrative for this NFL prop.
 
-PROP: {player} ({team}) - {stat} OVER {line} vs {opponent}
+PROP: {player} ({team}) - {stat} {bet_type} {line} vs {opponent}
 CONFIDENCE: {confidence}%
 RECOMMENDATION: {"BET" if confidence >= 65 else "LEAN" if confidence >= 55 else "AVOID"}
 
@@ -67,23 +65,23 @@ Length: 2-3 paragraphs, ~150-200 words total.
 Avoid: Clichés, empty phrases, excessive hedging."""
 
         try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=500,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            
-            narrative = response.content[0].text.strip()
+            # Use generate_content for unstructured text
+            narrative = self.client.generate_content(prompt)
+            if not narrative:
+                raise ValueError("Empty response from Gemini")
+
             logger.info(f"Generated narrative for {player} ({len(narrative)} chars)")
-            return narrative
+            return narrative.strip()
             
         except Exception as e:
             logger.error(f"Narrative generation failed: {e}")
-            return f"Analysis: {confidence}% confidence on {player} {stat} OVER {line}"
+            return f"Analysis: {confidence}% confidence on {player} {stat} {bet_type} {line}"
     
     def generate_game_overview(self, home_team: str, away_team: str, 
                                game_total: float, spread: float, context: Dict) -> str:
         """Generate game environment narrative"""
+        if not self.client or not self.client.is_available:
+            return f"{away_team} @ {home_team} | Total: {game_total} | Spread: {spread}"
         
         prompt = f"""Write a 1-paragraph game environment analysis.
 
@@ -98,13 +96,8 @@ Focus on: Game script expectations, pace, pass/run balance.
 Length: 80-100 words."""
 
         try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=300,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            
-            return response.content[0].text.strip()
+            overview = self.client.generate_content(prompt)
+            return overview.strip() if overview else f"{away_team} @ {home_team}"
             
         except Exception as e:
             logger.error(f"Game overview failed: {e}")
@@ -154,7 +147,8 @@ if __name__ == "__main__":
         'team': 'KC',
         'opponent': 'BUF',
         'stat_type': 'Pass Yds',
-        'line': 275.5
+        'line': 275.5,
+        'bet_type': 'OVER'
     }
     
     test_agents = {
@@ -163,6 +157,7 @@ if __name__ == "__main__":
         'Volume': {'raw_score': 65, 'rationale': ['High snap share, trending up']},
     }
     
+    # Needs GEMINI_API_KEY env var set
     narrative = generator.generate_prop_narrative(
         test_prop, test_agents, 70, {}
     )

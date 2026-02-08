@@ -254,3 +254,39 @@ class ParlayBuilder:
         output.append("="*60)
         
         return "\n".join(output)
+
+    @staticmethod
+    def parlay_to_dict(parlay: Parlay) -> Dict:
+        """Convert Parlay to JSON-serializable dict for assistant interface"""
+        return {
+            'parlay_type': parlay.parlay_type,
+            'combined_confidence': parlay.combined_confidence,
+            'expected_value': parlay.expected_value,
+            'recommended_units': parlay.recommended_units,
+            'risk_level': parlay.risk_level,
+            'rationale': parlay.rationale,
+            'correlation_bonus': parlay.correlation_bonus,
+            'correlation_penalty': getattr(parlay, 'correlation_penalty', 0),
+            'correlation_warnings': getattr(parlay, 'correlation_warnings', []),
+            'legs': [
+                {
+                    'player_name': leg.prop.player_name,
+                    'team': leg.prop.team,
+                    'opponent': leg.prop.opponent,
+                    'stat_type': leg.prop.stat_type,
+                    'bet_type': getattr(leg.prop, 'bet_type', 'OVER'),
+                    'line': leg.prop.line,
+                    'confidence': leg.final_confidence,
+                    'top_agents': [agent[0] for agent in getattr(leg, 'top_contributing_agents', [])[:2]],
+                }
+                for leg in parlay.legs
+            ]
+        }
+
+    @staticmethod
+    def parlays_to_dict(parlays: Dict[str, List[Parlay]]) -> Dict:
+        """Convert all parlays to JSON-serializable dict for assistant interface"""
+        return {
+            leg_type: [ParlayBuilder.parlay_to_dict(p) for p in parlay_list]
+            for leg_type, parlay_list in parlays.items()
+        }

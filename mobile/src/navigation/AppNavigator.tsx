@@ -2,11 +2,13 @@ import React from 'react';
 import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
-import HomeScreen from '../screens/HomeScreen';
+import ChatHomeScreen from '../screens/ChatHomeScreen';
 import ParlaysScreen from '../screens/ParlaysScreen';
 import BuildScreen from '../screens/BuildScreen';
 import ResultsScreen from '../screens/ResultsScreen';
 import MoreScreen from '../screens/MoreScreen';
+import { theme } from '../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,15 +19,15 @@ export default function AppNavigator() {
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            backgroundColor: '#FFFFFF',
-            borderTopColor: '#E5E7EB',
+            backgroundColor: theme.colors.background,
+            borderTopColor: theme.colors.glassBorder,
             borderTopWidth: 1,
             height: 60,
             paddingBottom: 8,
             paddingTop: 8,
           },
-          tabBarActiveTintColor: '#3B82F6',
-          tabBarInactiveTintColor: '#6B7280',
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.textSecondary,
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600',
@@ -33,11 +35,13 @@ export default function AppNavigator() {
         }}
       >
         <Tab.Screen
-          name="Picks"
-          component={HomeScreen}
+          name="Chat"
+          component={ChatHomeScreen}
           options={{
-            tabBarLabel: 'Picks',
-            tabBarIcon: ({ color }) => <TabIcon icon="🎯" color={color} />,
+            tabBarLabel: 'Agent',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="chatbubble-ellipses-outline" size={24} color={color} />
+            ),
           }}
         />
         <Tab.Screen
@@ -45,7 +49,9 @@ export default function AppNavigator() {
           component={ParlaysScreen}
           options={{
             tabBarLabel: 'Pre-Built',
-            tabBarIcon: ({ color }) => <TabIcon icon="🎰" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="flash-outline" size={24} color={color} />
+            ),
           }}
         />
         <Tab.Screen
@@ -53,7 +59,9 @@ export default function AppNavigator() {
           component={BuildScreen}
           options={{
             tabBarLabel: 'My Parlays',
-            tabBarIcon: ({ color }) => <TabIcon icon="⚡" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="construct-outline" size={24} color={color} />
+            ),
           }}
         />
         <Tab.Screen
@@ -61,7 +69,9 @@ export default function AppNavigator() {
           component={ResultsScreen}
           options={{
             tabBarLabel: 'Results',
-            tabBarIcon: ({ color }) => <TabIcon icon="📈" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="stats-chart-outline" size={24} color={color} />
+            ),
           }}
         />
         <Tab.Screen
@@ -69,7 +79,9 @@ export default function AppNavigator() {
           component={MoreScreen}
           options={{
             tabBarLabel: 'More',
-            tabBarIcon: ({ color }) => <TabIcon icon="⚙️" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="menu-outline" size={24} color={color} />
+            ),
           }}
         />
       </Tab.Navigator>
@@ -77,11 +89,4 @@ export default function AppNavigator() {
   );
 }
 
-// Simple emoji-based tab icon component
-function TabIcon({ icon, color }: { icon: string; color: string }) {
-  return (
-    <Text style={{ fontSize: 24, opacity: color === '#3B82F6' ? 1 : 0.6 }}>
-      {icon}
-    </Text>
-  );
-}
+
