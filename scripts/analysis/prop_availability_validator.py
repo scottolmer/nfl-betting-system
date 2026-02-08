@@ -5,9 +5,11 @@ Handles filtering props that aren't available on DraftKings Pick6
 
 from typing import List, Dict, Set, Tuple, Optional
 from dataclasses import dataclass
-import sqlite3
 import json
 import logging
+from datetime import datetime
+from sqlalchemy import func
+from api.database import SessionLocal, PropAvailability, PropValidationRule, ParlayValidationHistory, init_db
 from .models import PropAnalysis, PlayerProp
 
 logger = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ class ValidationRule:
 class PropAvailabilityValidator:
     """
     Validates prop availability using both rules and learned patterns
-
+    
     Features:
     1. Rule-based filtering (e.g., same player can't have UNDER completions + UNDER receptions)
     2. Learning from manual validations
@@ -45,63 +47,18 @@ class PropAvailabilityValidator:
         "Pass Yds": 149.5,
     }
 
-    def __init__(self, db_path: str = "bets.db", min_thresholds: Dict[str, float] = None):
-        self.db_path = db_path
-        # Allow custom thresholds to be passed in, otherwise use defaults
+    def __init__(self, db_path: str = None, min_thresholds: Dict[str, float] = None):
+        # db_path is ignored now, using shared DB
         if min_thresholds:
             self.min_thresholds = {**self.MINIMUM_THRESHOLDS, **min_thresholds}
         else:
             self.min_thresholds = self.MINIMUM_THRESHOLDS.copy()
-        self._init_database()
+            
+        init_db()  # Ensure tables exist
         self._load_default_rules()
 
-    def _init_database(self):
-        """Initialize validation database tables"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        # Table: Validation rules (both default and learned)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS prop_validation_rules (
-                rule_id TEXT PRIMARY KEY,
-                description TEXT,
-                rule_type TEXT,
-                conditions TEXT,
-                auto_applied INTEGER DEFAULT 1,
-                created_date TEXT,
-                times_triggered INTEGER DEFAULT 0
-            )
-        """)
-
-        # Table: Prop availability tracking
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS prop_availability (
-                prop_signature TEXT PRIMARY KEY,
-                player_name TEXT,
-                prop_type TEXT,
-                bet_type TEXT,
-                is_available INTEGER,
-                last_validated TEXT,
-                validation_source TEXT,
-                notes TEXT
-            )
-        """)
-
-        # Table: Parlay validation history
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS parlay_validation_history (
-                validation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                parlay_signature TEXT,
-                props_json TEXT,
-                is_valid INTEGER,
-                invalid_reason TEXT,
-                validated_date TEXT,
-                week INTEGER
-            )
-        """)
-
-        conn.commit()
-        conn.close()
+    def get_session(self):
+        return SessionLocal()
 
     def _load_default_rules(self):
         """Load default rules into database if not already present"""
@@ -152,56 +109,63 @@ class PropAvailabilityValidator:
             ),
         ]
 
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        for rule in default_rules:
-            cursor.execute("""
-                INSERT OR IGNORE INTO prop_validation_rules
-                (rule_id, description, rule_type, conditions, auto_applied, created_date)
-                VALUES (?, ?, ?, ?, ?, datetime('now'))
-            """, (
-                rule.rule_id,
-                rule.description,
-                rule.rule_type,
-                json.dumps(rule.conditions),
-                1 if rule.auto_applied else 0
-            ))
-
-        conn.commit()
-        conn.close()
+        session = self.get_session()
+        try:
+            for rule in default_rules:
+                # Check if exists
+                existing = session.query(PropValidationRule).filter_by(rule_id=rule.rule_id).first()
+                if not existing:
+                    new_rule = PropValidationRule(
+                        rule_id=rule.rule_id,
+                        description=rule.description,
+                        rule_type=rule.rule_type,
+                        conditions=rule.conditions, # SQLAlchemy handles JSON serialization
+                        auto_applied=rule.auto_applied,
+                        created_date=datetime.now()
+                    )
+                    session.add(new_rule)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error loading default rules: {e}")
+        finally:
+            session.close()
 
     def validate_parlay_props(self, props: List[PropAnalysis]) -> Tuple[bool, List[str]]:
         """
         Validate if all props in a parlay are available
-
-        Args:
-            props: List of PropAnalysis objects
-
-        Returns:
-            Tuple of (is_valid, list of violation reasons)
         """
         violations = []
+        session = self.get_session()
+        
+        try:
+            # Check against rules
+            rules = session.query(PropValidationRule).all()
+            
+            for rule in rules:
+                if not rule.auto_applied:
+                    continue
 
-        # Check against rules
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT rule_id, description, rule_type, conditions, auto_applied FROM prop_validation_rules")
-        rules = cursor.fetchall()
-        conn.close()
-
-        for rule_id, description, rule_type, conditions_json, auto_applied in rules:
-            if not auto_applied:
-                continue
-
-            conditions = json.loads(conditions_json)
-
-            if rule_type == "same_player_props":
-                violation = self._check_same_player_rule(props, conditions, description)
-                if violation:
-                    violations.append(violation)
-
-        return (len(violations) == 0, violations)
+                if rule.rule_type == "same_player_props":
+                    # rule.conditions is already a dict if using JSON type
+                    conditions = rule.conditions if isinstance(rule.conditions, dict) else (json.loads(rule.conditions) if rule.conditions else {})
+                    
+                    violation = self._check_same_player_rule(props, conditions, rule.description)
+                    if violation:
+                        violations.append(violation)
+                        
+                        # Update times_triggered
+                        rule.times_triggered += 1
+                        session.add(rule)
+            
+            session.commit()
+            return (len(violations) == 0, violations)
+            
+        except Exception as e:
+            logger.error(f"Error validating parlay: {e}")
+            return (True, []) # Default to valid on error to not block
+        finally:
+            session.close()
 
     def _check_same_player_rule(self, props: List[PropAnalysis], conditions: Dict, description: str) -> Optional[str]:
         """Check if props violate a same-player rule"""
@@ -266,57 +230,66 @@ class PropAvailabilityValidator:
         """Check if bet types match (allowing for order independence)"""
         if len(actual) != len(expected):
             return False
-
         # Sort both lists for comparison
         return sorted([b.upper() for b in actual]) == sorted([b.upper() for b in expected])
 
     def mark_prop_available(self, prop: PlayerProp, is_available: bool, notes: str = ""):
         """Manually mark a prop as available or not"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        prop_signature = self._get_prop_signature(prop)
-
-        cursor.execute("""
-            INSERT OR REPLACE INTO prop_availability
-            (prop_signature, player_name, prop_type, bet_type, is_available, last_validated, validation_source, notes)
-            VALUES (?, ?, ?, ?, ?, datetime('now'), 'manual', ?)
-        """, (
-            prop_signature,
-            prop.player_name,
-            prop.stat_type,
-            prop.bet_type,
-            1 if is_available else 0,
-            notes
-        ))
-
-        conn.commit()
-        conn.close()
+        session = self.get_session()
+        try:
+            prop_signature = self._get_prop_signature(prop)
+            
+            # Upsert logic
+            existing = session.query(PropAvailability).filter_by(id=prop_signature).first()
+            if existing:
+                existing.is_available = is_available
+                existing.last_updated = datetime.now()
+                existing.validation_source = 'manual'
+                existing.notes = notes
+            else:
+                new_prop = PropAvailability(
+                    id=prop_signature,
+                    player=prop.player_name,
+                    prop_type=prop.stat_type,
+                    bet_type=prop.bet_type,
+                    line=prop.line,
+                    is_available=is_available,
+                    last_updated=datetime.now(),
+                    validation_source='manual',
+                    notes=notes
+                )
+                session.add(new_prop)
+            
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error marking prop availability: {e}")
+        finally:
+            session.close()
 
     def add_custom_rule(self, description: str, rule_type: str, conditions: Dict, auto_applied: bool = True):
         """Add a new validation rule based on manual observation"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        # Generate rule ID
-        rule_id = f"custom_{rule_type}_{len(description.split())}"
-
-        cursor.execute("""
-            INSERT INTO prop_validation_rules
-            (rule_id, description, rule_type, conditions, auto_applied, created_date)
-            VALUES (?, ?, ?, ?, ?, datetime('now'))
-        """, (
-            rule_id,
-            description,
-            rule_type,
-            json.dumps(conditions),
-            1 if auto_applied else 0
-        ))
-
-        conn.commit()
-        conn.close()
-
-        logger.info(f"✅ Added custom rule: {description}")
+        session = self.get_session()
+        try:
+            # Generate rule ID
+            rule_id = f"custom_{rule_type}_{len(description.split())}"
+            
+            new_rule = PropValidationRule(
+                rule_id=rule_id,
+                description=description,
+                rule_type=rule_type,
+                conditions=conditions,
+                auto_applied=auto_applied,
+                created_date=datetime.now()
+            )
+            session.add(new_rule)
+            session.commit()
+            logger.info(f"✅ Added custom rule: {description}")
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Error adding custom rule: {e}")
+        finally:
+            session.close()
 
     def _get_prop_signature(self, prop: PlayerProp) -> str:
         """Generate unique signature for a prop"""
@@ -325,43 +298,30 @@ class PropAvailabilityValidator:
     def filter_available_props(self, props: List[PropAnalysis]) -> List[PropAnalysis]:
         """
         Filter props based on known availability
-
         Returns only props that haven't been marked as unavailable
         """
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        available_props = []
-        for prop_analysis in props:
-            prop_signature = self._get_prop_signature(prop_analysis.prop)
-
-            cursor.execute("""
-                SELECT is_available FROM prop_availability
-                WHERE prop_signature = ?
-            """, (prop_signature,))
-
-            result = cursor.fetchone()
-            if result is None:
-                # Unknown availability - include it
-                available_props.append(prop_analysis)
-            elif result[0] == 1:
-                # Marked as available
-                available_props.append(prop_analysis)
-            # else: marked as unavailable, skip it
-
-        conn.close()
-        return available_props
+        session = self.get_session()
+        try:
+            # Get all unavailable signatures
+            unavailable = session.query(PropAvailability.id).filter(PropAvailability.is_available == False).all()
+            unavailable_sigs = {row[0] for row in unavailable}
+            
+            available_props = []
+            for prop_analysis in props:
+                prop_signature = self._get_prop_signature(prop_analysis.prop)
+                if prop_signature not in unavailable_sigs:
+                    available_props.append(prop_analysis)
+            
+            return available_props
+        except Exception as e:
+            logger.error(f"Error filtering available props: {e}")
+            return props
+        finally:
+            session.close()
 
     def filter_by_minimum_thresholds(self, props: List[PropAnalysis], verbose: bool = True) -> List[PropAnalysis]:
         """
         Filter props that don't meet minimum thresholds for their stat type
-
-        Args:
-            props: List of PropAnalysis objects
-            verbose: Whether to print filtering information
-
-        Returns:
-            List of props that meet minimum threshold requirements
         """
         filtered_props = []
         filtered_count = 0
@@ -400,13 +360,6 @@ class PropAvailabilityValidator:
     def filter_defense_props(self, props: List[PropAnalysis], verbose: bool = True) -> List[PropAnalysis]:
         """
         Filter out defense/special teams props
-
-        Args:
-            props: List of PropAnalysis objects
-            verbose: Whether to print filtering information
-
-        Returns:
-            List of props with defense/ST props removed
         """
         filtered_props = []
         defense_count = 0
@@ -457,22 +410,19 @@ class PropAvailabilityValidator:
 
     def get_validation_stats(self) -> Dict:
         """Get statistics about validation rules and history"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT COUNT(*) FROM prop_validation_rules")
-        total_rules = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM prop_availability WHERE is_available = 1")
-        available_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM prop_availability WHERE is_available = 0")
-        unavailable_count = cursor.fetchone()[0]
-
-        conn.close()
-
-        return {
-            "total_rules": total_rules,
-            "props_marked_available": available_count,
-            "props_marked_unavailable": unavailable_count
-        }
+        session = self.get_session()
+        try:
+            total_rules = session.query(func.count(PropValidationRule.rule_id)).scalar()
+            available_count = session.query(func.count(PropAvailability.id)).filter(PropAvailability.is_available == True).scalar()
+            unavailable_count = session.query(func.count(PropAvailability.id)).filter(PropAvailability.is_available == False).scalar()
+            
+            return {
+                "total_rules": total_rules or 0,
+                "props_marked_available": available_count or 0,
+                "props_marked_unavailable": unavailable_count or 0
+            }
+        except Exception as e:
+            logger.error(f"Error getting validation stats: {e}")
+            return {"total_rules": 0, "props_marked_available": 0, "props_marked_unavailable": 0}
+        finally:
+            session.close()

@@ -1,136 +1,72 @@
 """Performance tracking and bet outcome logging for calibration"""
 
-import sqlite3
 import json
 from datetime import datetime
 from pathlib import Path
+from sqlalchemy import func, desc
+from api.database import SessionLocal, Parlay, Leg, CalibrationResult, init_db
 
 class PerformanceTracker:
-    def __init__(self, db_path="bets.db"):
-        self.db_path = Path(db_path)
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(str(self.db_path))
-        self.create_tables()
-        print(f"[OK] Performance tracker initialized at {self.db_path}")
+    def __init__(self, db_path=None):
+        # db_path is legacy but kept for compatibility. 
+        # The actual connection is handled by api.database.SessionLocal
+        init_db()  # Ensure tables exist
+        print(f"[OK] Performance tracker initialized (SQLAlchemy)")
     
-    def create_tables(self):
-        """Create database schema"""
-        cursor = self.conn.cursor()
-        
-        # Parlays table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS parlays (
-                parlay_id TEXT PRIMARY KEY,
-                created_date TEXT,
-                week INTEGER,
-                confidence_score REAL,
-                odds REAL,
-                parlay_type TEXT,
-                status TEXT DEFAULT 'pending',
-                agent_breakdown TEXT,
-                dependencies TEXT,
-                created_timestamp REAL
-            )
-        """)
-        
-        # Legs table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS legs (
-                leg_id TEXT PRIMARY KEY,
-                parlay_id TEXT,
-                player TEXT,
-                team TEXT,
-                prop_type TEXT,
-                bet_type TEXT,
-                line REAL,
-                agent_scores TEXT,
-                result INTEGER DEFAULT NULL,
-                FOREIGN KEY(parlay_id) REFERENCES parlays(parlay_id)
-            )
-        """)
-        
-        # Analysis table for calibration
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS calibration_results (
-                id INTEGER PRIMARY KEY,
-                parlay_id TEXT,
-                confidence_predicted REAL,
-                confidence_actual REAL,
-                calibration_error REAL,
-                notes TEXT,
-                FOREIGN KEY(parlay_id) REFERENCES parlays(parlay_id)
-            )
-        """)
-        
-        self.conn.commit()
-    
-    def log_parlay(self, parlay, week, parlay_type="standard"):
+    def get_session(self):
+        return SessionLocal()
+
+    def log_parlay(self, parlay_data, week, parlay_type="standard"):
         """
-        Log a parlay at bet time
-        
-        parlay = {
-            'confidence': 0.76,
-            'odds': -110,
-            'legs': [
-                {
-                    'player': 'Mahomes',
-                    'team': 'KC',
-                    'prop_type': 'pass_yards',
-                    'bet_type': 'OVER',
-                    'line': 250,
-                    'agent_scores': {'DVOA': 58, 'Matchup': 42, ...}
-                },
-                ...
-            ]
-        }
+        Log a parlay at bet time.
+        Uses SQLAlchemy ORM.
         """
-        cursor = self.conn.cursor()
+        session = self.get_session()
         parlay_id = f"parlay_{int(datetime.now().timestamp() * 1000)}"
         
         try:
-            # Log parlay
-            cursor.execute("""
-                INSERT INTO parlays 
-                (parlay_id, created_date, week, confidence_score, odds, parlay_type, agent_breakdown, created_timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                parlay_id,
-                datetime.now().isoformat(),
-                week,
-                parlay['confidence'],
-                parlay.get('odds'),
-                parlay_type,
-                json.dumps(parlay.get('agent_scores', {})),
-                datetime.now().timestamp()
-            ))
+            # Create Parlay object
+            # Note: SQLAlchemy JSON type handles serialization automatically
+            new_parlay = Parlay(
+                parlay_id=parlay_id,
+                created_date=datetime.now().isoformat(),
+                week=week,
+                confidence_score=parlay_data['confidence'],
+                odds=parlay_data.get('odds'),
+                parlay_type=parlay_type,
+                status="pending",
+                agent_breakdown=parlay_data.get('agent_scores', {}),
+                created_timestamp=datetime.now().timestamp()
+            )
+            session.add(new_parlay)
             
-            # Log legs
+            # Create Leg objects
             leg_count = 0
-            for leg in parlay.get('legs', []):
+            for leg_data in parlay_data.get('legs', []):
                 leg_id = f"{parlay_id}_leg_{leg_count}"
-                cursor.execute("""
-                    INSERT INTO legs
-                    (leg_id, parlay_id, player, team, prop_type, bet_type, line, agent_scores)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    leg_id,
-                    parlay_id,
-                    leg.get('player'),
-                    leg.get('team'),
-                    leg.get('prop_type'),
-                    leg.get('bet_type', 'OVER'),
-                    leg.get('line'),
-                    json.dumps(leg.get('agent_scores', {}))
-                ))
+                new_leg = Leg(
+                    leg_id=leg_id,
+                    parlay_id=parlay_id,
+                    player=leg_data.get('player'),
+                    team=leg_data.get('team'),
+                    prop_type=leg_data.get('prop_type'),
+                    bet_type=leg_data.get('bet_type', 'OVER'),
+                    line=leg_data.get('line'),
+                    agent_scores=leg_data.get('agent_scores', {})
+                )
+                session.add(new_leg)
                 leg_count += 1
             
-            self.conn.commit()
-            print(f"   [OK] Logged parlay {parlay_id} ({len(parlay.get('legs', []))} legs, {parlay['confidence']:.1f}% confidence)")
+            session.commit()
+            print(f"   [OK] Logged parlay {parlay_id} ({leg_count} legs, {parlay_data['confidence']:.1f}% confidence)")
             return parlay_id
 
         except Exception as e:
+            session.rollback()
             print(f"   [ERROR] Error logging parlay: {e}")
             return None
+        finally:
+            session.close()
     
     def log_results(self, parlay_id, leg_results):
         """
@@ -142,59 +78,58 @@ class PerformanceTracker:
             ...
         }
         """
-        cursor = self.conn.cursor()
+        session = self.get_session()
         
         try:
+            parlay = session.query(Parlay).filter(Parlay.parlay_id == parlay_id).first()
+            if not parlay:
+                print(f"[ERROR] Parlay {parlay_id} not found")
+                return
+
             parlay_won = all(leg_results.values())
             
             # Update parlay status
-            cursor.execute("UPDATE parlays SET status = ? WHERE parlay_id = ?",
-                          ('won' if parlay_won else 'lost', parlay_id))
+            parlay.status = 'won' if parlay_won else 'lost'
             
             # Update leg results
+            # We need to map 'leg_0', 'leg_1' keys to our Leg objects
             for leg_key, hit in leg_results.items():
-                leg_id = f"{parlay_id}_{leg_key}"
-                cursor.execute("UPDATE legs SET result = ? WHERE leg_id = ?",
-                              (int(hit), leg_id))
+                # specific leg_id e.g. "parlay_123_leg_0"
+                # If leg_key is "leg_0", we construct proper id
+                full_leg_id = f"{parlay_id}_{leg_key}"
+                
+                leg = session.query(Leg).filter(Leg.leg_id == full_leg_id).first()
+                if leg:
+                    leg.result = int(hit)
             
-            self.conn.commit()
+            session.commit()
+            
             hit_count = sum(1 for hit in leg_results.values() if hit)
             total_legs = len(leg_results)
             print(f"[OK] Logged results for {parlay_id}: {hit_count}/{total_legs} legs hit")
 
         except Exception as e:
             print(f"[ERROR] Error logging results: {e}")
+            session.rollback()
+        finally:
+            session.close()
     
     def get_all_results(self):
         """Get all completed parlays with their agent breakdown for calibration analysis"""
-        cursor = self.conn.cursor()
-        
+        session = self.get_session()
         try:
-            query = """
-                SELECT 
-                    parlay_id, week, confidence_score, status, agent_breakdown,
-                    (SELECT COUNT(*) FROM legs WHERE parlay_id = parlays.parlay_id) as leg_count
-                FROM parlays
-                WHERE status IN ('won', 'lost')
-                ORDER BY created_timestamp DESC
-            """
-            
-            results = cursor.execute(query).fetchall()
+            # Query parlays that are won or lost
+            parlays = session.query(Parlay).filter(Parlay.status.in_(['won', 'lost'])).order_by(desc(Parlay.created_timestamp)).all()
             
             parsed_results = []
-            for parlay_id, week, conf, status, agent_breakdown_json, leg_count in results:
-                try:
-                    agent_breakdown = json.loads(agent_breakdown_json) if agent_breakdown_json else {}
-                except:
-                    agent_breakdown = {}
-                
+            for p in parlays:
                 parsed_results.append({
-                    "parlay_id": parlay_id,
-                    "week": week,
-                    "confidence_score": conf,
-                    "result": "HIT" if status == "won" else "MISS",
-                    "agent_breakdown": agent_breakdown,
-                    "leg_count": leg_count,
+                    "parlay_id": p.parlay_id,
+                    "week": p.week,
+                    "confidence_score": p.confidence_score,
+                    "result": "HIT" if p.status == "won" else "MISS",
+                    "agent_breakdown": p.agent_breakdown or {},
+                    "leg_count": len(p.legs),
                 })
             
             return parsed_results
@@ -202,37 +137,27 @@ class PerformanceTracker:
         except Exception as e:
             print(f"[ERROR] Error getting all results: {e}")
             return []
+        finally:
+            session.close()
     
     def get_week_results(self, week):
         """Get all completed parlays for a specific week with agent breakdown"""
-        cursor = self.conn.cursor()
-        
+        session = self.get_session()
         try:
-            query = """
-                SELECT 
-                    parlay_id, week, confidence_score, status, agent_breakdown,
-                    (SELECT COUNT(*) FROM legs WHERE parlay_id = parlays.parlay_id) as leg_count
-                FROM parlays
-                WHERE week = ? AND status IN ('won', 'lost')
-                ORDER BY created_timestamp DESC
-            """
-            
-            results = cursor.execute(query, (week,)).fetchall()
+            parlays = session.query(Parlay).filter(
+                Parlay.week == week,
+                Parlay.status.in_(['won', 'lost'])
+            ).order_by(desc(Parlay.created_timestamp)).all()
             
             parsed_results = []
-            for parlay_id, w, conf, status, agent_breakdown_json, leg_count in results:
-                try:
-                    agent_breakdown = json.loads(agent_breakdown_json) if agent_breakdown_json else {}
-                except:
-                    agent_breakdown = {}
-                
+            for p in parlays:
                 parsed_results.append({
-                    "parlay_id": parlay_id,
-                    "week": w,
-                    "confidence_score": conf,
-                    "result": "HIT" if status == "won" else "MISS",
-                    "agent_breakdown": agent_breakdown,
-                    "leg_count": leg_count,
+                    "parlay_id": p.parlay_id,
+                    "week": p.week,
+                    "confidence_score": p.confidence_score,
+                    "result": "HIT" if p.status == "won" else "MISS",
+                    "agent_breakdown": p.agent_breakdown or {},
+                    "leg_count": len(p.legs),
                 })
             
             return parsed_results
@@ -240,34 +165,41 @@ class PerformanceTracker:
         except Exception as e:
             print(f"[ERROR] Error getting week results: {e}")
             return []
+        finally:
+            session.close()
     
     def calibration_report(self, week=None):
         """Generate calibration report comparing predicted vs actual confidence"""
-        cursor = self.conn.cursor()
-        
+        session = self.get_session()
         try:
-            query = """
-                SELECT 
-                    ROUND(confidence_score * 20) / 20.0 as confidence_bin,
-                    COUNT(*) as total,
-                    SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) as wins,
-                    ROUND(100.0 * SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) / COUNT(*), 1) as actual_hit_rate,
-                    ROUND(AVG(confidence_score) * 100, 1) as avg_predicted
-                FROM parlays
-                WHERE status != 'pending'
-            """
+            # We can't easily do the complex binning SQL in ORM without func, 
+            # so we'll fetch data and process in Python or use a raw query if needed for performance.
+            # For simplicity and DB-independence, let's fetch and process in Python for now.
+            # Or use query builder:
             
+            query = session.query(Parlay).filter(Parlay.status != 'pending')
             if week:
-                query += f" AND week = {week}"
+                query = query.filter(Parlay.week == week)
+                
+            parlays = query.all()
             
-            query += " GROUP BY confidence_bin ORDER BY confidence_bin DESC"
-            
-            results = cursor.execute(query).fetchall()
-            
-            if not results:
+            if not parlays:
                 print("\n[ERROR] No completed parlays to analyze yet\n")
                 return
+
+            # Analyze in Python
+            from collections import defaultdict
+            bins = defaultdict(lambda: {'total': 0, 'wins': 0, 'confs': []})
             
+            for p in parlays:
+                # Bin to nearest 5% (0.05)
+                # Matches original logic: ROUND(confidence_score * 20) / 20.0
+                bin_val = round(p.confidence_score * 20) / 20.0
+                bins[bin_val]['total'] += 1
+                if p.status == 'won':
+                    bins[bin_val]['wins'] += 1
+                bins[bin_val]['confs'].append(p.confidence_score)
+                
             print("\n" + "="*80)
             print("📊 CALIBRATION REPORT - Predicted vs Actual Hit Rates")
             print("="*80)
@@ -277,9 +209,13 @@ class PerformanceTracker:
             total_all = 0
             wins_all = 0
             
-            for bin_val, total, wins, hit_rate, avg_predicted in results:
-                if total == 0:
-                    continue
+            # Sort by bin value descending
+            for bin_val in sorted(bins.keys(), reverse=True):
+                stats = bins[bin_val]
+                total = stats['total']
+                wins = stats['wins']
+                hit_rate = (wins / total) * 100
+                avg_predicted = sum(stats['confs']) / total  # Use actual avg for more precision? Or bin center? Original used avg
                 
                 error = hit_rate - avg_predicted
                 error_sign = "+" if error >= 0 else ""
@@ -295,37 +231,27 @@ class PerformanceTracker:
                 overall_rate = (wins_all / total_all) * 100
                 print(f"{'OVERALL':<10} {total_all:<8} {wins_all:<8} {overall_rate:>6.1f}%")
             print("="*80)
-            print("\n💡 INTERPRETATION:")
-            print("  • Error = Actual - Predicted (negative = overconfident, positive = underconfident)")
-            print("  • Goal: error ≈ 0 (predictions match reality)")
-            print("  • Persistent negative error = system is too confident\n")
-        
+            
         except Exception as e:
             print(f"\n[ERROR] Error generating report: {e}\n")
+        finally:
+            session.close()
     
     def week_summary(self, week):
         """Show summary stats for a specific week"""
-        cursor = self.conn.cursor()
-        
+        session = self.get_session()
         try:
-            query = """
-                SELECT 
-                    COUNT(*) as total_parlays,
-                    SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) as wins,
-                    SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) as losses,
-                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-                    ROUND(AVG(confidence_score), 2) as avg_confidence
-                FROM parlays
-                WHERE week = ?
-            """
+            # Query stats
+            total = session.query(func.count(Parlay.parlay_id)).filter(Parlay.week == week).scalar()
             
-            result = cursor.execute(query, (week,)).fetchone()
-            
-            if not result or result[0] == 0:
+            if total == 0:
                 print(f"\n[ERROR] No parlays found for Week {week}\n")
                 return
-            
-            total, wins, losses, pending, avg_conf = result
+
+            wins = session.query(func.count(Parlay.parlay_id)).filter(Parlay.week == week, Parlay.status == 'won').scalar()
+            losses = session.query(func.count(Parlay.parlay_id)).filter(Parlay.week == week, Parlay.status == 'lost').scalar()
+            pending = session.query(func.count(Parlay.parlay_id)).filter(Parlay.week == week, Parlay.status == 'pending').scalar()
+            avg_conf = session.query(func.avg(Parlay.confidence_score)).filter(Parlay.week == week).scalar() or 0
             
             print(f"\n📊 WEEK {week} SUMMARY")
             print("="*50)
@@ -338,43 +264,36 @@ class PerformanceTracker:
         
         except Exception as e:
             print(f"\n[ERROR] Error getting summary: {e}\n")
+        finally:
+            session.close()
     
     def list_recent_parlays(self, limit=10):
         """List recent parlays and their status"""
-        cursor = self.conn.cursor()
-        
+        session = self.get_session()
         try:
-            query = """
-                SELECT 
-                    parlay_id, week, confidence_score, status, 
-                    (SELECT COUNT(*) FROM legs WHERE parlay_id = parlays.parlay_id) as leg_count
-                FROM parlays
-                ORDER BY created_timestamp DESC
-                LIMIT ?
-            """
+            parlays = session.query(Parlay).order_by(desc(Parlay.created_timestamp)).limit(limit).all()
             
-            results = cursor.execute(query, (limit,)).fetchall()
-            
-            if not results:
+            if not parlays:
                 print("\n[ERROR] No parlays logged yet\n")
                 return
             
-            print(f"\n📋 RECENT PARLAYS (Latest {len(results)})")
+            print(f"\n📋 RECENT PARLAYS (Latest {len(parlays)})")
             print("="*80)
             print(f"{'Parlay ID':<25} {'Week':<6} {'Legs':<6} {'Confidence':<12} {'Status':<10}")
             print("-"*80)
             
-            for parlay_id, week, conf, status, legs in results:
-                status_emoji = "[OK]" if status == "won" else "[ERROR]" if status == "lost" else "[PENDING]"
-                print(f"{parlay_id:<25} {week:<6} {legs:<6} {conf:>6.1f}%      "
-                      f"{status_emoji} {status:<8}")
+            for p in parlays:
+                status_emoji = "[OK]" if p.status == "won" else "[ERROR]" if p.status == "lost" else "[PENDING]"
+                print(f"{p.parlay_id:<25} {p.week:<6} {len(p.legs):<6} {p.confidence_score:>6.1f}%      "
+                      f"{status_emoji} {p.status:<8}")
             
             print("="*80 + "\n")
         
         except Exception as e:
             print(f"\n[ERROR] Error listing parlays: {e}\n")
+        finally:
+            session.close()
     
     def close(self):
-        """Close database connection"""
-        if self.conn:
-            self.conn.close()
+        """No-op for SQLAlchemy logic as sessions are closed per method"""
+        pass
