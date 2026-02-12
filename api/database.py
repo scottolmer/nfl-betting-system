@@ -22,7 +22,7 @@ DATABASE_URL = settings.database_url or "sqlite:///bets.db"
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-print(f"🔌 Connecting to database: {DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else DATABASE_URL}")
+print(f"Connecting to database: {DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else DATABASE_URL}")
 
 # Create engine
 # check_same_thread=False is needed for SQLite with FastAPI
@@ -340,7 +340,7 @@ def get_db():
 def init_db():
     """Create tables if they don't exist"""
     Base.metadata.create_all(bind=engine)
-    print("✅ Database tables initialized")
+    print("Database tables initialized")
 
 if __name__ == "__main__":
     init_db()
