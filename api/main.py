@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import props, parlays, results, auth, players, odds
+from api.routers import props, parlays, results, auth, players, odds, bets
 from api.config import settings
 from api.database import init_db
 import logging
@@ -85,6 +85,11 @@ app.include_router(
     odds.router,
     prefix="/api/odds",
     tags=["Odds"]
+)
+app.include_router(
+    bets.router,
+    prefix="/api/bets",
+    tags=["Bets"]
 )
 
 

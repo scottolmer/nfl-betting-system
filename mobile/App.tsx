@@ -5,12 +5,13 @@ import AppNavigator from './src/navigation/AppNavigator';
 import OnboardingCarousel from './src/components/onboarding/OnboardingCarousel';
 import { useOnboarding } from './src/hooks/useOnboarding';
 import { analytics, AnalyticsEvent } from './src/utils/analytics';
+import { AuthProvider } from './src/contexts/AuthContext';
+import { ModeProvider } from './src/contexts/ModeContext';
 
 export default function App() {
   const { isLoading, showOnboarding, completeOnboarding } = useOnboarding();
 
   useEffect(() => {
-    // Track app opened
     analytics.track(AnalyticsEvent.APP_OPENED);
   }, []);
 
@@ -28,14 +29,16 @@ export default function App() {
   }
 
   return (
-    <>
-      {showOnboarding ? (
-        <OnboardingCarousel onComplete={handleOnboardingComplete} />
-      ) : (
-        <AppNavigator />
-      )}
-      <StatusBar style="light" />
-    </>
+    <AuthProvider>
+      <ModeProvider>
+        {showOnboarding ? (
+          <OnboardingCarousel onComplete={handleOnboardingComplete} />
+        ) : (
+          <AppNavigator />
+        )}
+        <StatusBar style="light" />
+      </ModeProvider>
+    </AuthProvider>
   );
 }
 

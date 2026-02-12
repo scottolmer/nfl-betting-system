@@ -55,9 +55,51 @@
 
 ---
 
-## Sprint 2: MARCH — Props Mode [NOT STARTED]
+## Sprint 2: MARCH — Props Mode [COMPLETE]
 
-Full props experience: edge finder, multi-book odds comparison, bet sizing, server-synced bets, shared player/odds components reused by all pillars.
+### What was built
+
+**Edge service** — Finds where engine confidence exceeds market-implied probability:
+- `api/services/edge_service.py` — Kelly Criterion bet sizing, edge detection, implied probability conversion
+- Added `GET /api/props/edge-finder` — Find biggest edges across all props for a week
+- Added `GET /api/props/bet-sizing` — Kelly-based unit recommendations for any prop
+
+**Bets router** — Server-synced bet tracking (replaces local AsyncStorage):
+- `api/routers/bets.py` — POST /save, GET /mine (filtered by mode/week/status), PUT /{id}/status, GET /analytics
+- Analytics endpoint returns win rate, breakdowns by mode and week
+
+**7 shared components** (reused across all three pillars):
+- `components/player/PlayerCard.tsx` — Headshot (or initials fallback), name, team, position
+- `components/player/AgentBreakdownCard.tsx` — Color-coded bars for each agent's score, weight, direction
+- `components/player/StatTrendRow.tsx` — L5/L10 stats with mini sparkline and trend arrows
+- `components/odds/MultiBookOddsTable.tsx` — Book comparison table, best price highlighted in green
+- `components/odds/LineMovementChart.tsx` — Horizontal bar chart of line changes over time
+- `components/game/GameEnvironmentCard.tsx` — Implied total, spread, pace, venue pills
+- `components/betting/BetSizeSuggestion.tsx` — Unit recommendation box with Kelly %, edge, risk level
+
+**4 Props mode screens:**
+- `screens/props/PropsHomeScreen.tsx` — Top picks feed, stat category filters, player search, pull-to-refresh, edge finder button
+- `screens/props/PropDetailScreen.tsx` — Full player card + prop line + bet sizing + agent breakdown + multi-book odds + line chart + top reasons
+- `screens/props/EdgeFinderScreen.tsx` — Sorted list of biggest edges with unit recommendations
+- `screens/props/BetSlipScreen.tsx` — Filtered bet history (all/pending/placed/graded), server-synced, auth-gated
+
+**Navigation overhaul:**
+- `components/navigation/ModeSwitcher.tsx` — DFS | Props | Fantasy pill toggle at top of app
+- `navigation/PropsNavigator.tsx` — Stack navigator for Props screens
+- `navigation/DFSNavigator.tsx` — "Coming Soon" placeholder
+- `navigation/FantasyNavigator.tsx` — "Coming Soon" placeholder
+- Rewrote `navigation/AppNavigator.tsx` — Mode switcher at top, bottom tabs (Home / My Bets / Profile), mode-aware Home tab
+- Rewrote `App.tsx` — Wrapped in AuthProvider + ModeProvider
+
+**Dependencies added:**
+- `@react-navigation/native-stack` for stack navigation
+- `api/routers/bets.py` registered in `api/main.py`
+
+### Key decisions
+- **Shared components first** — PlayerCard, AgentBreakdownCard, MultiBookOddsTable are designed to be reused by DFS and Fantasy modes without modification
+- **Edge = engine confidence minus implied probability** — props with >2% edge surface in EdgeFinder
+- **Quarter-Kelly sizing** — conservative bet sizing, capped at 3 units max
+- **Server-synced bets** — UserBet table replaces AsyncStorage, enabling cross-device sync and analytics
 
 ## Sprint 3: APRIL — DFS Mode [NOT STARTED]
 

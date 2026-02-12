@@ -1,10 +1,13 @@
 """Props analysis API endpoints"""
 
 from fastapi import APIRouter, Depends, Query, HTTPException
+from sqlalchemy.orm import Session
 from api.dependencies import get_api_key
 from api.services.analysis_service import AnalysisService
+from api.services.edge_service import edge_service
 from api.schemas.props import PropAnalysisResponse
 from api.schemas.line_adjustment import LineAdjustmentRequest, LineAdjustmentResponse
+from api.database import get_db
 from typing import List, Optional
 import logging
 
@@ -192,3 +195,45 @@ async def adjust_line(
             status_code=500,
             detail=f"Error adjusting line: {str(e)}"
         )
+
+
+@router.get(
+    "/edge-finder",
+    summary="Find biggest edges across all props",
+    description="Compare engine confidence vs implied probability to find the largest edges.",
+)
+async def edge_finder(
+    week: int = Query(..., ge=1, le=18),
+    min_edge: float = Query(2.0, description="Minimum edge percentage"),
+    min_confidence: float = Query(55.0, description="Minimum engine confidence"),
+    limit: int = Query(30, le=100),
+    db: Session = Depends(get_db),
+    api_key: str = Depends(get_api_key),
+):
+    """Find the biggest edges between engine confidence and market odds."""
+    try:
+        edges = edge_service.find_edges(
+            db, week,
+            min_edge=min_edge,
+            min_confidence=min_confidence,
+            limit=limit,
+        )
+        return edges
+    except Exception as e:
+        logger.error(f"Edge finder error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/bet-sizing",
+    summary="Get bet sizing recommendation",
+    description="Kelly Criterion-based bet sizing for a specific prop.",
+)
+async def bet_sizing(
+    confidence: float = Query(..., ge=0, le=100, description="Engine confidence (0-100)"),
+    american_odds: int = Query(..., description="American odds (e.g. -110, +150)"),
+    bankroll: float = Query(100.0, description="Bankroll in units"),
+    api_key: str = Depends(get_api_key),
+):
+    """Calculate bet sizing based on Kelly Criterion."""
+    return edge_service.get_bet_sizing(confidence, american_odds, bankroll)
