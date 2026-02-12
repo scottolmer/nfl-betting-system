@@ -185,9 +185,38 @@
 - **Scoring flexibility** — PPR, Half-PPR, and Standard presets auto-detected from Sleeper league settings
 - **AsyncStorage for connection** — Sleeper connection persisted locally so users don't need to re-connect each session
 
-## Sprint 5: JUNE — Polish & Cross-Pillar Integration [NOT STARTED]
+## Sprint 5: JUNE — Polish & Cross-Pillar Integration [COMPLETE]
 
-Unified home feed, full player intelligence cards, universal search.
+### What was built
+
+**Game service** — Game-level environment context:
+- `api/services/game_service.py` — Implied total estimation from player projections, spread estimation, pace tier classification (fast/avg/slow by team matchup), dome detection, pass/run balance estimates, division rivalry detection. Week slate builder aggregating all games sorted by implied total.
+
+**Player Intelligence service** — Comprehensive player data aggregation:
+- `api/services/player_intel_service.py` — Aggregates all projections, odds, agent breakdowns, line movements, and game environment into a single intelligence payload. Identifies top 3 agent drivers by impact score (weight * |score - 50|). Provides both full intelligence and lightweight summary views for feed cards.
+
+**Feed router** — Unified cross-pillar home feed:
+- `api/routers/feed.py` — 2 endpoints:
+  - `GET /home` — Aggregated feed with 4 sections: top prop edges (confidence >= 60), DFS highlights (highest confidence with team diversity), fantasy alerts (start/sit signals from high-confidence projections), and game slate
+  - `GET /player-intel/{player_id}` — Full player intelligence card data
+
+**3 cross-pillar components:**
+- `components/player/PlayerIntelligenceCard.tsx` — Complete player view that fetches from `/api/feed/player-intel/{id}`. Shows: PlayerCard with confidence, stat projections table (engine projection, line, direction, confidence), top 3 agent drivers with score bars, game environment card. Supports compact mode with expand/collapse.
+- `components/game/GameSlateCard.tsx` — Horizontally scrollable game chips color-coded by implied total (green 50+, blue 44-49, red <44). Shows team abbreviation, total, pace/dome icons, and a color legend.
+- `components/search/PlayerSearchBar.tsx` — Universal debounced search (300ms) across all modes. Shows dropdown with avatar initials, name, team, position. Handles empty state, clear button, keyboard dismiss on select.
+
+**Unified HomeScreen (rewritten):**
+- `screens/HomeScreen.tsx` — Cross-pillar discovery feed replacing the old props-only home. Sections: universal PlayerSearchBar (tapping result opens PlayerIntelligenceCard inline), Top Prop Edges (PlayerCards with edge badges), DFS Highlights (horizontal scrolling confidence chips), Fantasy Alerts (start/sit rows with directional icons), Game Slate (GameSlateCard). Pull-to-refresh. "See All" links switch to respective mode.
+
+**Navigation update:**
+- `navigation/AppNavigator.tsx` — Added "Discover" tab (unified HomeScreen) as the first bottom tab. Tab bar now: Discover (compass icon) | Home (mode-specific) | My Bets | Profile. Mode switcher still at top for deep navigation.
+
+### Key decisions
+- **Discover tab is the default landing** — users see cross-pillar highlights first, then tap into specific modes
+- **PlayerIntelligenceCard fetches its own data** — self-contained component that can be embedded anywhere via player ID
+- **Feed aggregates from existing ProjectionService** — no new data sources needed, just smart aggregation and presentation
+- **Debounced universal search** — 300ms debounce prevents API spam, works across all three pillars
+- **Game environment derived from player data** — no separate game-level odds storage needed, implied total estimated from QB passing projections
 
 ## Sprint 6: JULY — Subscription & Automated Pipeline [NOT STARTED]
 

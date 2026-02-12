@@ -1,42 +1,53 @@
+/**
+ * HomeScreen — Unified feed showing top picks across all modes.
+ * Aggregates: prop edges, DFS highlights, fantasy alerts, game slate.
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   StyleSheet,
+  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../constants/theme';
 import { apiService } from '../services/api';
-import { PropAnalysis } from '../types';
-import QuickStartSection from '../components/home/QuickStartSection';
-import CollapsiblePropCard from '../components/home/CollapsiblePropCard';
-import InfoTooltip from '../components/common/InfoTooltip';
+import { useMode } from '../contexts/ModeContext';
+import PlayerCard from '../components/player/PlayerCard';
+import PlayerIntelligenceCard from '../components/player/PlayerIntelligenceCard';
+import GameSlateCard from '../components/game/GameSlateCard';
+import PlayerSearchBar from '../components/search/PlayerSearchBar';
+
+interface FeedSection {
+  title: string;
+  subtitle: string;
+  items: any[];
+}
 
 export default function HomeScreen({ navigation }: any) {
-  const [props, setProps] = useState<PropAnalysis[]>([]);
+  const { setMode } = useMode();
+  const [feed, setFeed] = useState<Record<string, FeedSection> | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentWeek] = useState(17); // TODO: Make this dynamic
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
+  const [currentWeek] = useState(17);
 
   useEffect(() => {
-    loadTopProps();
+    loadFeed();
   }, []);
 
-  const loadTopProps = async () => {
+  const loadFeed = async () => {
     try {
-      setError(null);
-      const data = await apiService.getTopProps({
-        week: currentWeek,
-        limit: 10,
+      const resp = await apiService['client'].get('/api/feed/home', {
+        params: { week: currentWeek, limit: 5 },
       });
-      setProps(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load props');
-      console.error('Error loading props:', err);
+      setFeed(resp.data.sections);
+    } catch (err) {
+      console.error('Error loading feed:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -45,90 +56,208 @@ export default function HomeScreen({ navigation }: any) {
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadTopProps();
+    loadFeed();
   };
 
-  const renderPropItem = ({ item }: { item: PropAnalysis }) => (
-    <CollapsiblePropCard prop={item} />
-  );
-
-  const handleViewPreBuilt = () => {
-    navigation.navigate('Pre-Built');
+  const handlePlayerSelect = (player: any) => {
+    setSelectedPlayerId(player.id);
   };
 
-  const handleBuildCustom = () => {
-    navigation.navigate('My Parlays');
+  const getConfColor = (conf: number) => {
+    if (conf >= 65) return theme.colors.success;
+    if (conf >= 55) return theme.colors.primary;
+    return theme.colors.textSecondary;
   };
 
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator color="#3B82F6" />
-        <Text style={styles.loadingText}>Loading top props...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>⚠️ {error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadTopProps}>
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
+      <View style={styles.center}>
+        <ActivityIndicator color={theme.colors.primary} size="large" />
+        <Text style={styles.loadingText}>Loading your feed...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.headerTitle}>🏈 NFL Betting Analysis</Text>
-            <Text style={styles.headerSubtitle}>Week {currentWeek}</Text>
-          </View>
-          <View style={styles.headerActions}>
-            <InfoTooltip tooltipKey="preBuildParlays" iconSize={20} iconColor="#9CA3AF" />
-          </View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Discover</Text>
+          <Text style={styles.headerSub}>Week {currentWeek} · All Modes</Text>
         </View>
-      </View>
 
-      <FlatList
-        data={props}
-        renderItem={renderPropItem}
-        keyExtractor={(item, index) => `${item.player_name}-${item.stat_type}-${index}`}
-        contentContainerStyle={styles.listContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListHeaderComponent={
-          <>
-            <QuickStartSection
-              featuredProp={props[0]}
-              onViewPreBuilt={handleViewPreBuilt}
-              onBuildCustom={handleBuildCustom}
+        {/* Universal Search */}
+        <View style={styles.searchSection}>
+          <PlayerSearchBar
+            onSelectPlayer={handlePlayerSelect}
+            placeholder="Search any player..."
+          />
+        </View>
+
+        {/* Player Intel Card (when player selected from search) */}
+        {selectedPlayerId && (
+          <View style={styles.section}>
+            <PlayerIntelligenceCard
+              playerId={selectedPlayerId}
+              week={currentWeek}
+              onClose={() => setSelectedPlayerId(null)}
+              compact
             />
+          </View>
+        )}
+
+        {/* Top Prop Edges */}
+        {feed?.prop_edges && feed.prop_edges.items.length > 0 && (
+          <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Top 10 Props</Text>
-              <InfoTooltip tooltipKey="confidence" iconSize={16} iconColor="#6B7280" />
+              <View>
+                <Text style={styles.sectionTitle}>{feed.prop_edges.title}</Text>
+                <Text style={styles.sectionSub}>{feed.prop_edges.subtitle}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setMode('props');
+                }}
+              >
+                <Text style={styles.seeAll}>See All</Text>
+              </TouchableOpacity>
             </View>
-          </>
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No props available</Text>
+            {feed.prop_edges.items.map((item: any, i: number) => (
+              <TouchableOpacity
+                key={i}
+                activeOpacity={0.7}
+                onPress={() => setSelectedPlayerId(item.player_id)}
+              >
+                <PlayerCard
+                  player={{
+                    name: item.player_name,
+                    team: item.team,
+                    position: item.position,
+                    headshot_url: item.headshot_url,
+                  }}
+                  subtitle={`${item.stat_type} · ${item.direction} ${item.implied_line ?? ''}`}
+                  rightContent={
+                    <View style={styles.edgeRight}>
+                      <Text style={[styles.edgeConf, { color: getConfColor(item.confidence) }]}>
+                        {Math.round(item.confidence)}
+                      </Text>
+                      <View style={styles.edgeBadge}>
+                        <Text style={styles.edgeText}>+{item.edge?.toFixed(0)} edge</Text>
+                      </View>
+                    </View>
+                  }
+                />
+              </TouchableOpacity>
+            ))}
           </View>
-        }
-        ListFooterComponent={
-          <View style={styles.helpFooter}>
-            <Text style={styles.helpFooterText}>💡 New to betting props?</Text>
-            <TouchableOpacity onPress={() => setShowTutorial(true)}>
-              <Text style={styles.helpFooterLink}>Watch Tutorial</Text>
-            </TouchableOpacity>
+        )}
+
+        {/* DFS Highlights */}
+        {feed?.dfs_picks && feed.dfs_picks.items.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View>
+                <Text style={styles.sectionTitle}>{feed.dfs_picks.title}</Text>
+                <Text style={styles.sectionSub}>{feed.dfs_picks.subtitle}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setMode('dfs');
+                }}
+              >
+                <Text style={styles.seeAll}>Go to DFS</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            >
+              {feed.dfs_picks.items.map((item: any, i: number) => (
+                <TouchableOpacity
+                  key={i}
+                  style={styles.dfsChip}
+                  activeOpacity={0.7}
+                  onPress={() => setSelectedPlayerId(item.player_id)}
+                >
+                  <Text style={styles.dfsName} numberOfLines={1}>{item.player_name}</Text>
+                  <Text style={styles.dfsMeta}>{item.team} · {item.position}</Text>
+                  <Text style={[styles.dfsConf, { color: getConfColor(item.confidence) }]}>
+                    {Math.round(item.confidence)}
+                  </Text>
+                  <Text style={styles.dfsDir}>{item.direction}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        }
-      />
+        )}
+
+        {/* Fantasy Alerts */}
+        {feed?.fantasy_alerts && feed.fantasy_alerts.items.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View>
+                <Text style={styles.sectionTitle}>{feed.fantasy_alerts.title}</Text>
+                <Text style={styles.sectionSub}>{feed.fantasy_alerts.subtitle}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setMode('fantasy');
+                }}
+              >
+                <Text style={styles.seeAll}>Fantasy</Text>
+              </TouchableOpacity>
+            </View>
+            {feed.fantasy_alerts.items.map((item: any, i: number) => (
+              <View key={i} style={styles.alertRow}>
+                <View
+                  style={[
+                    styles.alertIcon,
+                    {
+                      backgroundColor:
+                        item.alert_type === 'start'
+                          ? theme.colors.success + '20'
+                          : theme.colors.danger + '20',
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={item.alert_type === 'start' ? 'arrow-up' : 'arrow-down'}
+                    size={14}
+                    color={item.alert_type === 'start' ? theme.colors.success : theme.colors.danger}
+                  />
+                </View>
+                <View style={styles.alertInfo}>
+                  <Text style={styles.alertPlayer}>{item.player_name}</Text>
+                  <Text style={styles.alertMsg}>{item.message}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Game Slate */}
+        {feed?.game_slate && feed.game_slate.items.length > 0 && (
+          <View style={styles.section}>
+            <GameSlateCard games={feed.game_slate.items} week={currentWeek} />
+          </View>
+        )}
+
+        {/* Empty state */}
+        {!feed && (
+          <View style={styles.emptyState}>
+            <Ionicons name="analytics-outline" size={48} color={theme.colors.textTertiary} />
+            <Text style={styles.emptyTitle}>No Data Yet</Text>
+            <Text style={styles.emptyText}>
+              Once odds data is loaded for this week, your personalized feed will appear here.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -136,99 +265,164 @@ export default function HomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
-  centerContainer: {
+  content: {
+    paddingBottom: 40,
+  },
+  center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    padding: 20,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: '#1F2937',
-    paddingTop: 60,
-    paddingBottom: 16,
+    paddingTop: 16,
     paddingHorizontal: 20,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    paddingBottom: 12,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 2,
+    ...theme.typography.h1,
   },
-  headerSubtitle: {
+  headerSub: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
+    marginTop: 2,
   },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
+  searchSection: {
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    zIndex: 100,
   },
-  listContainer: {
-    paddingBottom: 16,
+  section: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    ...theme.typography.h3,
   },
-  helpFooter: {
-    padding: 20,
+  sectionSub: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+    marginTop: 1,
+  },
+  seeAll: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: theme.colors.primary,
+  },
+  // Prop edges
+  edgeRight: {
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    marginTop: 8,
+    gap: 2,
   },
-  helpFooterText: {
-    fontSize: 14,
-    color: '#6B7280',
+  edgeConf: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  edgeBadge: {
+    backgroundColor: theme.colors.success + '20',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  edgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: theme.colors.success,
+  },
+  // DFS horizontal
+  horizontalList: {
+    gap: 10,
+    paddingVertical: 2,
+  },
+  dfsChip: {
+    backgroundColor: theme.colors.glassLow,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
+    padding: 12,
+    alignItems: 'center',
+    width: 110,
+  },
+  dfsName: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+    textAlign: 'center',
+  },
+  dfsMeta: {
+    fontSize: 10,
+    color: theme.colors.textTertiary,
+    marginTop: 2,
+  },
+  dfsConf: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginTop: 6,
+  },
+  dfsDir: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: theme.colors.textTertiary,
+  },
+  // Fantasy alerts
+  alertRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.glassLow,
+    borderRadius: theme.borderRadius.s,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
+    padding: 10,
+    marginBottom: 6,
+    gap: 10,
+  },
+  alertIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alertInfo: {
+    flex: 1,
+  },
+  alertPlayer: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+  },
+  alertMsg: {
+    fontSize: 11,
+    color: theme.colors.textSecondary,
+    marginTop: 1,
+  },
+  // Empty
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    ...theme.typography.h3,
+    marginTop: 16,
     marginBottom: 8,
   },
-  helpFooterLink: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#3B82F6',
+  emptyText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: '#3B82F6',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
 });

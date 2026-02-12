@@ -1,7 +1,8 @@
 /**
  * AppNavigator — Mode switcher (DFS | Props | Fantasy) at top,
- * bottom tabs (Home / Search / My Bets / Profile) below.
- * Each mode swaps its own stack navigator into the Home tab.
+ * bottom tabs (Discover / Home / My Bets / Profile) below.
+ * Discover shows unified cross-pillar feed.
+ * Home shows the current mode's navigator.
  */
 
 import React from 'react';
@@ -18,6 +19,7 @@ import DFSNavigator from './DFSNavigator';
 import FantasyNavigator from './FantasyNavigator';
 
 // Shared screens
+import HomeScreen from '../screens/HomeScreen';
 import BetSlipScreen from '../screens/props/BetSlipScreen';
 import MoreScreen from '../screens/MoreScreen';
 
@@ -69,6 +71,15 @@ export default function AppNavigator() {
             },
           }}
         >
+          <Tab.Screen
+            name="Discover"
+            component={HomeScreen}
+            options={{
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="compass-outline" size={22} color={color} />
+              ),
+            }}
+          />
           <Tab.Screen
             name="Home"
             component={ModeHome}

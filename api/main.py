@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import props, parlays, results, auth, players, odds, bets, dfs, fantasy
+from api.routers import props, parlays, results, auth, players, odds, bets, dfs, fantasy, feed
 from api.config import settings
 from api.database import init_db
 import logging
@@ -41,6 +41,7 @@ app = FastAPI(
     - `/api/parlays/*` - Pre-built parlay generation
     - `/api/dfs/*` - DFS slip builder, correlation scoring, flex optimization
     - `/api/fantasy/*` - Sleeper integration, start/sit, waivers, trades, heatmaps
+    - `/api/feed/*` - Unified home feed, player intelligence cards
     - `/api/bets/*` - Server-synced bet tracking and analytics
     """,
     docs_url="/docs",
@@ -107,6 +108,13 @@ app.include_router(
     fantasy.router,
     prefix="/api/fantasy",
     tags=["Fantasy"]
+)
+
+# Sprint 5: Feed router (unified cross-pillar)
+app.include_router(
+    feed.router,
+    prefix="/api/feed",
+    tags=["Feed"]
 )
 
 
