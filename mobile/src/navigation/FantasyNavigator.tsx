@@ -1,53 +1,34 @@
 /**
- * FantasyNavigator — Placeholder stack for Fantasy mode (Sprint 4).
+ * FantasyNavigator — Stack navigator for Fantasy mode screens.
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import FantasyHomeScreen from '../screens/fantasy/FantasyHomeScreen';
+import SleeperConnectScreen from '../screens/fantasy/SleeperConnectScreen';
+import RosterScreen from '../screens/fantasy/RosterScreen';
+import StartSitScreen from '../screens/fantasy/StartSitScreen';
+import WaiverWireScreen from '../screens/fantasy/WaiverWireScreen';
+import MatchupHeatmapScreen from '../screens/fantasy/MatchupHeatmapScreen';
+import TradeAnalyzerScreen from '../screens/fantasy/TradeAnalyzerScreen';
 
-function FantasyComingSoon() {
-  return (
-    <View style={styles.container}>
-      <Ionicons name="trophy-outline" size={48} color={theme.colors.textTertiary} />
-      <Text style={styles.title}>Fantasy Mode</Text>
-      <Text style={styles.subtitle}>Coming Soon</Text>
-      <Text style={styles.description}>
-        Import your Sleeper roster, get start/sit advice, waiver wire rankings,
-        matchup heatmaps, and trade analysis — all powered by the same engine.
-      </Text>
-    </View>
-  );
-}
+const Stack = createNativeStackNavigator();
 
 export default function FantasyNavigator() {
-  return <FantasyComingSoon />;
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+      }}
+    >
+      <Stack.Screen name="FantasyHome" component={FantasyHomeScreen} />
+      <Stack.Screen name="SleeperConnect" component={SleeperConnectScreen} />
+      <Stack.Screen name="Roster" component={RosterScreen} />
+      <Stack.Screen name="StartSit" component={StartSitScreen} />
+      <Stack.Screen name="WaiverWire" component={WaiverWireScreen} />
+      <Stack.Screen name="MatchupHeatmap" component={MatchupHeatmapScreen} />
+      <Stack.Screen name="TradeAnalyzer" component={TradeAnalyzerScreen} />
+    </Stack.Navigator>
+  );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: 40,
-  },
-  title: {
-    ...theme.typography.h2,
-    marginTop: 16,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: theme.colors.primary,
-    fontWeight: '700',
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-});

@@ -137,9 +137,53 @@
 - **Flex optimization** — Flex candidate scored by confidence minus correlation penalty, balancing individual strength with slip-level risk
 - **Platform-aware stat mapping** — Each DFS platform (PrizePicks, Underdog) has its own stat name conventions mapped to internal types
 
-## Sprint 4: MAY — Fantasy Mode [NOT STARTED]
+## Sprint 4: MAY — Fantasy Mode [COMPLETE]
 
-Sleeper API integration, start/sit rankings, waiver wire, matchup heatmap, trade analyzer.
+### What was built
+
+**Sleeper API service** — Public API client for fantasy league data:
+- `api/services/sleeper_service.py` — Fetch user by username, get leagues by season, get rosters, get matchups, get NFL state. Player cache for Sleeper's large player endpoint. Maps Sleeper player IDs to our Player table via name+team matching (creates new Player records for unmapped players).
+
+**Fantasy service** — Analysis engine for fantasy decisions:
+- `api/services/fantasy_service.py` — PPR/Half-PPR/Standard scoring presets, projection-to-fantasy-points conversion, floor/ceiling calculation based on confidence spread. Start/sit rankings with human-readable reasons. Waiver wire scoring (fantasy points weighted by confidence). Trade analyzer with ROS value comparison and ACCEPT/CONSIDER/DECLINE verdicts. Matchup heatmap using engine confidence as matchup quality proxy. Lineup optimizer filling QB/RB/RB/WR/WR/TE/FLEX/K/DEF slots.
+
+**Fantasy router** — 8 endpoints:
+- `api/routers/fantasy.py`:
+  - `POST /connect-sleeper` — Look up Sleeper username, return user info + leagues
+  - `GET /leagues` — Get all leagues for a Sleeper user
+  - `GET /roster/{league_id}` — Full roster with fantasy point projections
+  - `GET /start-sit/{league_id}` — Per-position start/sit rankings
+  - `GET /waiver-wire/{league_id}` — Best available unrostered players
+  - `GET /matchup/{league_id}` — Projected totals, win probability vs opponent
+  - `GET /matchup-heatmap/{league_id}` — Color-coded player-vs-defense grid
+  - `POST /trade-analyzer` — ROS projection comparison with verdict
+  - `POST /optimize-lineup` — Optimal lineup from roster players
+
+**4 Fantasy components:**
+- `components/fantasy/MatchupCard.tsx` — Your projected total vs opponent with win probability bar, margin indicator, color-coded by advantage
+- `components/fantasy/RosterSlot.tsx` — Position badge (color-coded by position), player name/team, fantasy points with floor/ceiling range, START/SIT/FLEX verdict badge
+- `components/fantasy/ProjectionBar.tsx` — Visual floor/ceiling range bar with projected marker, confidence dot indicator
+- `components/fantasy/HeatmapCell.tsx` — Single matchup cell with red→yellow→green gradient by confidence, shows stat label + projection + grade. Compact mode for inline use
+
+**7 Fantasy screens:**
+- `screens/fantasy/FantasyHomeScreen.tsx` — Two states: (1) Onboarding with "Connect Sleeper" CTA and feature list when not connected; (2) Dashboard with MatchupCard, 6 quick-action tiles (Roster, Start/Sit, Waivers, Heatmap, Trade, Optimize) when connected. Stores Sleeper connection in AsyncStorage.
+- `screens/fantasy/SleeperConnectScreen.tsx` — Enter Sleeper username → lookup user → show leagues → tap to select. Validates username, shows user card on success, persists connection.
+- `screens/fantasy/RosterScreen.tsx` — Full roster with RosterSlot components, total projection with ProjectionBar, "Optimize Lineup" button that calls server-side optimizer. Supports auto-optimize on entry.
+- `screens/fantasy/StartSitScreen.tsx` — Position filter chips (All/QB/RB/WR/TE), ranked players with RosterSlot showing START/SIT/FLEX verdicts, expandable reasoning on tap.
+- `screens/fantasy/WaiverWireScreen.tsx` — Position-filtered list of best available players using PlayerCard, ranked by waiver score (fantasy points weighted by confidence).
+- `screens/fantasy/MatchupHeatmapScreen.tsx` — Color legend + per-player rows with horizontal scrolling HeatmapCell grid. Each player shows overall grade badge and per-stat matchup cells.
+- `screens/fantasy/TradeAnalyzerScreen.tsx` — Give/Get panels with player search dropdowns, add/remove chips. "Analyze Trade" button triggers ROS comparison. Result card shows ACCEPT/CONSIDER/DECLINE verdict with reasoning, ROS totals, difference, and percentage.
+
+**Navigation update:**
+- Rewrote `navigation/FantasyNavigator.tsx` — Real stack navigator with all 7 screens (replaced "Coming Soon" placeholder)
+- Registered `api/routers/fantasy.py` in `api/main.py`
+
+### Key decisions
+- **Sleeper API is free and public** — no API key needed, no auth from their side, rate-limit friendly
+- **Player ID mapping** — Sleeper IDs mapped to our Player table via name+team matching, auto-creates missing players
+- **Same projection engine** — Fantasy points derived from the same ProjectionService that powers DFS and Props, ensuring consistent analysis across all three pillars
+- **Scoring flexibility** — PPR, Half-PPR, and Standard presets auto-detected from Sleeper league settings
+- **AsyncStorage for connection** — Sleeper connection persisted locally so users don't need to re-connect each session
 
 ## Sprint 5: JUNE — Polish & Cross-Pillar Integration [NOT STARTED]
 
