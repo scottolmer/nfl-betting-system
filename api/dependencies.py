@@ -1,11 +1,6 @@
-"""Dependency injection for FastAPI routes"""
+"""Dependency injection for FastAPI routes."""
 
 from api.core.auth import get_api_key
+from api.core.jwt_auth import get_current_user, get_optional_user
 
-# For Phase 1, we only have API key authentication
-# Phase 2 will add:
-# - get_current_user (JWT authentication)
-# - get_premium_user (subscription tier checking)
-# - get_db (database session)
-
-__all__ = ["get_api_key"]
+__all__ = ["get_api_key", "get_current_user", "get_optional_user"]

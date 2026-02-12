@@ -5,13 +5,14 @@
 import axios, { AxiosInstance } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PropAnalysis, Parlay, LineAdjustmentRequest, LineAdjustmentResponse } from '../types';
+import { authService } from './authService';
 
 // API Configuration
 const API_BASE_URL = __DEV__
   ? 'http://192.168.1.207:8000'  // Development - local network IP
   : 'https://your-production-api.com';  // Production
 
-const API_KEY = 'dev_test_key_12345';  // TODO: Store securely in production
+const API_KEY = 'dev_test_key_12345';  // Fallback for non-auth endpoints
 
 class ApiService {
   private client: AxiosInstance;
@@ -26,9 +27,13 @@ class ApiService {
       },
     });
 
-    // Request interceptor for debugging
+    // Request interceptor: attach JWT if available, log request
     this.client.interceptors.request.use(
       (config) => {
+        const token = authService.getAccessToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
         console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
         return config;
       },
@@ -38,13 +43,22 @@ class ApiService {
       }
     );
 
-    // Response interceptor for debugging
+    // Response interceptor: auto-refresh on 401
     this.client.interceptors.response.use(
       (response) => {
         console.log(`[API] Response ${response.status} from ${response.config.url}`);
         return response;
       },
-      (error) => {
+      async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          const refreshed = await authService.refresh();
+          if (refreshed) {
+            originalRequest.headers.Authorization = `Bearer ${refreshed.access_token}`;
+            return this.client(originalRequest);
+          }
+        }
         console.error('[API] Response error:', error.response?.data || error.message);
         return Promise.reject(error);
       }

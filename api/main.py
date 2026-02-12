@@ -2,8 +2,9 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import props, parlays, results
+from api.routers import props, parlays, results, auth, players, odds
 from api.config import settings
+from api.database import init_db
 import logging
 
 # Configure logging
@@ -16,34 +17,28 @@ logger = logging.getLogger(__name__)
 # Create FastAPI app
 app = FastAPI(
     title="NFL Betting Analysis API",
-    version="1.0.0",
+    version="2.0.0",
     description="""
-    FastAPI backend for mobile NFL betting analysis app.
-
-    ## Features
-    * 9-agent prop analysis system (95%+ code reuse from existing CLI)
-    * Pre-built parlay generation
-    * Real-time prop filtering and search
-    * Minimal API key authentication (Phase 1)
+    Three-pillar NFL analysis platform: DFS, Props, and Fantasy.
 
     ## Authentication
-    All endpoints require `X-API-Key` header.
+    JWT Bearer tokens via `/api/auth/login` and `/api/auth/register`.
+    Legacy `X-API-Key` still supported for existing endpoints.
 
-    Development key: `dev_test_key_12345`
+    ## Calibrated 6-Agent Engine
+    1. **Injury** (weight 4.7) - Player health status
+    2. **DVOA** (weight 3.2) - Team efficiency analysis
+    3. **Variance** (weight 2.4) - Prop reliability (inverted signal)
+    4. **GameScript** (weight 0.82) - Game context (inverted signal)
+    5. **Volume** (weight 0.75) - Player usage
+    6. **Matchup** (weight 0.5) - Position-specific defense
 
-    ## Agents
-    The analysis system uses 9 specialized agents:
-    1. **DVOA** (weight 2.0) - Team efficiency analysis
-    2. **Matchup** (weight 1.5) - Position-specific defensive matchups
-    3. **Volume** (weight 1.5) - Player usage (snap/target share)
-    4. **GameScript** (weight 2.2) - Game context (total, spread)
-    5. **Variance** (weight 1.2) - Prop type reliability
-    6. **Trend** (weight 1.0) - Recent performance trends
-    7. **Injury** (weight 3.0) - Player health status
-    8. **HitRate** (weight 2.0) - Historical accuracy vs line
-    9. **Weather** (weight 0.0) - Weather impact (disabled)
-
-    Each prop receives a confidence score (0-100) based on weighted agent analysis.
+    ## Key Endpoints
+    - `/api/auth/*` - Registration, login, token refresh
+    - `/api/players/*` - Player search, ESPN headshots, projections
+    - `/api/odds/*` - Multi-book odds, best prices, line movement
+    - `/api/props/*` - Prop analysis and filtering
+    - `/api/parlays/*` - Pre-built parlay generation
     """,
     docs_url="/docs",
     redoc_url="/redoc"
@@ -75,6 +70,23 @@ app.include_router(
     tags=["Results"]
 )
 
+# Sprint 1: New routers
+app.include_router(
+    auth.router,
+    prefix="/api/auth",
+    tags=["Authentication"]
+)
+app.include_router(
+    players.router,
+    prefix="/api/players",
+    tags=["Players"]
+)
+app.include_router(
+    odds.router,
+    prefix="/api/odds",
+    tags=["Odds"]
+)
+
 
 @app.get("/", tags=["Health"])
 async def root():
@@ -101,10 +113,10 @@ async def health():
 async def startup_event():
     """Run on application startup"""
     logger.info("=" * 70)
-    logger.info("🏈 NFL BETTING ANALYSIS API - STARTING")
+    logger.info("NFL BETTING ANALYSIS API - STARTING")
     logger.info("=" * 70)
-    logger.info("FastAPI backend for mobile app")
-    logger.info("95%+ code reuse from existing analysis engine")
+    # Initialize database tables (creates new Sprint 1 tables if they don't exist)
+    init_db()
     logger.info("Docs available at /docs")
     logger.info("=" * 70)
 

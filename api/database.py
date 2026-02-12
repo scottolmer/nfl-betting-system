@@ -7,11 +7,12 @@ import os
 import json
 from datetime import datetime, timezone
 from typing import List, Optional, Any
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey, JSON, DateTime, Text, Index
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey, JSON, DateTime, Text, Index, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from api.config import settings
 import uuid
+import enum
 
 # Determine database URL
 # Prioritize env var, fall back to local sqlite file
@@ -185,6 +186,145 @@ class ParlayValidationHistory(Base):
     validated_date = Column(DateTime, default=datetime.now)
     week = Column(Integer)
 
+
+# --- Sprint 1: New Models ---
+
+class AppMode(str, enum.Enum):
+    DFS = "dfs"
+    PROPS = "props"
+    FANTASY = "fantasy"
+
+
+class Player(Base):
+    """NFL player with ESPN headshot data."""
+    __tablename__ = "players"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False, index=True)
+    team = Column(String, nullable=False, index=True)
+    position = Column(String, nullable=False)
+    espn_id = Column(String, nullable=True, unique=True)
+    headshot_url = Column(String, nullable=True)
+    status = Column(String, default="active")  # active, injured, inactive
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    projections = relationship("PlayerProjection", back_populates="player", cascade="all, delete-orphan")
+    book_odds = relationship("BookOdds", back_populates="player", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index('idx_player_name_team', 'name', 'team'),
+    )
+
+
+class User(Base):
+    """App user with subscription info."""
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    email = Column(String, unique=True, nullable=False, index=True)
+    password_hash = Column(String, nullable=False)
+    display_name = Column(String, nullable=True)
+    subscription_tier = Column(String, default="free")  # free, trial, premium
+    trial_start = Column(DateTime, nullable=True)
+    trial_end = Column(DateTime, nullable=True)
+    stripe_customer_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    bets = relationship("UserBet", back_populates="user", cascade="all, delete-orphan")
+
+
+class UserBet(Base):
+    """User-placed bet across all modes (DFS, Props, Fantasy)."""
+    __tablename__ = "user_bets"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
+    mode = Column(String, nullable=False)  # dfs, props, fantasy
+    platform = Column(String, nullable=True)  # PrizePicks, Underdog, DraftKings, etc.
+    week = Column(Integer, nullable=False)
+    legs = Column(JSON, default=[])  # Array of leg objects
+    status = Column(String, default="pending")  # pending, placed, won, lost, push
+    confidence = Column(Float, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    # Relationship
+    user = relationship("User", back_populates="bets")
+
+    __table_args__ = (
+        Index('idx_user_bet_week', 'user_id', 'week'),
+    )
+
+
+class PlayerProjection(Base):
+    """Engine-generated projection for a player prop."""
+    __tablename__ = "player_projections"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=False, index=True)
+    week = Column(Integer, nullable=False)
+    stat_type = Column(String, nullable=False)  # pass_yds, rush_yds, receptions, etc.
+    implied_line = Column(Float, nullable=True)  # Derived from odds pricing
+    engine_projection = Column(Float, nullable=True)  # Our adjusted projection
+    confidence = Column(Float, nullable=True)  # 0-100
+    direction = Column(String, nullable=True)  # OVER, UNDER, AVOID
+    agent_breakdown = Column(JSON, default={})  # Per-agent scores and reasoning
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    # Relationship
+    player = relationship("Player", back_populates="projections")
+
+    __table_args__ = (
+        Index('idx_projection_player_week', 'player_id', 'week'),
+        Index('idx_projection_week_stat', 'week', 'stat_type'),
+    )
+
+
+class BookOdds(Base):
+    """Odds from a specific bookmaker for a player prop."""
+    __tablename__ = "book_odds"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=False, index=True)
+    week = Column(Integer, nullable=False)
+    stat_type = Column(String, nullable=False)
+    bookmaker = Column(String, nullable=False)  # draftkings, fanduel, betmgm, etc.
+    line = Column(Float, nullable=False)
+    over_price = Column(Integer, nullable=True)  # American odds e.g. -110, +100
+    under_price = Column(Integer, nullable=True)
+    fetched_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Relationship
+    player = relationship("Player", back_populates="book_odds")
+
+    __table_args__ = (
+        Index('idx_book_odds_player_week', 'player_id', 'week', 'stat_type'),
+        Index('idx_book_odds_bookmaker', 'bookmaker', 'week'),
+    )
+
+
+class LineMovement(Base):
+    """Historical line movement tracking."""
+    __tablename__ = "line_movements"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=False, index=True)
+    week = Column(Integer, nullable=False)
+    stat_type = Column(String, nullable=False)
+    bookmaker = Column(String, nullable=False)
+    line = Column(Float, nullable=False)
+    over_price = Column(Integer, nullable=True)
+    under_price = Column(Integer, nullable=True)
+    recorded_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        Index('idx_line_movement_player_week', 'player_id', 'week', 'stat_type'),
+    )
 
 
 # --- Dependency ---

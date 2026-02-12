@@ -54,6 +54,24 @@ class Settings(BaseSettings):
         description="Cache expiration time in seconds (default: 1 hour)"
     )
 
+    # JWT Authentication
+    jwt_secret_key: str = Field(
+        default="dev-secret-change-in-production-abc123",
+        description="Secret key for JWT token signing"
+    )
+    jwt_algorithm: str = Field(
+        default="HS256",
+        description="JWT signing algorithm"
+    )
+    jwt_access_token_expire_minutes: int = Field(
+        default=30,
+        description="Access token expiry in minutes"
+    )
+    jwt_refresh_token_expire_days: int = Field(
+        default=30,
+        description="Refresh token expiry in days"
+    )
+
     # Existing API Keys (from original .env)
     anthropic_api_key: Optional[str] = Field(
         default=None,

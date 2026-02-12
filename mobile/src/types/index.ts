@@ -117,3 +117,76 @@ export interface PropFilters {
   stat_types?: string[];
   bet_type?: 'OVER' | 'UNDER';
 }
+
+// --- Sprint 1: New Types ---
+
+export type AppMode = 'dfs' | 'props' | 'fantasy';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  display_name: string | null;
+  subscription_tier: 'free' | 'trial' | 'premium';
+  trial_start: string | null;
+  trial_end: string | null;
+  created_at: string | null;
+}
+
+export interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
+
+export interface Player {
+  id: number;
+  name: string;
+  team: string;
+  position: string;
+  espn_id: string | null;
+  headshot_url: string | null;
+  status: string | null;
+}
+
+export interface PlayerProjection {
+  id: number;
+  player_id: number;
+  week: number;
+  stat_type: string;
+  implied_line: number | null;
+  engine_projection: number | null;
+  confidence: number | null;
+  direction: string | null;
+  agent_breakdown: Record<string, {
+    score: number;
+    weight: number;
+    direction: string;
+  }> | null;
+}
+
+export interface BookOddsEntry {
+  id: number;
+  player_id: number;
+  week: number;
+  stat_type: string;
+  bookmaker: string;
+  line: number;
+  over_price: number | null;
+  under_price: number | null;
+  fetched_at: string | null;
+}
+
+export interface BestPrices {
+  player_id: number;
+  stat_type: string;
+  best_over: { bookmaker: string; line: number; price: number } | null;
+  best_under: { bookmaker: string; line: number; price: number } | null;
+}
+
+export interface LineMovementEntry {
+  bookmaker: string;
+  line: number;
+  over_price: number | null;
+  under_price: number | null;
+  recorded_at: string | null;
+}
