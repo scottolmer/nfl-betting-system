@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import props, parlays, results, auth, players, odds, bets
+from api.routers import props, parlays, results, auth, players, odds, bets, dfs
 from api.config import settings
 from api.database import init_db
 import logging
@@ -39,6 +39,8 @@ app = FastAPI(
     - `/api/odds/*` - Multi-book odds, best prices, line movement
     - `/api/props/*` - Prop analysis and filtering
     - `/api/parlays/*` - Pre-built parlay generation
+    - `/api/dfs/*` - DFS slip builder, correlation scoring, flex optimization
+    - `/api/bets/*` - Server-synced bet tracking and analytics
     """,
     docs_url="/docs",
     redoc_url="/redoc"
@@ -90,6 +92,13 @@ app.include_router(
     bets.router,
     prefix="/api/bets",
     tags=["Bets"]
+)
+
+# Sprint 3: DFS router
+app.include_router(
+    dfs.router,
+    prefix="/api/dfs",
+    tags=["DFS"]
 )
 
 

@@ -101,9 +101,41 @@
 - **Quarter-Kelly sizing** — conservative bet sizing, capped at 3 units max
 - **Server-synced bets** — UserBet table replaces AsyncStorage, enabling cross-device sync and analytics
 
-## Sprint 3: APRIL — DFS Mode [NOT STARTED]
+## Sprint 3: APRIL — DFS Mode [COMPLETE]
 
-DFS slip builder with correlation scoring, flex play optimization, platform line comparisons, engine-generated suggestions.
+### What was built
+
+**DFS service** — Wraps the existing CorrelationAnalyzer for DFS-specific use:
+- `api/services/dfs_service.py` — Platform line mapping (PrizePicks/Underdog stat names), correlation scoring via CorrelationAnalyzer, flex play optimization (highest confidence + lowest correlation impact), greedy slip suggestion generator, line comparison (platform vs sportsbook consensus)
+- `api/routers/dfs.py` — 5 endpoints:
+  - `GET /lines` — DFS lines filtered by week, platform, position, stat type
+  - `POST /correlation-score` — Real-time correlation scoring for a set of picks
+  - `POST /optimize-flex` — Find optimal flex pick designation
+  - `GET /suggestions` — Engine-generated optimal slips
+  - `GET /line-comparison/{player_id}` — Platform line vs sportsbook consensus with discrepancy notes
+
+**5 DFS components:**
+- `components/dfs/SlipSummaryBar.tsx` — Floating bottom bar: pick count, correlation risk badge (color-coded), adjusted confidence, Review button
+- `components/dfs/CorrelationIndicator.tsx` — Full mode: visual gauge bar + risk badge + penalty text + expandable warnings. Compact mode: dot + label + penalty for inline use
+- `components/dfs/PlatformLineBadge.tsx` — Platform line vs sportsbook consensus comparison, shows difference and directional lean hint
+- `components/dfs/AgentReasoningCard.tsx` — "Why this pick?" card with top 3 agents ranked by impact (weight * |score - 50|), includes human-readable agent descriptions
+- `components/dfs/FlexPlayOptimizer.tsx` — Recommended flex pick with FLEX badge, flex score, reason text, and alternative candidates list
+
+**4 DFS screens:**
+- `screens/dfs/DFSHomeScreen.tsx` — Platform selector (PrizePicks/Underdog), "Build a Slip" CTA, Suggested Slips card, How It Works feature grid
+- `screens/dfs/SlipBuilderScreen.tsx` — Two modes: (1) Browse mode with search bar, player list with checkmark toggles, compact correlation indicator, SlipSummaryBar; (2) Review mode showing picked players, full CorrelationIndicator, FlexPlayOptimizer, AgentReasoningCard
+- `screens/dfs/DFSPlayerDetailScreen.tsx` — PlayerCard + PlatformLineBadge + engine projection + sportsbook comparison + AgentBreakdownCard + AgentReasoningCard
+- `screens/dfs/SuggestedSlipsScreen.tsx` — FlatList of engine-generated slips, each showing ranked picks with FLEX tags, correlation indicator, combined confidence score
+
+**Navigation update:**
+- Rewrote `navigation/DFSNavigator.tsx` — Real stack navigator with DFSHome, SlipBuilder, DFSPlayerDetail, SuggestedSlips screens (replaced "Coming Soon" placeholder)
+- Registered `api/routers/dfs.py` in `api/main.py`
+
+### Key decisions
+- **Reuses CorrelationAnalyzer** — DFS correlation scoring wraps the existing proven correlation detection logic, no duplication
+- **Greedy slip generation** — Suggestions built by iteratively selecting highest-confidence picks that don't create high correlation with existing picks
+- **Flex optimization** — Flex candidate scored by confidence minus correlation penalty, balancing individual strength with slip-level risk
+- **Platform-aware stat mapping** — Each DFS platform (PrizePicks, Underdog) has its own stat name conventions mapped to internal types
 
 ## Sprint 4: MAY — Fantasy Mode [NOT STARTED]
 

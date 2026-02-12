@@ -1,53 +1,28 @@
 /**
- * DFSNavigator — Placeholder stack for DFS mode (Sprint 3).
+ * DFSNavigator — Stack navigator for DFS mode screens.
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import DFSHomeScreen from '../screens/dfs/DFSHomeScreen';
+import SlipBuilderScreen from '../screens/dfs/SlipBuilderScreen';
+import DFSPlayerDetailScreen from '../screens/dfs/DFSPlayerDetailScreen';
+import SuggestedSlipsScreen from '../screens/dfs/SuggestedSlipsScreen';
 
-function DFSComingSoon() {
-  return (
-    <View style={styles.container}>
-      <Ionicons name="construct-outline" size={48} color={theme.colors.textTertiary} />
-      <Text style={styles.title}>DFS Mode</Text>
-      <Text style={styles.subtitle}>Coming Soon</Text>
-      <Text style={styles.description}>
-        Build optimized DFS slips with correlation scoring, flex play optimization,
-        and platform line comparisons. Powered by the same engine.
-      </Text>
-    </View>
-  );
-}
+const Stack = createNativeStackNavigator();
 
 export default function DFSNavigator() {
-  return <DFSComingSoon />;
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+      }}
+    >
+      <Stack.Screen name="DFSHome" component={DFSHomeScreen} />
+      <Stack.Screen name="SlipBuilder" component={SlipBuilderScreen} />
+      <Stack.Screen name="DFSPlayerDetail" component={DFSPlayerDetailScreen} />
+      <Stack.Screen name="SuggestedSlips" component={SuggestedSlipsScreen} />
+    </Stack.Navigator>
+  );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: 40,
-  },
-  title: {
-    ...theme.typography.h2,
-    marginTop: 16,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: theme.colors.primary,
-    fontWeight: '700',
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-});
