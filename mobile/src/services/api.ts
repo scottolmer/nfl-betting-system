@@ -20,12 +20,13 @@ class ApiService {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 30000,
+      timeout: 300000,
       headers: {
         'Content-Type': 'application/json',
         'X-API-Key': API_KEY,
       },
     });
+    console.log(`[API] Service initialized with timeout: ${this.client.defaults.timeout}ms`);
 
     // Request interceptor: attach JWT if available, log request
     this.client.interceptors.request.use(
@@ -77,6 +78,7 @@ class ApiService {
     stat_type?: string;
     bet_type?: 'OVER' | 'UNDER';
     limit?: number;
+    preferred_book?: string;
   }): Promise<PropAnalysis[]> {
     try {
       const response = await this.client.get<PropAnalysis[]>('/api/props/analyze', {

@@ -316,6 +316,33 @@ export default function PropDetailScreen({ route, navigation }: any) {
                 <Text style={styles.lineValue}>{prop.line}</Text>
               </View>
             </View>
+
+            {/* Show source book + other available lines */}
+            {prop.bookmaker && (
+              <View style={styles.bookSourceRow}>
+                <Ionicons name="book-outline" size={12} color={theme.colors.textTertiary} />
+                <Text style={styles.bookSourceText}>
+                  Line from {prop.bookmaker}
+                </Text>
+              </View>
+            )}
+            {prop.all_books && prop.all_books.length > 1 && (
+              <View style={styles.allBooksRow}>
+                {prop.all_books.map((book, i) => (
+                  <View key={i} style={[
+                    styles.bookChip,
+                    book.line === prop.line && styles.bookChipActive,
+                  ]}>
+                    <Text style={[
+                      styles.bookChipText,
+                      book.line === prop.line && styles.bookChipTextActive,
+                    ]}>
+                      {book.bookmaker}: {book.line}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </GlassCard>
         </AnimatedCard>
 
@@ -340,7 +367,11 @@ export default function PropDetailScreen({ route, navigation }: any) {
 
         {/* Agent Breakdown */}
         <AnimatedCard index={5}>
-          <AgentBreakdownCard breakdown={agentBreakdown} />
+          <AgentBreakdownCard
+            breakdown={agentBreakdown}
+            edgeExplanation={prop.edge_explanation}
+            topReasons={prop.top_reasons}
+          />
         </AnimatedCard>
 
         {/* Multi-book odds + line movement */}
@@ -355,23 +386,6 @@ export default function PropDetailScreen({ route, navigation }: any) {
               <LineMovementChartV2 movements={movements} currentLine={prop.line} />
             </AnimatedCard>
           </>
-        )}
-
-        {/* Top reasons */}
-        {prop.top_reasons && prop.top_reasons.length > 0 && (
-          <AnimatedCard index={8}>
-            <GlassCard>
-              <Text style={styles.reasonsTitle}>TOP REASONS</Text>
-              {prop.top_reasons.map((reason, i) => (
-                <View key={i} style={styles.reasonRow}>
-                  <View style={styles.reasonBulletCircle}>
-                    <Text style={styles.reasonBullet}>{i + 1}</Text>
-                  </View>
-                  <Text style={styles.reasonText}>{reason}</Text>
-                </View>
-              ))}
-            </GlassCard>
-          </AnimatedCard>
         )}
       </ScrollView>
     </View>
@@ -510,6 +524,47 @@ const styles = StyleSheet.create({
   lineValue: {
     ...theme.typography.scoreLG,
   },
+  bookSourceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.glassBorder,
+  },
+  bookSourceText: {
+    fontSize: 11,
+    color: theme.colors.textTertiary,
+    textTransform: 'capitalize',
+  },
+  allBooksRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+  },
+  bookChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
+  },
+  bookChipActive: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primaryMuted,
+  },
+  bookChipText: {
+    fontSize: 11,
+    color: theme.colors.textTertiary,
+    textTransform: 'capitalize',
+  },
+  bookChipTextActive: {
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
   projRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -533,35 +588,5 @@ const styles = StyleSheet.create({
   gaugeCenter: {
     alignItems: 'center',
     paddingVertical: 8,
-  },
-  // Reasons
-  reasonsTitle: {
-    ...theme.typography.caption,
-    marginBottom: 10,
-  },
-  reasonRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-    gap: 10,
-  },
-  reasonBulletCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: theme.colors.primaryMuted,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  reasonBullet: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: theme.colors.primary,
-  },
-  reasonText: {
-    flex: 1,
-    fontSize: 13,
-    color: theme.colors.textSecondary,
-    lineHeight: 18,
   },
 });

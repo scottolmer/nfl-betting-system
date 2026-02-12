@@ -146,14 +146,10 @@ export default function AIParlaysScreen({ route, navigation }: any) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color={theme.colors.textPrimary} />
-        </TouchableOpacity>
         <View>
           <Text style={styles.headerTitle}>AI Parlays</Text>
           <Text style={styles.headerSub}>Week {week} — 6-Agent Engine</Text>
         </View>
-        <View style={styles.backBtn} />
       </View>
 
       {/* Info banner */}
@@ -212,27 +208,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 56,
-    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingHorizontal: 20,
     paddingBottom: 12,
   },
-  backBtn: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   headerTitle: {
-    ...theme.typography.h2,
-    textAlign: 'center',
+    ...theme.typography.h1,
+    color: theme.colors.primary,
   },
   headerSub: {
-    fontSize: 12,
+    fontSize: 14,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    marginTop: 2,
   },
   infoBanner: {
     flexDirection: 'row',

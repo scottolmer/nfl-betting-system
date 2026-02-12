@@ -53,6 +53,7 @@ async def analyze_props(
     stat_type: Optional[str] = Query(None, description="Filter by stat type (Pass Yds, Rush Yds, Rec Yds, etc.)"),
     bet_type: Optional[str] = Query(None, description="Filter by bet direction (OVER, UNDER)"),
     limit: Optional[int] = Query(None, ge=1, le=200, description="Maximum number of results to return"),
+    preferred_book: Optional[str] = Query(None, description="Preferred sportsbook (e.g., draftkings, fanduel). Uses that book's line when available, median otherwise."),
     api_key: str = Depends(get_api_key)
 ):
     """
@@ -64,6 +65,7 @@ async def analyze_props(
     - `max_confidence`: Set maximum confidence (e.g., 60-80 range)
     - `teams`: Multiple teams comma-separated (e.g., "KC,BUF,DET")
     - `positions`: Multiple positions comma-separated (e.g., "QB,WR")
+    - `preferred_book`: Sportsbook preference for deduplication (e.g., "draftkings")
     """
     try:
         props = await analysis_service.analyze_props_for_week(
@@ -76,7 +78,8 @@ async def analyze_props(
             positions=positions,
             stat_type=stat_type,
             bet_type=bet_type,
-            limit=limit
+            limit=limit,
+            preferred_book=preferred_book
         )
         return props
     except FileNotFoundError as e:
@@ -102,6 +105,7 @@ async def get_top_props(
     week: int = Query(..., ge=1, le=18, description="NFL week number"),
     limit: int = Query(20, ge=1, le=100, description="Number of top props to return"),
     bet_type: Optional[str] = Query(None, description="Filter by OVER or UNDER"),
+    preferred_book: Optional[str] = Query(None, description="Preferred sportsbook for deduplication"),
     api_key: str = Depends(get_api_key)
 ):
     """Get top N props by confidence"""
@@ -110,7 +114,8 @@ async def get_top_props(
             week=week,
             min_confidence=50,  # Lower threshold to get more props, then take top N
             bet_type=bet_type,
-            limit=limit
+            limit=limit,
+            preferred_book=preferred_book
         )
         return props
     except Exception as e:

@@ -13,11 +13,11 @@ import { useMode } from '../contexts/ModeContext';
 
 // Mode navigators
 import PropsNavigator from './PropsNavigator';
-import FantasyNavigator from './FantasyNavigator';
+import ParlaysNavigator from './ParlaysNavigator';
 
 // Shared screens
 import HomeScreen from '../screens/HomeScreen';
-import CardDemoScreen from '../screens/CardDemoScreen';
+import DiscoverScreen from '../screens/DiscoverScreen';
 import BetSlipScreen from '../screens/props/BetSlipScreen';
 import MoreScreen from '../screens/MoreScreen';
 
@@ -30,8 +30,8 @@ function ModeHome() {
   const { mode } = useMode();
 
   switch (mode) {
-    case 'fantasy':
-      return <FantasyNavigator />;
+    case 'parlays':
+      return <ParlaysNavigator />;
     case 'props':
     default:
       return <PropsNavigator />;
@@ -48,9 +48,12 @@ function TabDot({ focused }: { focused: boolean }) {
 export default function AppNavigator() {
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
-  const handleModeChange = () => {
-    // Navigate to the Home tab so the user sees the mode switch take effect
-    navigationRef.current?.navigate('Home');
+  const handleModeChange = (mode: string) => {
+    // Navigate to the Home tab and target the specific root screen for that mode
+    // This ensures we don't land on a stale 'PropDetail' screen if the user was deep in the stack
+    navigationRef.current?.navigate('Home', {
+      screen: mode === 'parlays' ? 'ParlaysHome' : 'PropsHome'
+    });
   };
 
   return (
@@ -83,7 +86,7 @@ export default function AppNavigator() {
         >
           <Tab.Screen
             name="Discover"
-            component={CardDemoScreen}
+            component={DiscoverScreen}
             options={{
               tabBarIcon: ({ color, focused }) => (
                 <View style={styles.tabIconContainer}>

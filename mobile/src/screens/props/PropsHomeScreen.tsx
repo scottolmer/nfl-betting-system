@@ -18,6 +18,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
 import { apiService } from '../../services/api';
+import { sportsbookPreferences } from '../../services/userPreferences';
 import { PropAnalysis } from '../../types';
 import PlayerCard from '../../components/player/PlayerCard';
 import ConfidenceGauge from '../../components/charts/ConfidenceGauge';
@@ -82,10 +83,13 @@ export default function PropsHomeScreen({ navigation }: any) {
   const loadProps = useCallback(async () => {
     try {
       setError(null);
+      // Load preferred sportsbook for deduplication
+      const preferredBook = await sportsbookPreferences.getPreferredSportsbook();
       const data = await apiService.getProps({
         week: currentWeek,
         min_confidence: 55,
         limit: 200,
+        preferred_book: preferredBook && preferredBook !== 'auto' ? preferredBook : undefined,
       });
       setAllProps(data);
     } catch (err: any) {
@@ -208,18 +212,6 @@ export default function PropsHomeScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* AI Parlays CTA */}
-      <TouchableOpacity
-        style={styles.aiParlaysCTA}
-        onPress={() => navigation.navigate('AIParlays', { week: currentWeek })}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="sparkles" size={16} color={theme.colors.primary} />
-        <Text style={styles.aiParlaysText}>AI Parlays</Text>
-        <Text style={styles.aiParlaysSub}>6-agent optimized</Text>
-        <Ionicons name="chevron-forward" size={14} color={theme.colors.textTertiary} />
-      </TouchableOpacity>
-
       {/* Stat Filters */}
       <ScrollView
         horizontal
@@ -340,29 +332,6 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.glassBorder,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  aiParlaysCTA: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.backgroundCard,
-    borderWidth: 1,
-    borderColor: theme.colors.glassBorderActive,
-    borderRadius: theme.borderRadius.m,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 8,
-  },
-  aiParlaysText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: theme.colors.primary,
-  },
-  aiParlaysSub: {
-    flex: 1,
-    fontSize: 11,
-    color: theme.colors.textTertiary,
   },
   filterList: {
     height: 50,

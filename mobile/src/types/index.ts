@@ -23,8 +23,12 @@ export interface PropAnalysis {
   confidence: number;
   projection?: number;
   cushion?: number;
+  recommendation?: string;
+  edge_explanation?: string;
   top_reasons: string[];
-  agent_breakdown: Record<string, { score: number; weight: number; direction: string }>;
+  agent_breakdown: Record<string, { score: number; weight: number; direction: string; rationale?: string[] }>;
+  bookmaker?: string;
+  all_books?: Array<{ bookmaker: string; line: number; odds?: number }>;
 }
 
 export interface ParlayLeg {
@@ -124,7 +128,7 @@ export interface PropFilters {
 
 // --- Sprint 1: New Types ---
 
-export type AppMode = 'dfs' | 'props' | 'fantasy';
+export type AppMode = 'props' | 'parlays';
 
 export interface UserProfile {
   id: string;

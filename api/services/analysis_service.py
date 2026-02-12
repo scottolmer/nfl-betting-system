@@ -39,14 +39,16 @@ class AnalysisService:
         positions: Optional[str] = None,
         stat_type: Optional[str] = None,
         bet_type: Optional[str] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
+        preferred_book: Optional[str] = None
     ) -> List[PropAnalysisResponse]:
         """
         Analyze props with filters using EXISTING analysis engine.
         pure wrapper around PropAnalyzer.
         """
-        # Check cache first
-        cache_key = f"props_week_{week}_conf_{min_confidence}"
+        # Check cache first (include preferred_book in key since it affects dedup)
+        book_suffix = f"_book_{preferred_book}" if preferred_book else ""
+        cache_key = f"props_week_{week}_conf_{min_confidence}{book_suffix}"
         cached_data = await cache_get(cache_key)
 
         analyses_responses = []
@@ -63,9 +65,9 @@ class AnalysisService:
         if not cached_data:
             logger.info(f"Cache MISS - analyzing props for week {week}...")
 
-            # Load data using EXISTING loader
+            # Load data using EXISTING loader (preferred_book controls deduplication)
             logger.info(f"Loading data for week {week}...")
-            context = self.loader.load_all_data(week=week)
+            context = self.loader.load_all_data(week=week, preferred_book=preferred_book)
 
             # Analyze using EXISTING analyzer
             logger.info(f"Analyzing props with min_confidence={min_confidence}...")
@@ -218,6 +220,8 @@ class AnalysisService:
 
     def _to_response(self, analysis: PropAnalysis) -> PropAnalysisResponse:
         """Convert PropAnalysis dataclass to Pydantic response schema"""
+        # Extract bookmaker info from the prop's source data
+        prop_data = getattr(analysis, '_source_prop_data', {})
         return PropAnalysisResponse(
             player_name=analysis.prop.player_name,
             team=analysis.prop.team,
@@ -229,14 +233,18 @@ class AnalysisService:
             confidence=analysis.final_confidence,
             recommendation=analysis.recommendation,
             edge_explanation=analysis.edge_explanation,
+            top_reasons=analysis.rationale[:5] if analysis.rationale else [],
             agent_breakdown={
                 agent: {
                     "score": result["raw_score"],
                     "weight": result["weight"],
-                    "direction": result["direction"]
+                    "direction": result["direction"],
+                    "rationale": result.get("rationale", [])
                 }
                 for agent, result in analysis.agent_breakdown.items()
-            }
+            },
+            bookmaker=prop_data.get('bookmaker'),
+            all_books=prop_data.get('all_books', []),
         )
 
     def get_player_odds(self, week: int, player_name: str, stat_type: str) -> List[dict]:

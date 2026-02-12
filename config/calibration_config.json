@@ -1,26 +1,22 @@
 {
   "_comment": "Calibration settings derived from offseason analysis of weeks 11-16 graded data",
   "_updated": "2026-02-05",
-
   "excluded_stat_types": [
     "player_tds_over"
   ],
   "_excluded_rationale": "player_tds_over had 0% win rate across 1,165 bets - completely broken",
-
   "over_under_bias": {
     "_description": "Bias corrections applied to confidence. Positive = boost UNDER confidence",
-    "_methodology": "Based on (UNDER_win_rate - OVER_win_rate) / 2 to split the difference",
-
-    "Rush+Rec Yds": 23.5,
-    "Pass Yds": 11.3,
-    "Receptions": 8.1,
-    "Rush Attempts": 4.1,
-    "Rec Yds": 4.0,
-    "Pass Completions": 4.9,
-    "player_pass_attempts": 7.8
+    "_methodology": "Scaled to ~1/3 of raw (UNDER_win_rate - OVER_win_rate) / 2 to avoid dominating the signal",
+    "Rush+Rec Yds": 6.0,
+    "Pass Yds": 3.0,
+    "Receptions": 2.5,
+    "Rush Attempts": 1.5,
+    "Rec Yds": 1.5,
+    "Pass Completions": 1.5,
+    "player_pass_attempts": 2.5
   },
-  "_bias_note": "Applied as: if UNDER bet, boost confidence by bias amount. If OVER bet, reduce by bias amount.",
-
+  "_bias_note": "Reduced from original values (23.5, 11.3, etc) which caused near-100% UNDER output. Now nudges rather than dominates.",
   "stat_type_bonus": {
     "_description": "Confidence bonus for high-reliability stat types (55%+ historical win rate)",
     "_methodology": "Conservative bonuses to avoid letting marginal bets through threshold",
@@ -30,27 +26,23 @@
     "Rush Yds": 1
   },
   "_stat_bonus_note": "Small bonuses - enough to differentiate but not inflate marginal bets",
-
   "stat_type_penalty": {
     "_description": "Confidence penalty for low-reliability stat types (<50% historical win rate)",
     "Rec Yds": 2
   },
   "_stat_penalty_note": "Rec Yds showed 48.4% - slightly worse than coin flip",
-
   "anti_predictive_agents": [
     "Variance",
     "GameScript"
   ],
   "_anti_predictive_rationale": "These agents show 35-36% win rate when agreeing, 59-60% when disagreeing. Signals INVERTED. Trend/Weather/HitRate REMOVED entirely.",
-
   "agreement_settings": {
     "high_agreement_threshold": 80,
     "low_agreement_threshold": 50,
-    "high_agreement_penalty": 12,
-    "low_agreement_bonus": 8,
-    "_description": "When >80% of agents agree, reduce confidence by penalty. When <50% agree, boost by bonus."
+    "high_agreement_penalty": 0,
+    "low_agreement_bonus": 5,
+    "_description": "Retaining bonus for disagreement (finding value), but REMOVING penalty for agreement to allow high confidence scores (80-90+)."
   },
-
   "stat_type_reliability": {
     "_description": "Win rate from analysis - use for filtering/prioritizing",
     "Rush+Rec Yds": 67.1,
@@ -62,7 +54,6 @@
     "Rush Attempts": 50.4,
     "Rec Yds": 48.4
   },
-
   "recommended_stat_types": [
     "Rush+Rec Yds",
     "Pass Completions",
@@ -70,7 +61,6 @@
     "Rush Yds"
   ],
   "_recommended_rationale": "These stat types have 55%+ historical win rate",
-
   "agent_weight_adjustments": {
     "_description": "Recommended weight multipliers based on agent predictive power analysis",
     "Matchup": 0.5,

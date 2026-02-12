@@ -11,7 +11,7 @@ import { AppMode } from '../../types';
 
 const MODES: { key: AppMode; label: string }[] = [
   { key: 'props', label: 'Props' },
-  { key: 'fantasy', label: 'Fantasy' },
+  { key: 'parlays', label: 'Parlays' },
 ];
 
 interface ModeSwitcherProps {

@@ -176,9 +176,14 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
             if not stat_type or (stat_type == market and not market.startswith('player_')): continue
 
             player_name_raw = row.get(name_col, ''); player_name_norm = normalize_name(player_name_raw)
-            line = float(row.get('point', 0)); label = row.get('label', 'Over')
+            # Support both CSV formats: 'point'/'label' (odds API) and 'line'/'direction' (fetcher)
+            raw_line = row.get('point') if row.get('point') is not None and not pd.isna(row.get('point')) else row.get('line', 0)
+            line = float(raw_line) if raw_line is not None else 0.0
+            raw_label = row.get('label') if row.get('label') is not None and not pd.isna(row.get('label')) else row.get('direction', 'Over')
+            label = str(raw_label) if raw_label else 'Over'
+            bookmaker = str(row.get('bookmaker', 'unknown')).strip().lower()
 
-            prop_unique_id = (player_name_norm, stat_type, line, label)
+            prop_unique_id = (player_name_norm, stat_type, line, label, bookmaker)
             if prop_unique_id in processed_ids: continue
             processed_ids.add(prop_unique_id)
 
@@ -230,6 +235,7 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
             position = infer_position(stat_type)
 
             # Include both OVER and UNDER bets (not just Over)
+            raw_odds = row.get('odds') if row.get('odds') is not None else row.get('price')
             prop = {
                 'player_name': player_name_norm, 'team': player_team_abbr, 'opponent': opponent_abbr,
                 'position': position, 'stat_type': stat_type, 'line': line,
@@ -237,6 +243,8 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
                 'game_total': 44.5,  # Default reasonable NFL game total
                 'spread': 0.0,  # Default neutral (ideally from separate moneyline data)
                 'is_home': is_home, 'week': week,
+                'bookmaker': bookmaker,
+                'odds': float(raw_odds) if raw_odds is not None and not pd.isna(raw_odds) else None,
             }
             props.append(prop)
     else: logger.error("Betting lines CSV format unrecognized.")
@@ -246,6 +254,76 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
     logger.info(f"Total props transformed after roster lookup: {len(props)}")
     if not props: logger.error("No props were transformed.")
     return props
+
+
+def deduplicate_props(props: list, preferred_book: Optional[str] = None) -> list:
+    """
+    Deduplicate props from multiple sportsbooks.
+    Groups by (player_name, stat_type, bet_type) and selects one representative line.
+
+    Strategy:
+    - If preferred_book is set and available for this prop, use that book's line
+    - Otherwise, use the median line across all books
+    - Stores all available books/lines as metadata for the frontend
+    """
+    from statistics import median
+    from collections import defaultdict
+
+    if not props:
+        return props
+
+    # Group props by (player, stat_type, bet_type)
+    groups = defaultdict(list)
+    for prop in props:
+        key = (prop['player_name'], prop['stat_type'], prop.get('bet_type', 'Over'))
+        groups[key].append(prop)
+
+    deduped = []
+    for key, group_props in groups.items():
+        if len(group_props) == 1:
+            # Only one book - keep as is, add metadata
+            prop = group_props[0]
+            prop['all_books'] = [{
+                'bookmaker': prop.get('bookmaker', 'unknown'),
+                'line': prop['line'],
+                'odds': prop.get('odds'),
+            }]
+            deduped.append(prop)
+            continue
+
+        # Multiple books - need to pick one
+        # Collect book info for metadata
+        all_books = [{
+            'bookmaker': p.get('bookmaker', 'unknown'),
+            'line': p['line'],
+            'odds': p.get('odds'),
+        } for p in group_props]
+
+        selected = None
+
+        # Try preferred book first
+        if preferred_book:
+            preferred_lower = preferred_book.lower().strip()
+            for p in group_props:
+                if p.get('bookmaker', '').lower().strip() == preferred_lower:
+                    selected = p
+                    break
+
+        # Fallback to median line
+        if selected is None:
+            lines = [p['line'] for p in group_props]
+            median_line = median(lines)
+            # Pick the prop closest to median line
+            selected = min(group_props, key=lambda p: abs(p['line'] - median_line))
+
+        selected['all_books'] = all_books
+        deduped.append(selected)
+
+    before_count = len(props)
+    after_count = len(deduped)
+    if before_count != after_count:
+        logger.info(f"Deduplication: {before_count} -> {after_count} props ({before_count - after_count} duplicates removed)")
+    return deduped
 
 
 # --- DVOA Transformation Functions (Using Positional Access) ---
@@ -395,7 +473,7 @@ class NFLDataLoader:
         # 2. Fallback to File
         return _load_roster_data(self.data_dir)
 
-    def load_all_data(self, week):
+    def load_all_data(self, week, preferred_book: Optional[str] = None):
         """Load all data needed for analysis"""
         logger.info(f"Loading data for Week {week}...")
 
@@ -682,9 +760,10 @@ class NFLDataLoader:
         # ====================================================================
         logger.info("Transforming raw data for agents using roster map...")
         # Pass roster map loaded during __init__
-        context['props'] = transform_betting_lines_to_props(
+        raw_props = transform_betting_lines_to_props(
             context.get('betting_lines_raw'), week, self.player_roster_map
         )
+        context['props'] = deduplicate_props(raw_props, preferred_book=preferred_book)
         context['dvoa_offensive'] = transform_dvoa_offensive(context.get('dvoa_off_raw'))
         context['dvoa_defensive'] = transform_dvoa_defensive(context.get('dvoa_def_raw'))
         context['defensive_vs_receiver'] = transform_def_vs_receiver(context.get('def_vs_wr_raw'))

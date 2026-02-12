@@ -126,10 +126,11 @@ class PropAnalyzer:
             return confidence
 
         # Apply bias: UNDER bets get boosted, OVER bets get reduced
+        # Use /3 to prevent bias from dominating over agent signals
         if bet_type == 'UNDER':
-            corrected = confidence + (bias / 2)  # Half the bias to be conservative
+            corrected = confidence + (bias / 3)
         else:
-            corrected = confidence - (bias / 2)
+            corrected = confidence - (bias / 3)
 
         corrected = max(0, min(100, corrected))
         return int(round(corrected))
@@ -188,10 +189,13 @@ class PropAnalyzer:
 
         high_threshold = settings.get('high_agreement_threshold', 80)
         low_threshold = settings.get('low_agreement_threshold', 50)
-        high_penalty = settings.get('high_agreement_penalty', 12)
-        low_bonus = settings.get('low_agreement_bonus', 8)
+        high_penalty = settings.get('high_agreement_penalty', 6)
+        low_bonus = settings.get('low_agreement_bonus', 5)
 
-        # Count agents with directional signals
+        # Use effective scores (after anti-predictive inversion) for agreement check
+        # This matches how scores are used in _calculate_final_confidence
+        anti_predictive = self._get_anti_predictive_agents()
+
         agreeing = 0
         total = 0
 
@@ -199,12 +203,11 @@ class PropAnalyzer:
             direction = result.get('direction', '').upper()
             if direction in ('OVER', 'UNDER'):
                 total += 1
-                # Check if agent agrees with majority direction
-                # For this, we need to determine what the "final" direction is
-                # We use OVER as reference since scores are in OVER perspective
                 score = result.get('raw_score', 50)
-                agent_favors_over = score >= 50
-                if agent_favors_over:
+                # Apply inversion for anti-predictive agents
+                if agent_name in anti_predictive:
+                    score = 100 - score
+                if score >= 50:
                     agreeing += 1
 
         if total == 0:
@@ -270,22 +273,24 @@ class PropAnalyzer:
         # Restore original bet type
         prop.bet_type = original_bet_type
 
-        # CRITICAL FIX: Invert confidence for UNDER bets
-        # If agents say 65% OVER will hit, then UNDER bet should show 35% confidence
+        # Apply bias correction to the OVER confidence BEFORE inversion.
+        # This ensures symmetric treatment: a bias that reduces OVER confidence
+        # automatically increases UNDER confidence by the same amount via 100-x.
+        over_confidence = self._apply_bias_correction(
+            over_confidence, prop.stat_type, 'OVER'
+        )
+
+        # Apply stat type reliability adjustment BEFORE inversion for symmetry.
+        # A stat bonus on the OVER score benefits whichever direction the agents lean.
+        over_confidence = self._apply_stat_type_adjustment(
+            over_confidence, prop.stat_type
+        )
+
+        # Invert confidence for UNDER bets
         if prop.bet_type == 'UNDER':
             final_confidence = 100 - over_confidence
         else:
             final_confidence = over_confidence
-
-        # Apply bias correction based on calibration analysis
-        final_confidence = self._apply_bias_correction(
-            final_confidence, prop.stat_type, prop.bet_type
-        )
-
-        # Apply stat type reliability bonus/penalty
-        final_confidence = self._apply_stat_type_adjustment(
-            final_confidence, prop.stat_type
-        )
 
         # Determine direction from OVER perspective: >50 = OVER likely, <50 = UNDER likely
         agents_favor_over = over_confidence >= 50
@@ -310,6 +315,9 @@ class PropAnalyzer:
             rationale=all_rationale, agent_breakdown=agent_results, edge_explanation=edge_explanation,
             top_contributing_agents=top_contributing_agents,
         )
+
+        # Store source prop data for bookmaker/all_books metadata
+        analysis._source_prop_data = prop_data
 
         # Meta-agent review (optional)
         if use_meta_agent and self.meta_agent and self.meta_agent.should_review(analysis):
@@ -434,13 +442,20 @@ class PropAnalyzer:
                 raw_score = result.get('raw_score', 50)
 
                 # CALIBRATION FIX: Invert scores for anti-predictive agents
-                # These agents show better outcomes when they DISAGREE
-                # So we flip their signal: if they say 70 (favor OVER), treat as 30 (favor UNDER)
                 if agent_name in anti_predictive:
                     raw_score = 100 - raw_score
 
-                total_weighted_score += raw_score * weight
-                total_weight += weight
+                # Reduce weight for neutral signals (score ~50) to prevent
+                # high-weight agents like Injury from diluting real signals
+                # when they have no actionable data (healthy players = 50)
+                effective_weight = weight
+                dist_from_neutral = abs(raw_score - 50)
+                if dist_from_neutral < 5:
+                    # Neutral signal: reduce to 20% of weight so it doesn't anchor
+                    effective_weight = weight * 0.2
+
+                total_weighted_score += raw_score * effective_weight
+                total_weight += effective_weight
 
         if total_weight == 0:
             for agent_name, result in agent_results.items():
@@ -462,12 +477,10 @@ class PropAnalyzer:
         # IMPORTANT: Apply bet_type inversion AFTER weighted average for symmetry
         # This ensures OVER 53% = UNDER 47%, not the other way around
 
-        # CALIBRATION FIX (Project 3): Global Dampening
-        # System was found to be overconfident (e.g. 75% confidence win rate was < 55%)
-        # Squash scores towards 50 to improve calibration.
-        # 0.82 factor means a 75 becomes ~70.5
+        # CALIBRATION FIX (Project 3): Global Dampening REMOVED
+        # Retaining 100% of the signal as per user request to use full 0-100 range.
         dist_from_50 = weighted_avg - 50
-        damped_dist = dist_from_50 * 0.82
+        damped_dist = dist_from_50 * 1.0
         final_score = 50 + damped_dist
 
         # Apply agreement adjustment AFTER dampening
