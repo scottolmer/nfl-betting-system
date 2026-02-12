@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { theme } from '../../constants/theme';
 
 interface EmptyStateProps {
   icon: string;
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 40,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     marginHorizontal: 16,
     marginVertical: 20,
@@ -52,19 +53,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 8,
     textAlign: 'center',
   },
   description: {
     fontSize: 15,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 20,
   },
   actionButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 8,

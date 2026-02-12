@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SavedParlay } from '../../types';
+import { theme } from '../../constants/theme';
 
 interface ManualGradeModalProps {
   visible: boolean;
@@ -78,7 +79,7 @@ export default function ManualGradeModal({
           <View style={styles.header}>
             <Text style={styles.title}>Grade Parlay</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#6B7280" />
+              <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modal: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 16,
     width: '100%',
     maxWidth: 400,
@@ -196,12 +197,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   closeButton: {
     padding: 4,
@@ -212,18 +213,18 @@ const styles = StyleSheet.create({
   parlayName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   parlayInfo: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 20,
   },
   question: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 12,
   },
   quickSelect: {
@@ -236,48 +237,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 2,
     borderColor: 'transparent',
     minWidth: 50,
     alignItems: 'center',
   },
   quickButtonActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#2563EB',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   quickButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   quickButtonTextActive: {
     color: '#FFFFFF',
   },
   orText: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     textAlign: 'center',
     marginBottom: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   resultPreview: {
     marginTop: 16,
     padding: 12,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
     borderRadius: 8,
   },
   resultText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   resultValue: {
@@ -285,17 +286,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   resultWon: {
-    color: '#10B981',
+    color: theme.colors.success,
   },
   resultLost: {
-    color: '#EF4444',
+    color: theme.colors.danger,
   },
   actions: {
     flexDirection: 'row',
     gap: 12,
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.glassBorder,
   },
   button: {
     flex: 1,
@@ -304,15 +305,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   cancelButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   gradeButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
   },
   gradeButtonText: {
     fontSize: 15,

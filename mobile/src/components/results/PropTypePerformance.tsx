@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../../constants/theme';
 
 interface PropTypeStat {
   prop_type: string;
@@ -21,9 +22,9 @@ export default function PropTypePerformance({ propTypeStats }: PropTypePerforman
   const sortedStats = [...propTypeStats].sort((a, b) => b.hit_rate - a.hit_rate);
 
   const getBarColor = (hitRate: number): string => {
-    if (hitRate >= 75) return '#10B981';
-    if (hitRate >= 65) return '#F59E0B';
-    return '#EF4444';
+    if (hitRate >= 75) return theme.colors.success;
+    if (hitRate >= 65) return theme.colors.warning;
+    return theme.colors.danger;
   };
 
   return (
@@ -68,7 +69,7 @@ export default function PropTypePerformance({ propTypeStats }: PropTypePerforman
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
@@ -82,12 +83,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 16,
   },
   emptyState: {
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   stats: {
     gap: 12,
@@ -112,16 +113,16 @@ const styles = StyleSheet.create({
   propType: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   legsCount: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   barContainer: {
     position: 'relative',
     height: 24,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderRadius: 4,
     overflow: 'hidden',
     justifyContent: 'center',
@@ -138,6 +139,6 @@ const styles = StyleSheet.create({
     right: 8,
     fontSize: 12,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
 });

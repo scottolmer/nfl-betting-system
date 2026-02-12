@@ -21,9 +21,9 @@ interface GameSlateCardProps {
 
 function getTotalColor(total: number | null | undefined): string {
   if (!total) return theme.colors.textTertiary;
-  if (total >= 50) return '#22C55E';   // High scoring
-  if (total >= 44) return '#3B82F6';   // Average
-  return '#EF4444';                     // Low scoring
+  if (total >= 50) return theme.colors.success;
+  if (total >= 44) return theme.colors.primary;
+  return theme.colors.danger;
 }
 
 function getPaceIcon(pace: string | undefined): string {
@@ -86,15 +86,15 @@ export default function GameSlateCard({ games, week }: GameSlateCardProps) {
       {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#22C55E' }]} />
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.success }]} />
           <Text style={styles.legendText}>50+</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} />
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.primary }]} />
           <Text style={styles.legendText}>44-49</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.danger }]} />
           <Text style={styles.legendText}>&lt;44</Text>
         </View>
       </View>

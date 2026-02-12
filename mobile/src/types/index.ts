@@ -11,9 +11,11 @@ export interface AgentAnalysis {
 }
 
 export interface PropAnalysis {
+  player_id?: number;
   player_name: string;
   team: string;
   position: string;
+  headshot_url?: string | null;
   stat_type: string;
   line: number;
   bet_type: 'OVER' | 'UNDER';
@@ -22,7 +24,7 @@ export interface PropAnalysis {
   projection?: number;
   cushion?: number;
   top_reasons: string[];
-  agent_analyses: AgentAnalysis[];
+  agent_breakdown: Record<string, { score: number; weight: number; direction: string }>;
 }
 
 export interface ParlayLeg {
@@ -38,9 +40,11 @@ export interface ParlayLeg {
 export interface Parlay {
   id: string;
   name: string;
+  parlay_type?: string;
   legs: ParlayLeg[];
   combined_confidence: number;
   risk_level: 'LOW' | 'MEDIUM' | 'HIGH';
+  rationale?: string;
   leg_count: number;
 }
 
@@ -189,4 +193,12 @@ export interface LineMovementEntry {
   over_price: number | null;
   under_price: number | null;
   recorded_at: string | null;
+}
+
+export interface RawBookOdds {
+  book: string;
+  line: number;
+  price: number;
+  side: 'over' | 'under';
+  timestamp: string;
 }

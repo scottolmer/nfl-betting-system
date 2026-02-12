@@ -1,10 +1,11 @@
 /**
  * Results Summary Card
- * Displays overall performance metrics
+ * Displays overall performance metrics — dark theme with glassmorphism
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../../constants/theme';
 
 interface ResultsSummaryCardProps {
   totalGraded: number;
@@ -38,7 +39,9 @@ export default function ResultsSummaryCard({
         <>
           <View style={styles.mainStats}>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>{winRate.toFixed(1)}%</Text>
+              <Text style={[styles.statValue, { color: winRate >= 55 ? theme.colors.success : winRate >= 50 ? theme.colors.primary : theme.colors.danger }]}>
+                {winRate.toFixed(1)}%
+              </Text>
               <Text style={styles.statLabel}>Win Rate</Text>
             </View>
             <View style={styles.statCard}>
@@ -54,14 +57,14 @@ export default function ResultsSummaryCard({
           <View style={styles.breakdown}>
             <View style={styles.breakdownRow}>
               <View style={[styles.statusBadge, styles.wonBadge]}>
-                <Text style={styles.statusText}>WON</Text>
+                <Text style={[styles.statusText, { color: theme.colors.success }]}>WON</Text>
               </View>
               <Text style={styles.breakdownValue}>{wins}</Text>
             </View>
 
             <View style={styles.breakdownRow}>
               <View style={[styles.statusBadge, styles.lostBadge]}>
-                <Text style={styles.statusText}>LOST</Text>
+                <Text style={[styles.statusText, { color: theme.colors.danger }]}>LOST</Text>
               </View>
               <Text style={styles.breakdownValue}>{losses}</Text>
             </View>
@@ -69,7 +72,7 @@ export default function ResultsSummaryCard({
             {pending > 0 && (
               <View style={styles.breakdownRow}>
                 <View style={[styles.statusBadge, styles.pendingBadge]}>
-                  <Text style={styles.statusText}>PENDING</Text>
+                  <Text style={[styles.statusText, { color: theme.colors.warning }]}>PENDING</Text>
                 </View>
                 <Text style={styles.breakdownValue}>{pending}</Text>
               </View>
@@ -83,21 +86,19 @@ export default function ResultsSummaryCard({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    ...theme.shadows.card,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 16,
   },
   emptyState: {
@@ -107,12 +108,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     textAlign: 'center',
   },
   mainStats: {
@@ -124,23 +125,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 12,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
+    backgroundColor: theme.colors.backgroundElevated,
+    borderRadius: theme.borderRadius.s,
     marginHorizontal: 4,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   breakdown: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.glassBorder,
     paddingTop: 12,
   },
   breakdownRow: {
@@ -156,13 +157,13 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   wonBadge: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: theme.colors.successMuted,
   },
   lostBadge: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: theme.colors.dangerMuted,
   },
   pendingBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: theme.colors.warningMuted,
   },
   statusText: {
     fontSize: 12,
@@ -172,6 +173,6 @@ const styles = StyleSheet.create({
   breakdownValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
 });

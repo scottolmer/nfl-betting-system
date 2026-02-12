@@ -1,6 +1,6 @@
 /**
  * Prop Detail Modal
- * Full prop analysis shown when a prop card is tapped
+ * Full prop analysis shown when a prop card is tapped — dark theme
  */
 
 import React from 'react';
@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { theme } from '../../constants/theme';
 import { PropAnalysis } from '../../types';
 import InfoTooltip from '../common/InfoTooltip';
 
@@ -29,17 +30,10 @@ export default function PropDetailModal({
   if (!prop) return null;
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return '#22C55E';
-    if (confidence >= 75) return '#F59E0B';
-    if (confidence >= 70) return '#3B82F6';
-    return '#6B7280';
-  };
-
-  const getConfidenceEmoji = (confidence: number): string => {
-    if (confidence >= 80) return '🔥';
-    if (confidence >= 75) return '⭐';
-    if (confidence >= 70) return '✅';
-    return '📊';
+    if (confidence >= 80) return theme.colors.success;
+    if (confidence >= 75) return theme.colors.warning;
+    if (confidence >= 70) return theme.colors.primary;
+    return theme.colors.textSecondary;
   };
 
   const getConfidenceLabel = (confidence: number): string => {
@@ -60,7 +54,7 @@ export default function PropDetailModal({
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeIcon}>✕</Text>
+            <Text style={styles.closeIcon}>{'\u2715'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Prop Analysis</Text>
           <View style={styles.placeholder} />
@@ -79,7 +73,9 @@ export default function PropDetailModal({
           <View style={styles.propLineSection}>
             <View style={styles.propLineRow}>
               <Text style={styles.statType}>{prop.stat_type}</Text>
-              <Text style={styles.betType}>{prop.bet_type}</Text>
+              <Text style={[styles.betType, { color: prop.bet_type === 'OVER' ? theme.colors.success : theme.colors.danger }]}>
+                {prop.bet_type}
+              </Text>
               <Text style={styles.line}>{prop.line}</Text>
             </View>
           </View>
@@ -91,9 +87,6 @@ export default function PropDetailModal({
               <InfoTooltip tooltipKey="confidence" />
             </View>
             <View style={styles.confidenceCard}>
-              <Text style={styles.confidenceEmoji}>
-                {getConfidenceEmoji(prop.confidence)}
-              </Text>
               <Text
                 style={[
                   styles.confidenceScore,
@@ -128,7 +121,7 @@ export default function PropDetailModal({
                     <Text
                       style={[
                         styles.statValue,
-                        { color: prop.cushion > 0 ? '#22C55E' : '#EF4444' },
+                        { color: prop.cushion > 0 ? theme.colors.success : theme.colors.danger },
                       ]}
                     >
                       {prop.cushion > 0 ? '+' : ''}{prop.cushion.toFixed(1)}
@@ -146,7 +139,9 @@ export default function PropDetailModal({
               <View style={styles.reasonsList}>
                 {prop.top_reasons.map((reason, index) => (
                   <View key={index} style={styles.reasonItem}>
-                    <Text style={styles.reasonBullet}>•</Text>
+                    <View style={styles.reasonBulletCircle}>
+                      <Text style={styles.reasonBulletText}>{index + 1}</Text>
+                    </View>
                     <Text style={styles.reasonText}>{reason}</Text>
                   </View>
                 ))}
@@ -197,7 +192,7 @@ export default function PropDetailModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -206,9 +201,9 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   closeButton: {
     width: 32,
@@ -218,12 +213,12 @@ const styles = StyleSheet.create({
   },
   closeIcon: {
     fontSize: 24,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   placeholder: {
     width: 32,
@@ -233,26 +228,30 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   playerSection: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 20,
     marginBottom: 12,
     alignItems: 'center',
   },
   playerName: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
     marginBottom: 6,
     textAlign: 'center',
   },
   matchup: {
     fontSize: 15,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   propLineSection: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 20,
     marginBottom: 12,
   },
@@ -265,21 +264,22 @@ const styles = StyleSheet.create({
   statType: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   betType: {
     fontSize: 17,
-    fontWeight: '600',
-    color: '#3B82F6',
+    fontWeight: '800',
   },
   line: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
   },
   section: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 16,
     marginBottom: 12,
   },
@@ -290,12 +290,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 17,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
   },
   confidenceSection: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 16,
     marginBottom: 12,
   },
@@ -308,18 +310,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
   },
-  confidenceEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
   confidenceScore: {
     fontSize: 36,
-    fontWeight: 'bold',
+    fontWeight: '800',
     marginBottom: 4,
   },
   confidenceLabel: {
     fontSize: 16,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     fontWeight: '600',
   },
   statsGrid: {
@@ -328,20 +326,20 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
   },
   statLabel: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textTertiary,
     marginBottom: 6,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
   },
   reasonsList: {
     gap: 12,
@@ -350,23 +348,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  reasonBullet: {
-    fontSize: 16,
-    color: '#3B82F6',
-    marginRight: 8,
+  reasonBulletCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: theme.colors.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
     marginTop: 2,
+  },
+  reasonBulletText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: theme.colors.primary,
   },
   reasonText: {
     flex: 1,
     fontSize: 15,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 22,
   },
   agentsList: {
     gap: 12,
   },
   agentCard: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
     borderRadius: 8,
     padding: 12,
   },
@@ -379,33 +386,33 @@ const styles = StyleSheet.create({
   agentName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   agentConfidence: {
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   agentReasoning: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     lineHeight: 20,
   },
   footer: {
     padding: 16,
     paddingBottom: 32,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.glassBorder,
   },
   actionButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingVertical: 16,
-    borderRadius: 8,
+    borderRadius: theme.borderRadius.s,
     alignItems: 'center',
   },
   actionButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: '#000',
   },
 });

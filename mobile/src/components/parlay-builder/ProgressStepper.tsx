@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../../constants/theme';
 
 interface ProgressStepperProps {
   currentStep: number;
@@ -76,11 +77,11 @@ export default function ProgressStepper({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   stepsContainer: {
     flexDirection: 'row',
@@ -95,51 +96,51 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 2,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
   },
   stepCircleActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   stepCircleCompleted: {
-    backgroundColor: '#22C55E',
-    borderColor: '#22C55E',
+    backgroundColor: theme.colors.success,
+    borderColor: theme.colors.success,
   },
   stepNumber: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   stepNumberActive: {
     color: '#FFFFFF',
   },
   stepLabel: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     fontWeight: '500',
   },
   stepLabelActive: {
-    color: '#3B82F6',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   connector: {
     height: 2,
     width: 40,
-    backgroundColor: '#D1D5DB',
+    backgroundColor: theme.colors.glassBorder,
     marginBottom: 26,
     marginHorizontal: 4,
   },
   connectorCompleted: {
-    backgroundColor: '#22C55E',
+    backgroundColor: theme.colors.success,
   },
   progressText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     fontWeight: '500',
   },

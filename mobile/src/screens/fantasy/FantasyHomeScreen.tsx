@@ -1,5 +1,5 @@
 /**
- * FantasyHomeScreen — Connect Sleeper onboarding OR league dashboard.
+ * FantasyHomeScreen V2 — Cyan accent migration, GlassCard usage, gradient CTA.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,6 +15,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
 import { apiService } from '../../services/api';
 import MatchupCard from '../../components/fantasy/MatchupCard';
+import GlassCard from '../../components/common/GlassCard';
+import AnimatedCard from '../../components/animated/AnimatedCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SLEEPER_STORAGE_KEY = 'sleeper_connection';
@@ -78,7 +80,7 @@ export default function FantasyHomeScreen({ navigation }: any) {
     );
   }
 
-  // Not connected — show onboarding
+  // Not connected
   if (!connection) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -87,22 +89,26 @@ export default function FantasyHomeScreen({ navigation }: any) {
           <Text style={styles.headerSubtitle}>Week {currentWeek}</Text>
         </View>
 
-        <View style={styles.onboardCard}>
-          <Ionicons name="trophy" size={40} color={theme.colors.primary} />
-          <Text style={styles.onboardTitle}>Connect Your League</Text>
-          <Text style={styles.onboardDesc}>
-            Import your Sleeper roster to get start/sit advice, waiver wire rankings,
-            matchup heatmaps, and trade analysis — all powered by our 6-agent engine.
-          </Text>
-          <TouchableOpacity
-            style={styles.connectBtn}
-            onPress={() => navigation.navigate('SleeperConnect')}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="link" size={18} color="#fff" />
-            <Text style={styles.connectBtnText}>Connect Sleeper</Text>
-          </TouchableOpacity>
-        </View>
+        <AnimatedCard index={0}>
+          <GlassCard style={styles.onboardCard}>
+            <View style={styles.onboardIconCircle}>
+              <Ionicons name="trophy" size={28} color={theme.colors.primary} />
+            </View>
+            <Text style={styles.onboardTitle}>Connect Your League</Text>
+            <Text style={styles.onboardDesc}>
+              Import your Sleeper roster to get start/sit advice, waiver wire rankings,
+              matchup heatmaps, and trade analysis — all powered by our 6-agent engine.
+            </Text>
+            <TouchableOpacity
+              style={styles.connectBtn}
+              onPress={() => navigation.navigate('SleeperConnect')}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="link" size={18} color="#000" />
+              <Text style={styles.connectBtnText}>Connect Sleeper</Text>
+            </TouchableOpacity>
+          </GlassCard>
+        </AnimatedCard>
 
         <View style={styles.featureList}>
           {[
@@ -111,44 +117,48 @@ export default function FantasyHomeScreen({ navigation }: any) {
             { icon: 'grid', title: 'Matchup Heatmap', desc: 'DVOA-colored matchup grid' },
             { icon: 'git-compare', title: 'Trade Analyzer', desc: 'ROS projection comparison' },
           ].map((f, i) => (
-            <View key={i} style={styles.featureRow}>
-              <View style={styles.featureIcon}>
-                <Ionicons name={f.icon as any} size={18} color={theme.colors.primary} />
+            <AnimatedCard key={i} index={i + 1}>
+              <View style={styles.featureRow}>
+                <View style={styles.featureIcon}>
+                  <Ionicons name={f.icon as any} size={18} color={theme.colors.primary} />
+                </View>
+                <View style={styles.featureInfo}>
+                  <Text style={styles.featureTitle}>{f.title}</Text>
+                  <Text style={styles.featureDesc}>{f.desc}</Text>
+                </View>
               </View>
-              <View style={styles.featureInfo}>
-                <Text style={styles.featureTitle}>{f.title}</Text>
-                <Text style={styles.featureDesc}>{f.desc}</Text>
-              </View>
-            </View>
+            </AnimatedCard>
           ))}
         </View>
       </ScrollView>
     );
   }
 
-  // Connected — show dashboard
+  // Connected — dashboard
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
+      <View style={styles.headerConnected}>
         <View>
           <Text style={styles.headerTitle}>Fantasy</Text>
-          <Text style={styles.headerSubtitle}>{connection.leagueName} · Week {currentWeek}</Text>
+          <Text style={styles.headerSubtitle}>{connection.leagueName} {'\u00B7'} Week {currentWeek}</Text>
         </View>
-        <TouchableOpacity onPress={handleDisconnect}>
-          <Ionicons name="log-out-outline" size={20} color={theme.colors.textTertiary} />
+        <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectBtn}>
+          <Ionicons name="log-out-outline" size={18} color={theme.colors.textTertiary} />
         </TouchableOpacity>
       </View>
 
       {/* Matchup card */}
       {matchup && (
-        <View style={styles.section}>
-          <MatchupCard
-            userTotal={matchup.user.projected_total}
-            opponentTotal={matchup.opponent.projected_total}
-            winProbability={matchup.win_probability}
-            week={currentWeek}
-          />
-        </View>
+        <AnimatedCard index={0}>
+          <View style={styles.section}>
+            <MatchupCard
+              userTotal={matchup.user.projected_total}
+              opponentTotal={matchup.opponent.projected_total}
+              winProbability={matchup.win_probability}
+              week={currentWeek}
+            />
+          </View>
+        </AnimatedCard>
       )}
 
       {/* Quick actions grid */}
@@ -191,15 +201,18 @@ export default function FantasyHomeScreen({ navigation }: any) {
             params: { leagueId: connection.leagueId, sleeperUserId: connection.userId, week: currentWeek, scoring: connection.scoring, autoOptimize: true },
           },
         ].map((action, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.actionCard}
-            onPress={() => navigation.navigate(action.screen, action.params)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name={action.icon as any} size={22} color={theme.colors.primary} />
-            <Text style={styles.actionTitle}>{action.title}</Text>
-          </TouchableOpacity>
+          <AnimatedCard key={i} index={i}>
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate(action.screen, action.params)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.actionIconCircle}>
+                <Ionicons name={action.icon as any} size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.actionTitle}>{action.title}</Text>
+            </TouchableOpacity>
+          </AnimatedCard>
         ))}
       </View>
     </ScrollView>
@@ -221,6 +234,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  headerConnected: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -230,29 +248,41 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...theme.typography.h1,
+    color: theme.colors.primary,
   },
   headerSubtitle: {
     fontSize: 14,
     color: theme.colors.textSecondary,
     marginTop: 2,
   },
+  disconnectBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.colors.backgroundCard,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   section: {
     paddingHorizontal: 16,
   },
   // Onboarding
   onboardCard: {
-    backgroundColor: theme.colors.glassLow,
-    borderRadius: theme.borderRadius.m,
-    borderWidth: 1,
-    borderColor: theme.colors.glassBorder,
-    padding: 28,
     marginHorizontal: 16,
-    marginBottom: 20,
     alignItems: 'center',
+    padding: 28,
+  },
+  onboardIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.primaryMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   onboardTitle: {
     ...theme.typography.h2,
-    marginTop: 16,
     marginBottom: 8,
   },
   onboardDesc: {
@@ -270,20 +300,21 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 28,
     gap: 8,
+    ...theme.shadows.glow,
   },
   connectBtnText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#fff',
+    color: '#000',
   },
   featureList: {
     paddingHorizontal: 16,
-    gap: 10,
+    gap: 2,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.glassLow,
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: theme.borderRadius.s,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
@@ -294,7 +325,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: theme.colors.primary + '15',
+    backgroundColor: theme.colors.primaryMuted,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -319,14 +350,22 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   actionCard: {
-    width: '31%',
-    backgroundColor: theme.colors.glassLow,
+    width: '100%',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: theme.borderRadius.m,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
     padding: 16,
     alignItems: 'center',
     gap: 8,
+  },
+  actionIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.primaryMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   actionTitle: {
     fontSize: 12,

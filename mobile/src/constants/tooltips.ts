@@ -168,7 +168,7 @@ export const ONBOARDING_CONTENT = {
         range: '80+',
         label: 'Elite',
         description: 'Highest conviction picks with strong edge',
-        color: '#22C55E',
+        color: '#10B981',
       },
       {
         emoji: '⭐',
@@ -182,7 +182,7 @@ export const ONBOARDING_CONTENT = {
         range: '70-74',
         label: 'Solid',
         description: 'Decent edge but slightly more risk',
-        color: '#3B82F6',
+        color: '#0AE2A3',
       },
     ],
     footer: 'Scores calculated by 9 AI agents analyzing stats, trends, matchups, and more.',

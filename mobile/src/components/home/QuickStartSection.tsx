@@ -1,10 +1,11 @@
 /**
  * Quick Start Section
- * Hero section on Home screen with featured pick and clear CTAs
+ * Hero section on Home screen with featured pick and clear CTAs — dark theme
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { theme } from '../../constants/theme';
 import { PropAnalysis } from '../../types';
 
 interface QuickStartSectionProps {
@@ -21,22 +22,14 @@ export default function QuickStartSection({
   onFeaturedPress,
 }: QuickStartSectionProps) {
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return '#22C55E';
-    if (confidence >= 75) return '#F59E0B';
-    if (confidence >= 70) return '#3B82F6';
-    return '#6B7280';
-  };
-
-  const getConfidenceEmoji = (confidence: number): string => {
-    if (confidence >= 80) return '🔥';
-    if (confidence >= 75) return '⭐';
-    if (confidence >= 70) return '✅';
-    return '📊';
+    if (confidence >= 70) return theme.colors.primary;
+    if (confidence >= 60) return theme.colors.success;
+    return theme.colors.textSecondary;
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>🎯 Quick Start</Text>
+      <Text style={styles.sectionTitle}>Quick Start</Text>
 
       {featuredProp ? (
         <TouchableOpacity
@@ -45,20 +38,15 @@ export default function QuickStartSection({
           activeOpacity={0.8}
         >
           <View style={styles.featuredHeader}>
-            <Text style={styles.featuredBadge}>TODAY'S TOP PICK</Text>
-            <View style={styles.confidenceContainer}>
-              <Text style={styles.confidenceEmoji}>
-                {getConfidenceEmoji(featuredProp.confidence)}
-              </Text>
-              <Text
-                style={[
-                  styles.confidenceScore,
-                  { color: getConfidenceColor(featuredProp.confidence) },
-                ]}
-              >
-                {Math.round(featuredProp.confidence)}
-              </Text>
-            </View>
+            <Text style={styles.featuredBadge}>TOP PICK</Text>
+            <Text
+              style={[
+                styles.confidenceScore,
+                { color: getConfidenceColor(featuredProp.confidence) },
+              ]}
+            >
+              {Math.round(featuredProp.confidence)}
+            </Text>
           </View>
 
           <Text style={styles.playerName}>{featuredProp.player_name}</Text>
@@ -68,13 +56,15 @@ export default function QuickStartSection({
 
           <View style={styles.propLine}>
             <Text style={styles.statType}>{featuredProp.stat_type}</Text>
-            <Text style={styles.betType}>{featuredProp.bet_type}</Text>
+            <Text style={[styles.betType, { color: featuredProp.bet_type === 'OVER' ? theme.colors.success : theme.colors.danger }]}>
+              {featuredProp.bet_type}
+            </Text>
             <Text style={styles.line}>{featuredProp.line}</Text>
           </View>
 
           {featuredProp.top_reasons && featuredProp.top_reasons[0] && (
             <Text style={styles.topReason} numberOfLines={2}>
-              💡 {featuredProp.top_reasons[0]}
+              {featuredProp.top_reasons[0]}
             </Text>
           )}
 
@@ -93,7 +83,6 @@ export default function QuickStartSection({
           style={[styles.ctaButton, styles.ctaPrimary]}
           onPress={onViewPreBuilt}
         >
-          <Text style={styles.ctaIcon}>🎰</Text>
           <Text style={styles.ctaTextPrimary}>View Pre-Built</Text>
         </TouchableOpacity>
 
@@ -101,7 +90,6 @@ export default function QuickStartSection({
           style={[styles.ctaButton, styles.ctaSecondary]}
           onPress={onBuildCustom}
         >
-          <Text style={styles.ctaIcon}>⚡</Text>
           <Text style={styles.ctaTextSecondary}>Build Custom</Text>
         </TouchableOpacity>
       </View>
@@ -111,21 +99,24 @@ export default function QuickStartSection({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.background,
     padding: 16,
     marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
     marginBottom: 12,
   },
   featuredCard: {
-    backgroundColor: '#1F2937',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorderActive,
     padding: 20,
     marginBottom: 16,
+    ...theme.shadows.glow,
   },
   featuredHeader: {
     flexDirection: 'row',
@@ -135,31 +126,23 @@ const styles = StyleSheet.create({
   },
   featuredBadge: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#FCD34D',
+    fontWeight: '800',
+    color: theme.colors.gold,
     letterSpacing: 0.5,
-  },
-  confidenceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  confidenceEmoji: {
-    fontSize: 20,
   },
   confidenceScore: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   playerName: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   matchup: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     marginBottom: 12,
   },
   propLine: {
@@ -171,33 +154,32 @@ const styles = StyleSheet.create({
   statType: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
   },
   betType: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#3B82F6',
+    fontWeight: '800',
   },
   line: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
   },
   topReason: {
     fontSize: 13,
-    color: '#D1D5DB',
+    color: theme.colors.textSecondary,
     lineHeight: 18,
     marginBottom: 12,
   },
   tapHint: {
     fontSize: 12,
-    color: '#6B7280',
+    color: theme.colors.textTertiary,
     fontStyle: 'italic',
     textAlign: 'center',
   },
   noFeaturedText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     textAlign: 'center',
   },
   ctaContainer: {
@@ -210,28 +192,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: theme.borderRadius.s,
     gap: 8,
   },
   ctaPrimary: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
   },
   ctaSecondary: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-  },
-  ctaIcon: {
-    fontSize: 18,
+    borderColor: theme.colors.glassBorder,
   },
   ctaTextPrimary: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#000',
   },
   ctaTextSecondary: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
 });

@@ -43,97 +43,81 @@ class AnalysisService:
     ) -> List[PropAnalysisResponse]:
         """
         Analyze props with filters using EXISTING analysis engine.
-
-        NO CHANGES to PropAnalyzer or agents - pure wrapper.
-        Uses existing 9-agent system:
-        - DVOA (team efficiency)
-        - Matchup (position-specific defense)
-        - Volume (snap/target share)
-        - GameScript (game total/spread)
-        - Injury (health status)
-        - Trend (recent performance)
-        - Variance (prop reliability)
-        - HitRate (historical accuracy)
-        - Weather (disabled)
-
-        Args:
-            week: NFL week number (1-18)
-            min_confidence: Minimum confidence threshold (0-100)
-            max_confidence: Maximum confidence threshold (0-100), optional
-            team: Filter by single team abbreviation (e.g., "KC")
-            teams: Filter by multiple teams, comma-separated (e.g., "KC,BUF,DET")
-            position: Filter by single position (QB, WR, RB, TE)
-            positions: Filter by multiple positions, comma-separated (e.g., "QB,WR")
-            stat_type: Filter by stat type (Pass Yds, Rush Yds, etc.)
-            bet_type: Filter by OVER or UNDER
-            limit: Maximum number of results to return
-
-        Returns:
-            List of PropAnalysisResponse objects
+        pure wrapper around PropAnalyzer.
         """
-        # Check cache first (cache key based on week and min_confidence)
+        # Check cache first
         cache_key = f"props_week_{week}_conf_{min_confidence}"
         cached_data = await cache_get(cache_key)
 
+        analyses_responses = []
+
         if cached_data:
             logger.info(f"✓ Cache HIT for week {week}, min_confidence {min_confidence}")
-            analyses_data = json.loads(cached_data)
-            # Reconstruct PropAnalysis objects from cached data (for filtering)
-            # For now, we'll cache the final responses instead to avoid reconstruction
-        else:
+            try:
+                # Deserialize cached JSON list of dicts into Pydantic models
+                analyses_responses = [PropAnalysisResponse(**item) for item in json.loads(cached_data)]
+            except Exception as e:
+                logger.error(f"Cache deserialization failed: {e}")
+                cached_data = None # Force re-analysis
+
+        if not cached_data:
             logger.info(f"Cache MISS - analyzing props for week {week}...")
 
-            # Load data using EXISTING loader (100% reuse)
+            # Load data using EXISTING loader
             logger.info(f"Loading data for week {week}...")
             context = self.loader.load_all_data(week=week)
 
-            # Analyze using EXISTING analyzer (100% reuse)
+            # Analyze using EXISTING analyzer
             logger.info(f"Analyzing props with min_confidence={min_confidence}...")
             analyses = self.analyzer.analyze_all_props(context, min_confidence=min_confidence)
 
-            # Convert to responses before caching
-            all_responses = [self._to_response(a) for a in analyses]
+            # Convert to responses
+            analyses_responses = [self._to_response(a) for a in analyses]
 
-            # Cache the responses (serialized as JSON)
-            cache_data = json.dumps([r.model_dump() for r in all_responses])
+            # Cache the responses
+            cache_data = json.dumps([r.model_dump() for r in analyses_responses])
             await cache_set(cache_key, cache_data, expire=settings.cache_ttl_seconds)
-            logger.info(f"✓ Cached {len(all_responses)} props for week {week}")
+            logger.info(f"✓ Cached {len(analyses_responses)} props for week {week}")
 
-            # Set analyses variable for filtering below
-            analyses_responses = all_responses
-
-        # If we got cached data, deserialize it
-        if cached_data:
-            analyses_responses = [PropAnalysisResponse(**data) for data in analyses_data]
-
-        # Apply filters
+        # --- Filtering ---
         filtered = analyses_responses
 
-        # Confidence range filtering
+        # Confidence range
         if max_confidence is not None:
             filtered = [a for a in filtered if a.confidence <= max_confidence]
 
-        # Team filtering (single or multiple)
+        # Team filtering
         if teams:
-            # Multiple teams (comma-separated)
             team_list = [t.strip().upper() for t in teams.split(',')]
             filtered = [a for a in filtered if a.team.upper() in team_list]
         elif team:
-            # Single team (backward compatibility)
             filtered = [a for a in filtered if a.team.upper() == team.upper()]
 
-        # Position filtering (single or multiple)
+        # Position filtering
         if positions:
-            # Multiple positions (comma-separated)
             position_list = [p.strip().upper() for p in positions.split(',')]
             filtered = [a for a in filtered if a.position.upper() in position_list]
         elif position:
-            # Single position (backward compatibility)
             filtered = [a for a in filtered if a.position == position]
 
-        # Other filters (stat_type, bet_type)
+        # Other filters
         if stat_type:
-            filtered = [a for a in filtered if a.stat_type == stat_type]
+            if stat_type == 'TDs':
+                # Fuzzy match for TDs (Pass TDs, Rush TDs, Rec TDs)
+                filtered = [a for a in filtered if 'TD' in a.stat_type]
+                logger.info(f"After TD filter: {len(filtered)} matches")
+                if not filtered:
+                    # DEBUG: Exfiltrate available stat types via error
+                    available = list(set([a.stat_type for a in analyses_responses]))
+                    raise ValueError(f"DEBUG: Found 0 matches for TDs. Available types: {available}")
+            else:
+                # Try strict match first, then fuzzy match if no results
+                strict_matches = [a for a in filtered if a.stat_type == stat_type]
+                if strict_matches:
+                    filtered = strict_matches
+                else:
+                    # Fuzzy match (e.g. "Pass Yds" matches "player_pass_yds")
+                    filtered = [a for a in filtered if stat_type.lower().replace(' ', '') in a.stat_type.lower().replace('_', '').replace(' ', '')]
         if bet_type:
             filtered = [a for a in filtered if a.bet_type.upper() == bet_type.upper()]
 
@@ -145,7 +129,6 @@ class AnalysisService:
             filtered = filtered[:limit]
 
         logger.info(f"✓ Returning {len(filtered)} props after filters")
-
         return filtered
 
     async def get_raw_analyses_for_week(
@@ -255,3 +238,68 @@ class AnalysisService:
                 for agent, result in analysis.agent_breakdown.items()
             }
         )
+
+    def get_player_odds(self, week: int, player_name: str, stat_type: str) -> List[dict]:
+        """
+        Get odds for a specific player and stat type from the raw betting lines.
+        Returns a list of odds entries (one per book/line).
+        """
+        # Load data (this is cached by the loader logic or we rely on OS caching)
+        context = self.loader.load_all_data(week=week)
+        
+        df = context.get('betting_lines_raw')
+        if df is None or df.empty:
+            return []
+
+        # Filter by player and stat_type
+        from scripts.analysis.data_loader import normalize_name
+        target_name = normalize_name(player_name)
+        
+        results = []
+        
+        for _, row in df.iterrows():
+            # Handle variable column names
+            p_name = row.get('player_name') or row.get('description')
+            row_player = normalize_name(str(p_name or ''))
+            
+            if not row_player or target_name not in row_player: 
+                # Use "in" check for "Patrick Mahomes II" vs "Patrick Mahomes"
+                if row_player not in target_name: 
+                     continue
+                
+            s_type = row.get('stat_type') or row.get('market')
+            row_stat = str(s_type or '')
+            
+            # Simple normalization: remove spaces, lowercase, underscores
+            rs_norm = row_stat.lower().replace(' ', '').replace('_', '')
+            st_norm = stat_type.lower().replace(' ', '').replace('_', '')
+            
+            # Check for match (e.g. 'playerpassyds' vs 'passyds')
+            match = False
+            if rs_norm == st_norm:
+                match = True
+            elif f"player{st_norm}" == rs_norm:
+                match = True
+            elif st_norm in rs_norm and len(st_norm) > 3: # loose match
+                match = True
+                
+            if not match:
+                continue
+
+            # Extract values with fallbacks
+            line = row.get('line') if row.get('line') is not None else row.get('point')
+            price = row.get('odds') if row.get('odds') is not None else row.get('price')
+            side = row.get('direction') or row.get('label')
+            
+            if line is None or price is None:
+                continue
+
+            results.append({
+                "book": row.get('bookmaker', 'Unknown'),
+                "line": float(line),
+                "price": int(float(price)), 
+                "side": str(side).lower(), # 'Over' or 'Under'
+                "timestamp": str(row.get('fetch_time', '') or row.get('last_update', ''))
+            })
+            
+        return results

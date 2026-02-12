@@ -17,11 +17,11 @@ interface HeatmapCellProps {
 
 function getHeatColor(value: number): string {
   // 0 = red (bad matchup), 50 = yellow, 100 = green (good matchup)
-  if (value >= 70) return '#22C55E';  // green
-  if (value >= 55) return '#84CC16';  // lime
-  if (value >= 45) return '#EAB308';  // yellow
-  if (value >= 30) return '#F97316';  // orange
-  return '#EF4444';                    // red
+  if (value >= 70) return theme.colors.success;   // green
+  if (value >= 55) return '#84CC16';              // lime
+  if (value >= 45) return theme.colors.warning;   // yellow
+  if (value >= 30) return '#F97316';              // orange
+  return theme.colors.danger;                     // red
 }
 
 function formatStatType(stat: string): string {

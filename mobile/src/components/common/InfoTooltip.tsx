@@ -13,6 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { TOOLTIPS, TooltipContent } from '../../constants/tooltips';
+import { theme } from '../../constants/theme';
 
 interface InfoTooltipProps {
   tooltipKey: string;
@@ -23,7 +24,7 @@ interface InfoTooltipProps {
 export default function InfoTooltip({
   tooltipKey,
   iconSize = 16,
-  iconColor = '#9CA3AF',
+  iconColor = theme.colors.textTertiary,
 }: InfoTooltipProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const tooltip = TOOLTIPS[tooltipKey];
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 16,
     padding: 24,
     maxWidth: 400,
@@ -132,17 +133,17 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 12,
   },
   modalDescription: {
     fontSize: 16,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 24,
     marginBottom: 16,
   },
   exampleContainer: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
@@ -150,16 +151,16 @@ const styles = StyleSheet.create({
   exampleLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 6,
   },
   exampleText: {
     fontSize: 14,
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     lineHeight: 20,
   },
   closeButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',

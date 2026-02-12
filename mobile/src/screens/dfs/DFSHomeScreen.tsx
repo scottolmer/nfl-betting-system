@@ -1,5 +1,5 @@
 /**
- * DFSHomeScreen — Platform selector, "Build Slip" CTA, suggested slips, active slips.
+ * DFSHomeScreen V2 — Cyan accent migration, gradient CTA, GlassCard usage.
  */
 
 import React, { useState } from 'react';
@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
+import GlassCard from '../../components/common/GlassCard';
+import AnimatedCard from '../../components/animated/AnimatedCard';
 
 const PLATFORMS = [
   { key: 'prizepicks', label: 'PrizePicks', icon: 'trophy' as const },
@@ -20,7 +22,7 @@ const PLATFORMS = [
 
 export default function DFSHomeScreen({ navigation }: any) {
   const [platform, setPlatform] = useState('prizepicks');
-  const [currentWeek] = useState(17);
+  const [currentWeek] = useState(13);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -42,7 +44,7 @@ export default function DFSHomeScreen({ navigation }: any) {
             <Ionicons
               name={p.icon}
               size={20}
-              color={platform === p.key ? '#fff' : theme.colors.textSecondary}
+              color={platform === p.key ? '#000' : theme.colors.textSecondary}
             />
             <Text style={[styles.platformLabel, platform === p.key && styles.platformLabelActive]}>
               {p.label}
@@ -51,27 +53,31 @@ export default function DFSHomeScreen({ navigation }: any) {
         ))}
       </View>
 
-      {/* Build Slip CTA */}
-      <TouchableOpacity
-        style={styles.buildSlipCTA}
-        onPress={() => navigation.navigate('SlipBuilder', { platform, week: currentWeek })}
-        activeOpacity={0.8}
-      >
-        <View style={styles.ctaLeft}>
-          <Ionicons name="add-circle" size={28} color="#fff" />
-          <View>
-            <Text style={styles.ctaTitle}>Build a Slip</Text>
-            <Text style={styles.ctaSubtitle}>
-              Pick players with real-time correlation scoring
-            </Text>
+      {/* Build Parlay CTA */}
+      <AnimatedCard index={0}>
+        <TouchableOpacity
+          style={styles.buildSlipCTA}
+          onPress={() => navigation.navigate('SlipBuilder', { platform, week: currentWeek })}
+          activeOpacity={0.8}
+        >
+          <View style={styles.ctaLeft}>
+            <View style={styles.ctaIconCircle}>
+              <Ionicons name="add" size={22} color="#000" />
+            </View>
+            <View>
+              <Text style={styles.ctaTitle}>Build a Parlay</Text>
+              <Text style={styles.ctaSubtitle}>
+                Pick players with real-time correlation scoring
+              </Text>
+            </View>
           </View>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
-      </TouchableOpacity>
+          <Ionicons name="chevron-forward" size={20} color="rgba(0,0,0,0.4)" />
+        </TouchableOpacity>
+      </AnimatedCard>
 
       {/* Suggested Slips */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Suggested Slips</Text>
+        <Text style={styles.sectionTitle}>Suggested Parlays</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('SuggestedSlips', { platform, week: currentWeek })}
         >
@@ -79,27 +85,28 @@ export default function DFSHomeScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        style={styles.suggestedCard}
-        onPress={() => navigation.navigate('SuggestedSlips', { platform, week: currentWeek })}
-        activeOpacity={0.7}
-      >
-        <View style={styles.suggestedHeader}>
-          <Ionicons name="flash" size={18} color={theme.colors.gold} />
-          <Text style={styles.suggestedTitle}>Engine-Generated Slips</Text>
-        </View>
-        <Text style={styles.suggestedDesc}>
-          Optimized for highest confidence with lowest correlation risk.
-          Our engine builds slips using the same 6-agent analysis that
-          achieves 55.7% win rate.
-        </Text>
-        <View style={styles.suggestedFooter}>
-          <Text style={styles.suggestedCTA}>View Suggestions</Text>
-          <Ionicons name="arrow-forward" size={14} color={theme.colors.primary} />
-        </View>
-      </TouchableOpacity>
+      <AnimatedCard index={1}>
+        <GlassCard>
+          <View style={styles.suggestedHeader}>
+            <Ionicons name="flash" size={18} color={theme.colors.gold} />
+            <Text style={styles.suggestedTitle}>Engine-Generated Parlays</Text>
+          </View>
+          <Text style={styles.suggestedDesc}>
+            Optimized for highest confidence with lowest correlation risk.
+            Our engine builds parlays using the same 6-agent analysis that
+            achieves 55.7% win rate.
+          </Text>
+          <TouchableOpacity
+            style={styles.suggestedFooter}
+            onPress={() => navigation.navigate('SuggestedSlips', { platform, week: currentWeek })}
+          >
+            <Text style={styles.suggestedCTA}>View Suggestions</Text>
+            <Ionicons name="arrow-forward" size={14} color={theme.colors.primary} />
+          </TouchableOpacity>
+        </GlassCard>
+      </AnimatedCard>
 
-      {/* Quick Stats */}
+      {/* How It Works */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>How It Works</Text>
       </View>
@@ -111,11 +118,15 @@ export default function DFSHomeScreen({ navigation }: any) {
           { icon: 'swap-horizontal', title: 'Flex Optimizer', desc: 'Auto-suggest the optimal flex pick' },
           { icon: 'analytics', title: 'Line Comparison', desc: 'Platform vs sportsbook consensus' },
         ].map((f, i) => (
-          <View key={i} style={styles.featureItem}>
-            <Ionicons name={f.icon as any} size={20} color={theme.colors.primary} />
-            <Text style={styles.featureTitle}>{f.title}</Text>
-            <Text style={styles.featureDesc}>{f.desc}</Text>
-          </View>
+          <AnimatedCard key={i} index={i + 2}>
+            <GlassCard style={styles.featureItem}>
+              <View style={styles.featureIconCircle}>
+                <Ionicons name={f.icon as any} size={18} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.featureTitle}>{f.title}</Text>
+              <Text style={styles.featureDesc}>{f.desc}</Text>
+            </GlassCard>
+          </AnimatedCard>
         ))}
       </View>
     </ScrollView>
@@ -137,6 +148,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...theme.typography.h1,
+    color: theme.colors.primary,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -155,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: theme.colors.glassLow,
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: theme.borderRadius.m,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
@@ -171,7 +183,7 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   platformLabelActive: {
-    color: '#fff',
+    color: '#000',
   },
   buildSlipCTA: {
     flexDirection: 'row',
@@ -182,6 +194,7 @@ const styles = StyleSheet.create({
     padding: 18,
     marginHorizontal: 16,
     marginBottom: 20,
+    ...theme.shadows.glow,
   },
   ctaLeft: {
     flexDirection: 'row',
@@ -189,14 +202,22 @@ const styles = StyleSheet.create({
     gap: 12,
     flex: 1,
   },
+  ctaIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   ctaTitle: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#fff',
+    color: '#000',
   },
   ctaSubtitle: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(0,0,0,0.5)',
     marginTop: 2,
   },
   sectionHeader: {
@@ -213,15 +234,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: theme.colors.primary,
-  },
-  suggestedCard: {
-    backgroundColor: theme.colors.glassLow,
-    borderRadius: theme.borderRadius.m,
-    borderWidth: 1,
-    borderColor: theme.colors.glassBorder,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 20,
   },
   suggestedHeader: {
     flexDirection: 'row',
@@ -257,18 +269,22 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   featureItem: {
-    width: '47%',
-    backgroundColor: theme.colors.glassLow,
-    borderRadius: theme.borderRadius.m,
-    borderWidth: 1,
-    borderColor: theme.colors.glassBorder,
-    padding: 14,
+    width: '100%',
+    marginBottom: 0,
+  },
+  featureIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.primaryMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   featureTitle: {
     fontSize: 13,
     fontWeight: '700',
     color: theme.colors.textPrimary,
-    marginTop: 8,
     marginBottom: 2,
   },
   featureDesc: {

@@ -26,7 +26,7 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const stored = await AsyncStorage.getItem(MODE_KEY);
-        if (stored && ['dfs', 'props', 'fantasy'].includes(stored)) {
+        if (stored && ['props', 'fantasy'].includes(stored)) {
           setModeState(stored as AppMode);
         }
       } catch {

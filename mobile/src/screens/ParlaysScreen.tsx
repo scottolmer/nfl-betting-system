@@ -15,6 +15,7 @@ import HelpBanner from '../components/common/HelpBanner';
 import InfoTooltip from '../components/common/InfoTooltip';
 import ParlayFilters, { FilterOption } from '../components/parlays/ParlayFilters';
 import Badge from '../components/common/Badge';
+import { theme } from '../constants/theme';
 
 export default function ParlaysScreen() {
   const [parlays, setParlays] = useState<Parlay[]>([]);
@@ -81,20 +82,20 @@ export default function ParlaysScreen() {
   const getRiskColor = (risk: string): string => {
     switch (risk) {
       case 'LOW':
-        return '#22C55E';
+        return theme.colors.success;
       case 'MEDIUM':
-        return '#F59E0B';
+        return theme.colors.warning;
       case 'HIGH':
-        return '#EF4444';
+        return theme.colors.danger;
       default:
-        return '#6B7280';
+        return theme.colors.textSecondary;
     }
   };
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return '#22C55E';
-    if (confidence >= 70) return '#F59E0B';
-    return '#6B7280';
+    if (confidence >= 80) return theme.colors.success;
+    if (confidence >= 70) return theme.colors.warning;
+    return theme.colors.textSecondary;
   };
 
   const renderLeg = (leg: ParlayLeg, index: number) => (
@@ -135,7 +136,7 @@ export default function ParlaysScreen() {
                 <Text style={styles.parlaySubtitle}>
                   {item.leg_count} legs • {Math.round(item.combined_confidence)} confidence
                 </Text>
-                <InfoTooltip tooltipKey="combinedConfidence" iconSize={14} iconColor="#9CA3AF" />
+                <InfoTooltip tooltipKey="combinedConfidence" iconSize={14} iconColor={theme.colors.textTertiary} />
               </View>
             </View>
             <View style={styles.parlayBadges}>
@@ -143,7 +144,7 @@ export default function ParlaysScreen() {
                 <View style={[styles.riskBadge, { backgroundColor: getRiskColor(item.risk_level) }]}>
                   <Text style={styles.riskBadgeText}>{item.risk_level}</Text>
                 </View>
-                <InfoTooltip tooltipKey="riskLevel" iconSize={12} iconColor="#9CA3AF" />
+                <InfoTooltip tooltipKey="riskLevel" iconSize={12} iconColor={theme.colors.textTertiary} />
               </View>
             </View>
           </View>
@@ -173,7 +174,7 @@ export default function ParlaysScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator color="#3B82F6" />
+        <ActivityIndicator color={theme.colors.primary} />
         <Text style={styles.loadingText}>Generating parlays...</Text>
       </View>
     );
@@ -200,7 +201,7 @@ export default function ParlaysScreen() {
               Week {currentWeek} • {parlays.length} Parlays
             </Text>
           </View>
-          <InfoTooltip tooltipKey="preBuildParlays" iconSize={20} iconColor="#9CA3AF" />
+          <InfoTooltip tooltipKey="preBuildParlays" iconSize={20} iconColor={theme.colors.textTertiary} />
         </View>
       </View>
 
@@ -244,17 +245,17 @@ export default function ParlaysScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
     padding: 20,
   },
   header: {
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.backgroundCard,
     paddingTop: 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -267,18 +268,18 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   listContainer: {
     paddingBottom: 16,
   },
   parlayCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     marginBottom: 12,
     marginHorizontal: 16,
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
   parlayTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   parlayMetaRow: {
@@ -316,7 +317,7 @@ const styles = StyleSheet.create({
   },
   parlaySubtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   parlayBadges: {
     alignItems: 'flex-end',
@@ -332,29 +333,29 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   riskBadgeText: {
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     fontSize: 12,
     fontWeight: 'bold',
   },
   parlayLegs: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#F9FAFB',
+    borderTopColor: theme.colors.glassBorder,
+    backgroundColor: theme.colors.backgroundElevated,
   },
   legsHeader: {
     padding: 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   legsHeaderText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     textTransform: 'uppercase',
   },
   legContainer: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   legHeader: {
     flexDirection: 'row',
@@ -364,8 +365,8 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#3B82F6',
-    color: '#FFFFFF',
+    backgroundColor: theme.colors.primary,
+    color: theme.colors.backgroundCard,
     textAlign: 'center',
     lineHeight: 24,
     fontSize: 14,
@@ -378,12 +379,12 @@ const styles = StyleSheet.create({
   legPlayer: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   legDetails: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   legConfidence: {
@@ -397,49 +398,49 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     flex: 1,
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.backgroundCard,
     fontSize: 16,
     fontWeight: '600',
   },
   secondaryButton: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
   },
   secondaryButtonText: {
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     fontSize: 16,
     fontWeight: '600',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   errorText: {
     fontSize: 16,
-    color: '#EF4444',
+    color: theme.colors.danger,
     textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.backgroundCard,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -449,6 +450,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
 });

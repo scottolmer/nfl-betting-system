@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../../constants/theme';
 
 interface ResultsEmptyStateProps {
   onNavigateToMyParlays?: () => void;
@@ -15,7 +16,7 @@ export default function ResultsEmptyState({ onNavigateToMyParlays }: ResultsEmpt
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        <Ionicons name="stats-chart-outline" size={64} color="#9CA3AF" />
+        <Ionicons name="stats-chart-outline" size={64} color={theme.colors.textTertiary} />
       </View>
 
       <Text style={styles.title}>No Results Yet</Text>
@@ -60,7 +61,7 @@ export default function ResultsEmptyState({ onNavigateToMyParlays }: ResultsEmpt
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Go to My Parlays</Text>
-          <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
+          <Ionicons name="arrow-forward" size={16} color="#fff" />
         </TouchableOpacity>
       )}
     </View>
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -86,13 +87,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 8,
     textAlign: 'center',
   },
   description: {
     fontSize: 15,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 32,
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -123,13 +124,13 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 14,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 20,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

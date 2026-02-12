@@ -1,10 +1,12 @@
 /**
- * BetSizeSuggestion — Kelly-based unit recommendation display.
+ * BetSizeSuggestion V2 — Kelly-based unit recommendation with ConfidenceGauge.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../../constants/theme';
+import GlassCard from '../common/GlassCard';
+import ConfidenceGauge from '../charts/ConfidenceGauge';
 
 interface BetSizeSuggestionProps {
   confidence: number;
@@ -33,10 +35,15 @@ export default function BetSizeSuggestion({
   const riskColor = getRiskColor(riskLevel);
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>Bet Sizing</Text>
+    <GlassCard>
+      <Text style={styles.title}>BET SIZING</Text>
 
       <View style={styles.mainRow}>
+        {/* Confidence Gauge */}
+        <View style={styles.gaugeBox}>
+          <ConfidenceGauge score={confidence} size="md" />
+        </View>
+
         {/* Units recommendation */}
         <View style={styles.unitsBox}>
           <Text style={[styles.unitsValue, { color: riskColor }]}>
@@ -53,21 +60,19 @@ export default function BetSizeSuggestion({
               +{edgePct.toFixed(1)}%
             </Text>
           </View>
-          <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Confidence</Text>
-            <Text style={styles.statValue}>{Math.round(confidence)}</Text>
-          </View>
           {kellyPct != null && (
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Kelly (1/4)</Text>
+              <Text style={styles.statLabel}>Kelly</Text>
               <Text style={styles.statValue}>{kellyPct.toFixed(1)}%</Text>
             </View>
           )}
           <View style={styles.statRow}>
             <Text style={styles.statLabel}>Risk</Text>
-            <Text style={[styles.statValue, { color: riskColor, textTransform: 'capitalize' }]}>
-              {riskLevel}
-            </Text>
+            <View style={[styles.riskBadge, { backgroundColor: riskColor + '1A' }]}>
+              <Text style={[styles.riskText, { color: riskColor }]}>
+                {riskLevel.toUpperCase()}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -75,19 +80,11 @@ export default function BetSizeSuggestion({
       <Text style={styles.disclaimer}>
         Based on quarter-Kelly criterion. Never exceed 3% of bankroll on a single bet.
       </Text>
-    </View>
+    </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.colors.glassLow,
-    borderRadius: theme.borderRadius.m,
-    borderWidth: 1,
-    borderColor: theme.colors.glassBorder,
-    padding: 14,
-    marginBottom: 12,
-  },
   title: {
     ...theme.typography.caption,
     marginBottom: 12,
@@ -97,24 +94,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  gaugeBox: {
+    marginRight: 12,
+  },
   unitsBox: {
-    backgroundColor: theme.colors.glassHigh,
+    backgroundColor: theme.colors.backgroundElevated,
     borderRadius: theme.borderRadius.m,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
-    minWidth: 80,
+    marginRight: 12,
+    minWidth: 64,
   },
   unitsValue: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '800',
   },
   unitsLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: theme.colors.textTertiary,
     fontWeight: '600',
     marginTop: 2,
+    textTransform: 'uppercase',
   },
   statsCol: {
     flex: 1,
@@ -123,6 +124,7 @@ const styles = StyleSheet.create({
   statRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   statLabel: {
     fontSize: 12,
@@ -132,6 +134,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: theme.colors.textPrimary,
+  },
+  riskBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  riskText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   disclaimer: {
     fontSize: 10,

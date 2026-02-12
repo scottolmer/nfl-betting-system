@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SavedParlayLeg } from '../../types';
 import InfoTooltip from '../common/InfoTooltip';
+import { theme } from '../../constants/theme';
 
 interface ParlayFloatingSummaryProps {
   legs: SavedParlayLeg[];
@@ -24,20 +25,20 @@ export default function ParlayFloatingSummary({
   const getRiskColor = (risk: string): string => {
     switch (risk) {
       case 'LOW':
-        return '#22C55E';
+        return theme.colors.success;
       case 'MEDIUM':
-        return '#F59E0B';
+        return theme.colors.warning;
       case 'HIGH':
-        return '#EF4444';
+        return theme.colors.danger;
       default:
-        return '#6B7280';
+        return theme.colors.textSecondary;
     }
   };
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 70) return '#22C55E';
-    if (confidence >= 60) return '#F59E0B';
-    return '#EF4444';
+    if (confidence >= 70) return theme.colors.success;
+    if (confidence >= 60) return theme.colors.warning;
+    return theme.colors.danger;
   };
 
   return (
@@ -111,7 +112,7 @@ export default function ParlayFloatingSummary({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.backgroundElevated,
     marginHorizontal: 16,
     marginVertical: 12,
     borderRadius: 12,
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
   },
   badges: {
     flexDirection: 'row',
@@ -149,12 +150,12 @@ const styles = StyleSheet.create({
   },
   content: {
     borderTopWidth: 1,
-    borderTopColor: '#374151',
+    borderTopColor: theme.colors.glassBorder,
     paddingTop: 12,
   },
   emptyText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -172,16 +173,16 @@ const styles = StyleSheet.create({
   legCountText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
   },
   validIndicator: {
     fontSize: 12,
-    color: '#22C55E',
+    color: theme.colors.success,
     fontWeight: '500',
   },
   invalidIndicator: {
     fontSize: 12,
-    color: '#F59E0B',
+    color: theme.colors.warning,
     fontWeight: '500',
   },
   confidenceRow: {
@@ -191,18 +192,18 @@ const styles = StyleSheet.create({
   },
   confidenceLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   legsPreview: {
     gap: 4,
   },
   legPreview: {
     fontSize: 13,
-    color: '#D1D5DB',
+    color: theme.colors.textSecondary,
   },
   moreLegText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     fontStyle: 'italic',
     marginTop: 2,
   },

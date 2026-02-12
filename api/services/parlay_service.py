@@ -44,26 +44,41 @@ class ParlayService:
         # Use EXISTING build_parlays method (100% reuse)
         parlays_dict = self.builder.build_parlays(all_analyses, min_confidence=min_confidence)
 
-        # Flatten to list and take top 6
-        all_parlays = []
-        for parlay_type, parlays in parlays_dict.items():
-            all_parlays.extend(parlays)
+        # Return a diverse mix: best of each leg count, then fill remaining slots
+        diverse_picks = []
+        for leg_type in ['2-leg', '3-leg', '4-leg', '5-leg', '6-leg']:
+            type_parlays = parlays_dict.get(leg_type, [])
+            if type_parlays:
+                # Sort this type by confidence and take the best one
+                type_parlays.sort(key=lambda p: p.combined_confidence, reverse=True)
+                diverse_picks.append(type_parlays[0])
 
-        # Sort by confidence and take top 6
-        all_parlays.sort(key=lambda p: p.combined_confidence, reverse=True)
-        top_6 = all_parlays[:6]
+        # Fill remaining slots (up to 10) with the best unused parlays
+        picked_ids = set(id(p) for p in diverse_picks)
+        remaining = []
+        for parlays in parlays_dict.values():
+            for p in parlays:
+                if id(p) not in picked_ids:
+                    remaining.append(p)
+        remaining.sort(key=lambda p: p.combined_confidence, reverse=True)
+        diverse_picks.extend(remaining[:10 - len(diverse_picks)])
 
-        logger.info(f"✓ Generated {len(all_parlays)} parlays, returning top 6")
+        # Sort final list: group by leg count ascending, then confidence descending
+        diverse_picks.sort(key=lambda p: (len(p.legs), -p.combined_confidence))
 
-        # Convert to API response models
-        return [self._to_response(p) for p in top_6]
+        total_all = sum(len(v) for v in parlays_dict.values())
+        logger.info(f"✓ Generated {total_all} parlays, returning {len(diverse_picks)} (diverse mix)")
 
-    def _to_response(self, parlay: Parlay) -> ParlayResponse:
+        # Convert to API response models with unique index
+        return [self._to_response(p, i) for i, p in enumerate(diverse_picks)]
+
+    def _to_response(self, parlay: Parlay, index: int = 0) -> ParlayResponse:
         """Convert Parlay dataclass to Pydantic response schema"""
         import hashlib
 
-        # Generate unique ID based on parlay content
-        parlay_content = f"{parlay.parlay_type}_{parlay.combined_confidence}_{len(parlay.legs)}"
+        # Generate unique ID based on parlay content + leg player names
+        leg_names = "_".join(leg.prop.player_name for leg in parlay.legs)
+        parlay_content = f"{parlay.parlay_type}_{parlay.combined_confidence}_{leg_names}_{index}"
         parlay_id = hashlib.md5(parlay_content.encode()).hexdigest()[:12]
 
         # Generate name

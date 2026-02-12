@@ -1,25 +1,23 @@
 /**
- * AppNavigator — Mode switcher (DFS | Props | Fantasy) at top,
- * bottom tabs (Discover / Home / My Bets / Profile) below.
- * Discover shows unified cross-pillar feed.
- * Home shows the current mode's navigator.
+ * AppNavigator V2 — Pure black tab bar, cyan active icon, subtle dot indicator,
+ * 4% white opacity top border.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
 import { useMode } from '../contexts/ModeContext';
 
 // Mode navigators
 import PropsNavigator from './PropsNavigator';
-import DFSNavigator from './DFSNavigator';
 import FantasyNavigator from './FantasyNavigator';
 
 // Shared screens
 import HomeScreen from '../screens/HomeScreen';
+import CardDemoScreen from '../screens/CardDemoScreen';
 import BetSlipScreen from '../screens/props/BetSlipScreen';
 import MoreScreen from '../screens/MoreScreen';
 
@@ -32,8 +30,6 @@ function ModeHome() {
   const { mode } = useMode();
 
   switch (mode) {
-    case 'dfs':
-      return <DFSNavigator />;
     case 'fantasy':
       return <FantasyNavigator />;
     case 'props':
@@ -42,13 +38,27 @@ function ModeHome() {
   }
 }
 
-export default function AppNavigator() {
+function TabDot({ focused }: { focused: boolean }) {
+  if (!focused) return null;
   return (
-    <NavigationContainer>
+    <View style={styles.activeDot} />
+  );
+}
+
+export default function AppNavigator() {
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
+
+  const handleModeChange = () => {
+    // Navigate to the Home tab so the user sees the mode switch take effect
+    navigationRef.current?.navigate('Home');
+  };
+
+  return (
+    <NavigationContainer ref={navigationRef}>
       <View style={styles.container}>
         {/* Mode switcher fixed at top */}
         <View style={styles.modeSwitcherBar}>
-          <ModeSwitcher />
+          <ModeSwitcher onModeChange={handleModeChange} />
         </View>
 
         {/* Bottom tab navigator */}
@@ -56,15 +66,15 @@ export default function AppNavigator() {
           screenOptions={{
             headerShown: false,
             tabBarStyle: {
-              backgroundColor: theme.colors.backgroundDark,
-              borderTopColor: theme.colors.glassBorder,
+              backgroundColor: '#000000',
+              borderTopColor: 'rgba(255, 255, 255, 0.04)',
               borderTopWidth: 1,
-              height: 60,
-              paddingBottom: 8,
+              height: 64,
+              paddingBottom: 10,
               paddingTop: 8,
             },
             tabBarActiveTintColor: theme.colors.primary,
-            tabBarInactiveTintColor: theme.colors.textSecondary,
+            tabBarInactiveTintColor: theme.colors.textTertiary,
             tabBarLabelStyle: {
               fontSize: 11,
               fontWeight: '600',
@@ -73,10 +83,13 @@ export default function AppNavigator() {
         >
           <Tab.Screen
             name="Discover"
-            component={HomeScreen}
+            component={CardDemoScreen}
             options={{
-              tabBarIcon: ({ color }) => (
-                <Ionicons name="compass-outline" size={22} color={color} />
+              tabBarIcon: ({ color, focused }) => (
+                <View style={styles.tabIconContainer}>
+                  <Ionicons name={focused ? 'compass' : 'compass-outline'} size={22} color={color} />
+                  <TabDot focused={focused} />
+                </View>
               ),
             }}
           />
@@ -84,8 +97,11 @@ export default function AppNavigator() {
             name="Home"
             component={ModeHome}
             options={{
-              tabBarIcon: ({ color }) => (
-                <Ionicons name="home-outline" size={22} color={color} />
+              tabBarIcon: ({ color, focused }) => (
+                <View style={styles.tabIconContainer}>
+                  <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
+                  <TabDot focused={focused} />
+                </View>
               ),
             }}
           />
@@ -93,8 +109,11 @@ export default function AppNavigator() {
             name="My Bets"
             component={BetSlipScreen}
             options={{
-              tabBarIcon: ({ color }) => (
-                <Ionicons name="receipt-outline" size={22} color={color} />
+              tabBarIcon: ({ color, focused }) => (
+                <View style={styles.tabIconContainer}>
+                  <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={22} color={color} />
+                  <TabDot focused={focused} />
+                </View>
               ),
             }}
           />
@@ -102,8 +121,11 @@ export default function AppNavigator() {
             name="More"
             component={MoreScreen}
             options={{
-              tabBarIcon: ({ color }) => (
-                <Ionicons name="person-outline" size={22} color={color} />
+              tabBarIcon: ({ color, focused }) => (
+                <View style={styles.tabIconContainer}>
+                  <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
+                  <TabDot focused={focused} />
+                </View>
               ),
               tabBarLabel: 'Profile',
             }}
@@ -117,14 +139,24 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#000000',
   },
   modeSwitcherBar: {
     paddingTop: 50,
     paddingBottom: 8,
-    backgroundColor: theme.colors.backgroundDark,
+    backgroundColor: '#000000',
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.glassBorder,
+    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
     alignItems: 'center',
+  },
+  tabIconContainer: {
+    alignItems: 'center',
+  },
+  activeDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.primary,
+    marginTop: 2,
   },
 });

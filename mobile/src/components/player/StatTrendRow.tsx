@@ -1,10 +1,11 @@
 /**
- * StatTrendRow — L5/L10 stats with mini sparkline and trend arrow.
+ * StatTrendRow V2 — SVG sparkline replaces manual bars. Hit rate circular badge.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../../constants/theme';
+import MiniSparkline from '../charts/MiniSparkline';
 
 interface StatTrendRowProps {
   label: string;
@@ -21,51 +22,15 @@ function TrendArrow({ values }: { values: number[] }) {
   const diff = recent - earlier;
 
   if (Math.abs(diff) < 1) return <Text style={[styles.arrow, { color: theme.colors.textSecondary }]}>-</Text>;
-  if (diff > 0) return <Text style={[styles.arrow, { color: theme.colors.success }]}>↑</Text>;
-  return <Text style={[styles.arrow, { color: theme.colors.danger }]}>↓</Text>;
-}
-
-function MiniSparkline({ values, line }: { values: number[]; line: number }) {
-  if (values.length === 0) return null;
-  const max = Math.max(...values, line) * 1.1;
-  const min = Math.min(...values, line) * 0.9;
-  const range = max - min || 1;
-
-  return (
-    <View style={styles.sparkline}>
-      {/* Line threshold marker */}
-      <View
-        style={[
-          styles.threshold,
-          { bottom: `${((line - min) / range) * 100}%` },
-        ]}
-      />
-      {values.map((v, i) => {
-        const height = Math.max(((v - min) / range) * 32, 2);
-        const overLine = v >= line;
-        return (
-          <View
-            key={i}
-            style={[
-              styles.sparkBar,
-              {
-                height,
-                backgroundColor: overLine ? theme.colors.success : theme.colors.danger,
-                opacity: 0.4 + (i / values.length) * 0.6,
-              },
-            ]}
-          />
-        );
-      })}
-    </View>
-  );
+  if (diff > 0) return <Text style={[styles.arrow, { color: theme.colors.success }]}>{'\u2191'}</Text>;
+  return <Text style={[styles.arrow, { color: theme.colors.danger }]}>{'\u2193'}</Text>;
 }
 
 export default function StatTrendRow({ label, line, last5, last10Avg }: StatTrendRowProps) {
   const avg5 = last5.length > 0 ? last5.reduce((a, b) => a + b, 0) / last5.length : 0;
-  const hitRate = last5.length > 0
-    ? Math.round((last5.filter((v) => v >= line).length / last5.length) * 100)
-    : 0;
+  const hitCount = last5.filter((v) => v >= line).length;
+  const hitRate = last5.length > 0 ? Math.round((hitCount / last5.length) * 100) : 0;
+  const hitColor = hitRate >= 60 ? theme.colors.success : theme.colors.danger;
 
   return (
     <View style={styles.row}>
@@ -73,7 +38,18 @@ export default function StatTrendRow({ label, line, last5, last10Avg }: StatTren
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.lineText}>Line: {line}</Text>
       </View>
-      <MiniSparkline values={last5} line={line} />
+
+      {/* SVG Sparkline */}
+      <View style={styles.sparklineContainer}>
+        <MiniSparkline
+          values={last5}
+          threshold={line}
+          width={80}
+          height={32}
+          color={hitRate >= 60 ? theme.colors.chartHit : theme.colors.chartMiss}
+        />
+      </View>
+
       <View style={styles.statsCol}>
         <View style={styles.statRow}>
           <Text style={styles.statLabel}>L5 Avg</Text>
@@ -85,13 +61,13 @@ export default function StatTrendRow({ label, line, last5, last10Avg }: StatTren
             <Text style={styles.statValue}>{last10Avg.toFixed(1)}</Text>
           </View>
         )}
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Hit</Text>
-          <Text style={[styles.statValue, { color: hitRate >= 60 ? theme.colors.success : theme.colors.danger }]}>
-            {hitRate}%
-          </Text>
-        </View>
       </View>
+
+      {/* Hit rate badge */}
+      <View style={[styles.hitBadge, { backgroundColor: hitColor + '1A' }]}>
+        <Text style={[styles.hitText, { color: hitColor }]}>{hitRate}%</Text>
+      </View>
+
       <TrendArrow values={last5} />
     </View>
   );
@@ -101,7 +77,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.glassLow,
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: theme.borderRadius.s,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
@@ -109,7 +85,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   labelCol: {
-    width: 80,
+    width: 72,
   },
   label: {
     fontSize: 12,
@@ -120,28 +96,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: theme.colors.textTertiary,
   },
-  sparkline: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    height: 32,
-    marginHorizontal: 8,
-    gap: 2,
-  },
-  sparkBar: {
-    flex: 1,
-    borderRadius: 2,
-    minWidth: 4,
-  },
-  threshold: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: theme.colors.textTertiary,
+  sparklineContainer: {
+    marginHorizontal: 6,
   },
   statsCol: {
-    width: 60,
+    width: 58,
     marginRight: 4,
   },
   statRow: {
@@ -157,10 +116,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.colors.textPrimary,
   },
+  hitBadge: {
+    width: 38,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  hitText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
   arrow: {
     fontSize: 18,
     fontWeight: '700',
-    width: 20,
+    width: 18,
     textAlign: 'center',
   },
 });

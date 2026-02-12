@@ -161,7 +161,7 @@ export default function BetSlipScreen({ navigation }: any) {
             <Ionicons name="receipt-outline" size={48} color={theme.colors.textTertiary} />
             <Text style={styles.emptyTitle}>No Bets Yet</Text>
             <Text style={styles.emptyText}>
-              Bets you save from Props, DFS, or Fantasy will appear here.
+              Parlays you build from Props will appear here.
             </Text>
           </View>
         }

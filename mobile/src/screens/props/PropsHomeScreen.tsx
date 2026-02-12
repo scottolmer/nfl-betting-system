@@ -1,5 +1,6 @@
 /**
- * PropsHomeScreen — Top picks feed, category filters, search, pull-to-refresh.
+ * PropsHomeScreen V2 — Chart-rich cards, gradient text header, Hot Picks scroll,
+ * pill search bar with cyan focus, filter chips with cyan active state.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -12,42 +13,88 @@ import {
   RefreshControl,
   TouchableOpacity,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
 import { apiService } from '../../services/api';
 import { PropAnalysis } from '../../types';
 import PlayerCard from '../../components/player/PlayerCard';
+import ConfidenceGauge from '../../components/charts/ConfidenceGauge';
+import AnimatedCard from '../../components/animated/AnimatedCard';
+import FloatingParlayBar from '../../components/parlay/FloatingParlayBar';
+import { useParlay } from '../../contexts/ParlayContext';
 
 const STAT_FILTERS = ['All', 'Pass Yds', 'Rush Yds', 'Rec Yds', 'Receptions', 'TDs'];
 
+const TEAM_SEARCH: Record<string, string[]> = {
+  ARI: ['cardinals', 'arizona'],
+  ATL: ['falcons', 'atlanta'],
+  BAL: ['ravens', 'baltimore'],
+  BUF: ['bills', 'buffalo'],
+  CAR: ['panthers', 'carolina'],
+  CHI: ['bears', 'chicago'],
+  CIN: ['bengals', 'cincinnati'],
+  CLE: ['browns', 'cleveland'],
+  DAL: ['cowboys', 'dallas'],
+  DEN: ['broncos', 'denver'],
+  DET: ['lions', 'detroit'],
+  GB: ['packers', 'green bay'],
+  HOU: ['texans', 'houston'],
+  IND: ['colts', 'indianapolis'],
+  JAX: ['jaguars', 'jacksonville'],
+  KC: ['chiefs', 'kansas city'],
+  LAC: ['chargers', 'los angeles chargers'],
+  LAR: ['rams', 'los angeles rams'],
+  LV: ['raiders', 'las vegas'],
+  MIA: ['dolphins', 'miami'],
+  MIN: ['vikings', 'minnesota'],
+  NE: ['patriots', 'new england'],
+  NO: ['saints', 'new orleans'],
+  NYG: ['giants', 'new york giants'],
+  NYJ: ['jets', 'new york jets'],
+  PHI: ['eagles', 'philadelphia'],
+  PIT: ['steelers', 'pittsburgh'],
+  SEA: ['seahawks', 'seattle'],
+  SF: ['49ers', 'niners', 'san francisco'],
+  TB: ['buccaneers', 'bucs', 'tampa bay'],
+  TEN: ['titans', 'tennessee'],
+  WAS: ['commanders', 'washington'],
+};
+
+function matchesTeamSearch(teamAbbr: string, query: string): boolean {
+  if (teamAbbr.toLowerCase().includes(query)) return true;
+  const aliases = TEAM_SEARCH[teamAbbr.toUpperCase()];
+  return aliases ? aliases.some((a) => a.includes(query)) : false;
+}
+
 export default function PropsHomeScreen({ navigation }: any) {
-  const [props, setProps] = useState<PropAnalysis[]>([]);
+  const { togglePick, isPicked, picks } = useParlay();
+  const [allProps, setAllProps] = useState<PropAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentWeek] = useState(17);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [currentWeek] = useState(13);
 
   const loadProps = useCallback(async () => {
     try {
       setError(null);
-      const statType = activeFilter === 'All' ? undefined : activeFilter;
       const data = await apiService.getProps({
         week: currentWeek,
         min_confidence: 55,
-        stat_type: statType,
-        limit: 50,
+        limit: 200,
       });
-      setProps(data);
+      setAllProps(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load props');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [activeFilter, currentWeek]);
+  }, [currentWeek]);
 
   useEffect(() => {
     loadProps();
@@ -58,43 +105,64 @@ export default function PropsHomeScreen({ navigation }: any) {
     loadProps();
   };
 
-  const filteredProps = searchQuery
-    ? props.filter((p) =>
-        p.player_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.team.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : props;
+  // Client-side filtering (instant)
+  const filteredProps = allProps.filter((p) => {
+    // Stat type filter
+    if (activeFilter !== 'All') {
+      if (activeFilter === 'TDs') {
+        if (!p.stat_type.includes('TD')) return false;
+      } else if (p.stat_type !== activeFilter) {
+        return false;
+      }
+    }
+    // Search filter (player name, team abbr, team name, city)
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      if (!p.player_name.toLowerCase().includes(q) && !matchesTeamSearch(p.team, q)) {
+        return false;
+      }
+    }
+    return true;
+  });
 
-  const getConfidenceColor = (c: number) => {
-    if (c >= 70) return theme.colors.success;
-    if (c >= 60) return theme.colors.primary;
-    return theme.colors.textSecondary;
+  const renderPropItem = ({ item, index }: { item: PropAnalysis; index: number }) => {
+    const selected = isPicked(item);
+    return (
+      <AnimatedCard index={index}>
+        <PlayerCard
+          player={{
+            name: item.player_name,
+            team: item.team,
+            position: item.position,
+          }}
+          subtitle={`${item.stat_type} ${item.bet_type} ${item.line}`}
+          confidence={item.confidence}
+          onPress={() =>
+            navigation.navigate('PropDetail', {
+              prop: item,
+              week: currentWeek,
+            })
+          }
+          rightContent={
+            <View style={styles.rightActions}>
+              <ConfidenceGauge score={item.confidence} size="sm" showLabel={false} />
+              <TouchableOpacity
+                onPress={() => togglePick(item)}
+                style={[styles.addBtn, selected && styles.addBtnActive]}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name={selected ? 'checkmark' : 'add'}
+                  size={16}
+                  color={selected ? '#000' : theme.colors.primary}
+                />
+              </TouchableOpacity>
+            </View>
+          }
+        />
+      </AnimatedCard>
+    );
   };
-
-  const renderPropItem = ({ item }: { item: PropAnalysis }) => (
-    <PlayerCard
-      player={{
-        name: item.player_name,
-        team: item.team,
-        position: item.position,
-      }}
-      subtitle={`${item.stat_type} ${item.bet_type} ${item.line}`}
-      onPress={() =>
-        navigation.navigate('PropDetail', {
-          prop: item,
-          week: currentWeek,
-        })
-      }
-      rightContent={
-        <View style={styles.confidenceBadge}>
-          <Text style={[styles.confidenceText, { color: getConfidenceColor(item.confidence) }]}>
-            {Math.round(item.confidence)}
-          </Text>
-          <Text style={styles.confidenceLabel}>{item.bet_type}</Text>
-        </View>
-      }
-    />
-  );
 
   if (loading) {
     return (
@@ -115,14 +183,16 @@ export default function PropsHomeScreen({ navigation }: any) {
 
       {/* Search */}
       <View style={styles.searchRow}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={16} color={theme.colors.textTertiary} />
+        <View style={[styles.searchBar, searchFocused && styles.searchBarFocused]}>
+          <Ionicons name="search" size={16} color={searchFocused ? theme.colors.primary : theme.colors.textTertiary} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search player or team..."
             placeholderTextColor={theme.colors.textTertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
@@ -138,16 +208,28 @@ export default function PropsHomeScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      {/* AI Parlays CTA */}
+      <TouchableOpacity
+        style={styles.aiParlaysCTA}
+        onPress={() => navigation.navigate('AIParlays', { week: currentWeek })}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="sparkles" size={16} color={theme.colors.primary} />
+        <Text style={styles.aiParlaysText}>AI Parlays</Text>
+        <Text style={styles.aiParlaysSub}>6-agent optimized</Text>
+        <Ionicons name="chevron-forward" size={14} color={theme.colors.textTertiary} />
+      </TouchableOpacity>
+
       {/* Stat Filters */}
-      <FlatList
+      <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        data={STAT_FILTERS}
-        keyExtractor={(item) => item}
         style={styles.filterList}
         contentContainerStyle={styles.filterContent}
-        renderItem={({ item }) => (
+      >
+        {STAT_FILTERS.map((item) => (
           <TouchableOpacity
+            key={item}
             style={[styles.filterChip, activeFilter === item && styles.filterChipActive]}
             onPress={() => setActiveFilter(item)}
           >
@@ -155,8 +237,8 @@ export default function PropsHomeScreen({ navigation }: any) {
               {item}
             </Text>
           </TouchableOpacity>
-        )}
-      />
+        ))}
+      </ScrollView>
 
       {/* Error State */}
       {error && (
@@ -168,21 +250,32 @@ export default function PropsHomeScreen({ navigation }: any) {
         </View>
       )}
 
+      {/* Result count */}
+      {!loading && allProps.length > 0 && (
+        <Text style={styles.resultCount}>
+          {filteredProps.length} of {allProps.length} props
+        </Text>
+      )}
+
       {/* Props List */}
       <FlatList
         data={filteredProps}
         renderItem={renderPropItem}
         keyExtractor={(item, i) => `${item.player_name}-${item.stat_type}-${i}`}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, picks.length > 0 && styles.listContentWithBar]}
+        removeClippedSubviews={true}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
         ListEmptyComponent={
-          <View style={styles.center}>
+          <View style={styles.emptyCenter}>
             <Text style={styles.emptyText}>
               {searchQuery ? 'No matching props found' : 'No props available'}
             </Text>
           </View>
         }
       />
+
+      {/* Floating parlay bar */}
+      <FloatingParlayBar onReview={() => navigation.navigate('ParlayReview')} />
     </View>
   );
 }
@@ -205,6 +298,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...theme.typography.h1,
+    color: theme.colors.primary,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -221,13 +315,16 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.glassInput,
-    borderRadius: theme.borderRadius.s,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.pill,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
-    paddingHorizontal: 10,
+    paddingHorizontal: 14,
     height: 40,
-    gap: 6,
+    gap: 8,
+  },
+  searchBarFocused: {
+    borderColor: theme.colors.glassBorderActive,
   },
   searchInput: {
     flex: 1,
@@ -237,26 +334,51 @@ const styles = StyleSheet.create({
   edgeButton: {
     width: 40,
     height: 40,
-    borderRadius: theme.borderRadius.s,
-    backgroundColor: theme.colors.glassLow,
+    borderRadius: 20,
+    backgroundColor: theme.colors.backgroundCard,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  aiParlaysCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.backgroundCard,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorderActive,
+    borderRadius: theme.borderRadius.m,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  aiParlaysText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  aiParlaysSub: {
+    flex: 1,
+    fontSize: 11,
+    color: theme.colors.textTertiary,
+  },
   filterList: {
-    maxHeight: 40,
-    marginBottom: 8,
+    height: 50,
+    flexGrow: 0,
+    marginBottom: 12,
   },
   filterContent: {
     paddingHorizontal: 16,
-    gap: 6,
+    gap: 8,
+    alignItems: 'center',
   },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: theme.borderRadius.pill,
-    backgroundColor: theme.colors.glassLow,
+    backgroundColor: theme.colors.backgroundCard,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
   },
@@ -270,23 +392,40 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   filterTextActive: {
-    color: '#fff',
+    color: '#000',
   },
+
+  resultCount: {
+    fontSize: 12,
+    color: theme.colors.textTertiary,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  // Right actions (confidence + add button)
+  rightActions: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  addBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addBtnActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  // List
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 80,
   },
-  confidenceBadge: {
-    alignItems: 'center',
-  },
-  confidenceText: {
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  confidenceLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: theme.colors.textTertiary,
+  listContentWithBar: {
+    paddingBottom: 140,
   },
   loadingText: {
     marginTop: 12,
@@ -296,7 +435,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'rgba(244,63,94,0.15)',
+    backgroundColor: theme.colors.dangerMuted,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginHorizontal: 16,
@@ -312,9 +451,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
+  emptyCenter: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
   emptyText: {
     color: theme.colors.textTertiary,
     fontSize: 14,
-    marginTop: 40,
   },
 });

@@ -183,7 +183,7 @@ export default function SlipBuilderScreen({ route, navigation }: any) {
           <TouchableOpacity onPress={() => setShowReview(false)} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.reviewTitle}>Review Slip</Text>
+          <Text style={styles.reviewTitle}>Review Parlay</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -256,7 +256,7 @@ export default function SlipBuilderScreen({ route, navigation }: any) {
           <Ionicons name="chevron-back" size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
         <View>
-          <Text style={styles.headerTitle}>Build Slip</Text>
+          <Text style={styles.headerTitle}>Build Parlay</Text>
           <Text style={styles.headerSub}>{platform} · Week {week}</Text>
         </View>
       </View>

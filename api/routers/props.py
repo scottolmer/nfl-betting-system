@@ -237,3 +237,132 @@ async def bet_sizing(
 ):
     """Calculate bet sizing based on Kelly Criterion."""
     return edge_service.get_bet_sizing(confidence, american_odds, bankroll)
+
+
+@router.get(
+    "/player-history",
+    summary="Get historical stat values for a player",
+    description="Returns game-by-game stat values for a player and stat type across recent weeks.",
+)
+async def get_player_history(
+    player_name: str = Query(..., description="Player name (e.g., 'Patrick Mahomes')"),
+    stat_type: str = Query(..., description="Stat type (e.g., 'Pass Yds', 'Rush Yds', 'Rec Yds', 'Receptions')"),
+    week: int = Query(..., ge=1, le=18, description="Current NFL week (history loaded from preceding weeks)"),
+    line: Optional[float] = Query(None, description="Betting line to calculate hit rate against"),
+    api_key: str = Depends(get_api_key),
+):
+    """
+    Get a player's historical stat values from recent weeks.
+    Returns structured data for hit rate bars, sparklines, and trend charts.
+    """
+    import re
+    import pandas as pd
+
+    # Map stat types to one or more (data_file, column_name) tuples
+    stat_mapping = {
+        'Receptions': [('receiving_base', 'REC')],
+        'Rec Yds': [('receiving_base', 'YDS')],
+        'Rush Yds': [('rushing_base', 'YDS')],
+        'Rush Att': [('rushing_base', 'ATT')],
+        'Rush Attempts': [('rushing_base', 'ATT')],
+        'Pass Yds': [('passing_base', 'YDS')],
+        'Completions': [('passing_base', 'COM')],
+        'Pass Completions': [('passing_base', 'COM')],
+        'Pass Att': [('passing_base', 'ATT')],
+        'Pass Attempts': [('passing_base', 'ATT')],
+        'Pass TDs': [('passing_base', 'TD')],
+        'Rush TDs': [('rushing_base', 'TD')],
+        'Rec TDs': [('receiving_base', 'TD')],
+        # Composite stats
+        'Rush+Rec Yds': [('rushing_base', 'YDS'), ('receiving_base', 'YDS')],
+        'Pass+Rush Yds': [('passing_base', 'YDS'), ('rushing_base', 'YDS')],
+    }
+
+    stat_components = stat_mapping.get(stat_type)
+    if not stat_components:
+        return {"values": [], "average": None, "message": f"Stat type '{stat_type}' not supported for history"}
+
+    try:
+        # Load data using the analysis service's loader
+        context = analysis_service.loader.load_all_data(week=week)
+        historical_stats = context.get('historical_stats', {})
+
+        player_name_lower = re.sub(r'\s+', ' ', player_name.lower().strip())
+        weekly_values = []
+
+        # Iterate through weeks ensuring specific order
+        for week_key in sorted(historical_stats.keys()):
+            week_data = historical_stats[week_key]
+            
+            week_total = 0.0
+            found_any = False
+            
+            # For each component of the stat (e.g., [Rush Yds, Rec Yds])
+            for data_file, column_name in stat_components:
+                if data_file not in week_data:
+                    continue
+
+                df = week_data[data_file]
+                if 'Player_Normalized' not in df.columns:
+                    df['Player_Normalized'] = df['Player'].str.lower().str.strip().str.replace(r'\s+', ' ', regex=True)
+                
+                player_row = df[df['Player_Normalized'] == player_name_lower]
+
+                if not player_row.empty and column_name in player_row.columns:
+                    val = player_row.iloc[0][column_name]
+                    try:
+                        week_total += float(val)
+                        found_any = True
+                    except (ValueError, TypeError):
+                        pass
+            
+            # Only add if we found data in at least one of the files
+            if found_any:
+                weekly_values.append(week_total)
+
+        if not weekly_values:
+            return {"values": [], "average": None, "message": "No historical data found for this player/stat"}
+
+        avg = sum(weekly_values) / len(weekly_values)
+        result = {
+            "values": weekly_values,
+            "average": round(avg, 1),
+            "total_games": len(weekly_values),
+        }
+
+        if line is not None:
+            over_count = sum(1 for v in weekly_values if v > line)
+            under_count = sum(1 for v in weekly_values if v < line)
+            result["line"] = line
+            result["over_count"] = over_count
+            result["under_count"] = under_count
+            result["hit_rate_pct"] = round((over_count / len(weekly_values)) * 100, 1)
+
+        return result
+
+    except Exception as e:
+        logger.error(f"Error getting player history: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/odds",
+    summary="Get raw betting odds for a player",
+    description="Get odds from raw betting lines CSV for a specific player and stat type."
+)
+async def get_player_odds_endpoint(
+    week: int = Query(..., ge=1, le=18),
+    player_name: str = Query(...),
+    stat_type: str = Query(...),
+    api_key: str = Depends(get_api_key)
+):
+    """
+    Get raw betting odds for a player/stat from the loaded CSVs.
+    Useful for displaying live odds comparison on the frontend.
+    """
+    try:
+        odds = analysis_service.get_player_odds(week, player_name, stat_type)
+        return odds
+    except Exception as e:
+        logger.error(f"Error getting player odds: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))

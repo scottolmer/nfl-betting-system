@@ -16,6 +16,7 @@ import ParlayResultCard from '../components/results/ParlayResultCard';
 import ResultsFilterBar, { ResultsFilters } from '../components/results/ResultsFilterBar';
 import ResultsEmptyState from '../components/results/ResultsEmptyState';
 import InfoTooltip from '../components/common/InfoTooltip';
+import { theme } from '../constants/theme';
 
 export default function ResultsScreen({ navigation }: any) {
   const [parlays, setParlays] = useState<SavedParlay[]>([]);
@@ -136,7 +137,7 @@ export default function ResultsScreen({ navigation }: any) {
               <Text style={styles.headerTitle}>Results</Text>
               <Text style={styles.headerSubtitle}>Track Your Performance</Text>
             </View>
-            <InfoTooltip tooltipKey="hitRate" iconSize={20} iconColor="#9CA3AF" />
+            <InfoTooltip tooltipKey="hitRate" iconSize={20} iconColor={theme.colors.textTertiary} />
           </View>
         </View>
         <View style={styles.loadingContainer}>
@@ -155,7 +156,7 @@ export default function ResultsScreen({ navigation }: any) {
             <Text style={styles.headerSubtitle}>Track Your Performance</Text>
           </View>
           <View style={styles.headerActions}>
-            <InfoTooltip tooltipKey="hitRate" iconSize={20} iconColor="#9CA3AF" />
+            <InfoTooltip tooltipKey="hitRate" iconSize={20} iconColor={theme.colors.textTertiary} />
             <TouchableOpacity
               style={styles.refreshButton}
               onPress={handleRefresh}
@@ -164,7 +165,7 @@ export default function ResultsScreen({ navigation }: any) {
               <Ionicons
                 name="refresh"
                 size={20}
-                color="#9CA3AF"
+                color={theme.colors.textTertiary}
                 style={refreshing && styles.refreshing}
               />
             </TouchableOpacity>
@@ -249,10 +250,10 @@ export default function ResultsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.backgroundCard,
     paddingTop: 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -265,12 +266,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   headerActions: {
     flexDirection: 'row',
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   emptyContainer: {
     flex: 1,
@@ -312,11 +313,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   sectionCount: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   noResultsContainer: {
     padding: 32,
@@ -324,11 +325,11 @@ const styles = StyleSheet.create({
   },
   noResultsText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 16,
   },
   clearFiltersButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
   clearFiltersText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
   },
   bottomPadding: {
     height: 20,

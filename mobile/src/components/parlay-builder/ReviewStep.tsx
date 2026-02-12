@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SavedParlayLeg, Sportsbook } from '../../types';
 import InfoTooltip from '../common/InfoTooltip';
+import { theme } from '../../constants/theme';
 
 interface ReviewStepProps {
   parlayName: string;
@@ -34,20 +35,20 @@ export default function ReviewStep({
   const getRiskColor = (risk: string): string => {
     switch (risk) {
       case 'LOW':
-        return '#22C55E';
+        return theme.colors.success;
       case 'MEDIUM':
-        return '#F59E0B';
+        return theme.colors.warning;
       case 'HIGH':
-        return '#EF4444';
+        return theme.colors.danger;
       default:
-        return '#6B7280';
+        return theme.colors.textSecondary;
     }
   };
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 70) return '#22C55E';
-    if (confidence >= 60) return '#F59E0B';
-    return '#EF4444';
+    if (confidence >= 70) return theme.colors.success;
+    if (confidence >= 60) return theme.colors.warning;
+    return theme.colors.danger;
   };
 
   return (
@@ -119,7 +120,7 @@ export default function ReviewStep({
                         style={[
                           styles.legCushion,
                           {
-                            color: leg.cushion > 0 ? '#22C55E' : '#EF4444',
+                            color: leg.cushion > 0 ? theme.colors.success : theme.colors.danger,
                           },
                         ]}
                       >
@@ -174,13 +175,13 @@ export default function ReviewStep({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   content: {
     padding: 16,
   },
   summaryCard: {
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.textPrimary,
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
   },
   summarySportsbook: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     marginBottom: 16,
   },
   statsRow: {
@@ -202,14 +203,14 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: '#374151',
+    backgroundColor: theme.colors.backgroundElevated,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
   },
   statLabel: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     marginBottom: 4,
     textAlign: 'center',
   },
@@ -229,10 +230,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   legCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -266,12 +267,12 @@ const styles = StyleSheet.create({
   legPlayer: {
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   legTeam: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 6,
   },
   legPropRow: {
@@ -283,27 +284,27 @@ const styles = StyleSheet.create({
   legStat: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   legBetType: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#3B82F6',
+    color: theme.colors.primary,
   },
   legLine: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   adjustedIndicator: {
     fontSize: 11,
-    color: '#F59E0B',
+    color: theme.colors.warning,
     fontStyle: 'italic',
     marginBottom: 4,
   },
   legProjection: {
     fontSize: 12,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   legCushion: {
     fontWeight: '600',
@@ -318,9 +319,9 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: theme.colors.primaryMuted,
     borderLeftWidth: 4,
-    borderLeftColor: '#3B82F6',
+    borderLeftColor: theme.colors.primary,
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
@@ -335,24 +336,24 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 6,
   },
   infoText: {
     fontSize: 13,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 20,
   },
   disclaimerBox: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: theme.colors.warningMuted,
     borderLeftWidth: 4,
-    borderLeftColor: '#F59E0B',
+    borderLeftColor: theme.colors.warning,
     borderRadius: 8,
     padding: 16,
   },
   disclaimerText: {
     fontSize: 12,
-    color: '#92400E',
+    color: theme.colors.warning,
     lineHeight: 18,
   },
 });

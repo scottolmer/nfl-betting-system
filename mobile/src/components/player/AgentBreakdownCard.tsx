@@ -1,11 +1,12 @@
 /**
- * AgentBreakdownCard — Color-coded agent signals with reasoning.
- * Shows each agent's score, weight, and direction.
+ * AgentBreakdownCard V2 — Wider gradient-filled bars, score badges with colored
+ * circular backgrounds, "Agreement Level" indicator.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../../constants/theme';
+import GlassCard from '../common/GlassCard';
 
 interface AgentData {
   score: number;
@@ -34,6 +35,14 @@ function getBarColor(score: number, direction: string): string {
   return theme.colors.danger;
 }
 
+function getScoreBgColor(score: number, direction: string): string {
+  if (direction === 'AVOID') return 'rgba(71, 85, 105, 0.2)';
+  if (score >= 70) return theme.colors.successMuted;
+  if (score >= 55) return theme.colors.primaryMuted;
+  if (score >= 45) return 'rgba(148, 163, 184, 0.12)';
+  return theme.colors.dangerMuted;
+}
+
 function getDirectionLabel(direction: string): string {
   if (direction === 'OVER') return 'OV';
   if (direction === 'UNDER') return 'UN';
@@ -43,17 +52,35 @@ function getDirectionLabel(direction: string): string {
 export default function AgentBreakdownCard({ breakdown }: AgentBreakdownCardProps) {
   if (!breakdown || Object.keys(breakdown).length === 0) return null;
 
-  // Sort by weight descending so most impactful agents show first
   const sorted = Object.entries(breakdown).sort(
     ([, a], [, b]) => b.weight - a.weight,
   );
 
+  // Agreement level calculation
+  const directions = sorted.map(([, d]) => d.direction).filter(d => d !== 'AVOID');
+  const overCount = directions.filter(d => d === 'OVER').length;
+  const underCount = directions.filter(d => d === 'UNDER').length;
+  const agreementPct = directions.length > 0
+    ? Math.round((Math.max(overCount, underCount) / directions.length) * 100)
+    : 0;
+  const isHighAgreement = agreementPct > 80;
+
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>Agent Breakdown</Text>
+    <GlassCard>
+      {/* Header with agreement indicator */}
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>AGENT BREAKDOWN</Text>
+        <View style={[styles.agreementBadge, isHighAgreement && styles.agreementWarning]}>
+          <Text style={[styles.agreementText, isHighAgreement && styles.agreementTextWarning]}>
+            {agreementPct}% agree
+          </Text>
+        </View>
+      </View>
+
       {sorted.map(([name, data]) => {
         const barWidth = Math.min(Math.max(data.score, 5), 100);
         const color = getBarColor(data.score, data.direction);
+        const scoreBg = getScoreBgColor(data.score, data.direction);
 
         return (
           <View key={name} style={styles.row}>
@@ -64,36 +91,50 @@ export default function AgentBreakdownCard({ breakdown }: AgentBreakdownCardProp
             <View style={styles.barContainer}>
               <View style={[styles.bar, { width: `${barWidth}%`, backgroundColor: color }]} />
             </View>
-            <View style={styles.scoreCol}>
+            <View style={[styles.scoreBadge, { backgroundColor: scoreBg }]}>
               <Text style={[styles.score, { color }]}>{Math.round(data.score)}</Text>
-              <Text style={[styles.direction, { color }]}>
-                {getDirectionLabel(data.direction)}
-              </Text>
             </View>
+            <Text style={[styles.direction, { color }]}>
+              {getDirectionLabel(data.direction)}
+            </Text>
           </View>
         );
       })}
-    </View>
+    </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.colors.glassLow,
-    borderRadius: theme.borderRadius.m,
-    borderWidth: 1,
-    borderColor: theme.colors.glassBorder,
-    padding: 14,
-    marginBottom: 12,
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
   },
   title: {
     ...theme.typography.caption,
-    marginBottom: 12,
+  },
+  agreementBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: theme.colors.primaryMuted,
+  },
+  agreementWarning: {
+    backgroundColor: theme.colors.warningMuted,
+  },
+  agreementText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  agreementTextWarning: {
+    color: theme.colors.warning,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   labelCol: {
     width: 80,
@@ -109,26 +150,32 @@ const styles = StyleSheet.create({
   },
   barContainer: {
     flex: 1,
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 3,
+    height: 10,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 5,
     marginHorizontal: 8,
     overflow: 'hidden',
   },
   bar: {
-    height: 6,
-    borderRadius: 3,
+    height: 10,
+    borderRadius: 5,
   },
-  scoreCol: {
-    width: 40,
-    alignItems: 'flex-end',
+  scoreBadge: {
+    width: 34,
+    height: 26,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
   },
   score: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '800',
   },
   direction: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
+    width: 20,
+    textAlign: 'center',
   },
 });

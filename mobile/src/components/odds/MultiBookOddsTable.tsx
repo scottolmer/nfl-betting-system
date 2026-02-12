@@ -1,5 +1,7 @@
 /**
- * MultiBookOddsTable — Book comparison table with best price highlighted.
+ * MultiBookOddsTable V2 — Card-per-book rows instead of striped table.
+ * Best price gets cyan glow border + "BEST" badge.
+ * Over/under prices green/red colored.
  */
 
 import React from 'react';
@@ -37,7 +39,6 @@ export default function MultiBookOddsTable({ odds, direction }: MultiBookOddsTab
     );
   }
 
-  // Find best over and under prices
   const bestOver = odds.reduce<number | null>((best, o) => {
     if (o.over_price == null) return best;
     return best == null || o.over_price > best ? o.over_price : best;
@@ -48,46 +49,59 @@ export default function MultiBookOddsTable({ odds, direction }: MultiBookOddsTab
   }, null);
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>Multi-Book Odds</Text>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={[styles.headerCell, styles.bookCol]}>Book</Text>
-        <Text style={[styles.headerCell, styles.lineCol]}>Line</Text>
-        <Text style={[styles.headerCell, styles.priceCol]}>Over</Text>
-        <Text style={[styles.headerCell, styles.priceCol]}>Under</Text>
-      </View>
-      {/* Rows */}
+    <View style={styles.container}>
+      <Text style={styles.title}>MULTI-BOOK ODDS</Text>
       {odds.map((o, i) => {
         const isOverBest = o.over_price === bestOver && bestOver != null;
         const isUnderBest = o.under_price === bestUnder && bestUnder != null;
+        const isBestForDirection =
+          (direction === 'OVER' && isOverBest) || (direction === 'UNDER' && isUnderBest);
 
         return (
-          <View key={`${o.bookmaker}-${i}`} style={[styles.row, i % 2 === 0 && styles.rowAlt]}>
-            <Text style={[styles.cell, styles.bookCol]} numberOfLines={1}>
-              {BOOK_DISPLAY[o.bookmaker] || o.bookmaker}
-            </Text>
-            <Text style={[styles.cell, styles.lineCol]}>{o.line}</Text>
-            <Text
-              style={[
-                styles.cell,
-                styles.priceCol,
-                isOverBest && styles.bestPrice,
-                direction === 'OVER' && isOverBest && styles.bestPriceHighlight,
-              ]}
-            >
-              {formatOdds(o.over_price)}
-            </Text>
-            <Text
-              style={[
-                styles.cell,
-                styles.priceCol,
-                isUnderBest && styles.bestPrice,
-                direction === 'UNDER' && isUnderBest && styles.bestPriceHighlight,
-              ]}
-            >
-              {formatOdds(o.under_price)}
-            </Text>
+          <View
+            key={`${o.bookmaker}-${i}`}
+            style={[styles.bookCard, isBestForDirection && styles.bookCardBest]}
+          >
+            <View style={styles.bookHeader}>
+              <Text style={styles.bookName}>
+                {BOOK_DISPLAY[o.bookmaker] || o.bookmaker}
+              </Text>
+              {isBestForDirection && (
+                <View style={styles.bestBadge}>
+                  <Text style={styles.bestText}>BEST</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.pricesRow}>
+              <View style={styles.lineBox}>
+                <Text style={styles.lineLabel}>Line</Text>
+                <Text style={styles.lineValue}>{o.line}</Text>
+              </View>
+              <View style={styles.priceBox}>
+                <Text style={styles.priceLabel}>Over</Text>
+                <Text
+                  style={[
+                    styles.priceValue,
+                    { color: theme.colors.success },
+                    isOverBest && styles.bestPriceValue,
+                  ]}
+                >
+                  {formatOdds(o.over_price)}
+                </Text>
+              </View>
+              <View style={styles.priceBox}>
+                <Text style={styles.priceLabel}>Under</Text>
+                <Text
+                  style={[
+                    styles.priceValue,
+                    { color: theme.colors.danger },
+                    isUnderBest && styles.bestPriceValue,
+                  ]}
+                >
+                  {formatOdds(o.under_price)}
+                </Text>
+              </View>
+            </View>
           </View>
         );
       })}
@@ -96,61 +110,85 @@ export default function MultiBookOddsTable({ odds, direction }: MultiBookOddsTab
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.colors.glassLow,
-    borderRadius: theme.borderRadius.m,
-    borderWidth: 1,
-    borderColor: theme.colors.glassBorder,
-    padding: 14,
+  container: {
     marginBottom: 12,
   },
   title: {
     ...theme.typography.caption,
     marginBottom: 10,
   },
-  headerRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.glassBorder,
-    paddingBottom: 6,
-    marginBottom: 4,
+  bookCard: {
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.s,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
+    padding: 12,
+    marginBottom: 8,
   },
-  headerCell: {
-    fontSize: 10,
+  bookCardBest: {
+    borderColor: theme.colors.glassBorderActive,
+    ...theme.shadows.glow,
+  },
+  bookHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  bookName: {
+    fontSize: 13,
     fontWeight: '700',
-    color: theme.colors.textTertiary,
-    textTransform: 'uppercase',
+    color: theme.colors.textPrimary,
+  },
+  bestBadge: {
+    backgroundColor: theme.colors.primaryMuted,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  bestText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: theme.colors.primary,
     letterSpacing: 0.5,
   },
-  row: {
+  pricesRow: {
     flexDirection: 'row',
-    paddingVertical: 6,
+    justifyContent: 'space-between',
   },
-  rowAlt: {
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    borderRadius: 4,
+  lineBox: {
+    alignItems: 'center',
+    flex: 1,
   },
-  cell: {
-    fontSize: 13,
+  priceBox: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  lineLabel: {
+    fontSize: 10,
+    color: theme.colors.textTertiary,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  priceLabel: {
+    fontSize: 10,
+    color: theme.colors.textTertiary,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  lineValue: {
+    fontSize: 16,
+    fontWeight: '700',
     color: theme.colors.textPrimary,
-    fontWeight: '500',
   },
-  bookCol: {
-    flex: 2,
+  priceValue: {
+    fontSize: 16,
+    fontWeight: '700',
   },
-  lineCol: {
-    flex: 1,
-    textAlign: 'center',
-  },
-  priceCol: {
-    flex: 1,
-    textAlign: 'right',
-  },
-  bestPrice: {
+  bestPriceValue: {
     fontWeight: '800',
-  },
-  bestPriceHighlight: {
-    color: theme.colors.success,
   },
   empty: {
     padding: 20,

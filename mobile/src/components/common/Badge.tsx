@@ -1,10 +1,11 @@
 /**
  * Badge Component
- * Reusable badge for status, risk levels, and featured items
+ * Reusable badge for status, risk levels, and featured items — dark theme
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { theme } from '../../constants/theme';
 
 export type BadgeVariant = 'featured' | 'success' | 'warning' | 'danger' | 'info' | 'default';
 
@@ -16,6 +17,33 @@ interface BadgeProps {
   textStyle?: TextStyle;
 }
 
+const variantStyles: Record<BadgeVariant, { backgroundColor: string; color: string }> = {
+  featured: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    color: theme.colors.gold,
+  },
+  success: {
+    backgroundColor: theme.colors.successMuted,
+    color: theme.colors.success,
+  },
+  warning: {
+    backgroundColor: theme.colors.warningMuted,
+    color: theme.colors.warning,
+  },
+  danger: {
+    backgroundColor: theme.colors.dangerMuted,
+    color: theme.colors.danger,
+  },
+  info: {
+    backgroundColor: theme.colors.primaryMuted,
+    color: theme.colors.primary,
+  },
+  default: {
+    backgroundColor: 'rgba(148, 163, 184, 0.12)',
+    color: theme.colors.textSecondary,
+  },
+};
+
 export default function Badge({
   text,
   variant = 'default',
@@ -23,33 +51,6 @@ export default function Badge({
   style,
   textStyle,
 }: BadgeProps) {
-  const variantStyles = {
-    featured: {
-      backgroundColor: '#FCD34D',
-      color: '#92400E',
-    },
-    success: {
-      backgroundColor: '#22C55E',
-      color: '#FFFFFF',
-    },
-    warning: {
-      backgroundColor: '#F59E0B',
-      color: '#FFFFFF',
-    },
-    danger: {
-      backgroundColor: '#EF4444',
-      color: '#FFFFFF',
-    },
-    info: {
-      backgroundColor: '#3B82F6',
-      color: '#FFFFFF',
-    },
-    default: {
-      backgroundColor: '#6B7280',
-      color: '#FFFFFF',
-    },
-  };
-
   const sizeStyles = {
     small: {
       paddingHorizontal: 8,
@@ -105,7 +106,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   text: {
-    fontWeight: 'bold',
+    fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },

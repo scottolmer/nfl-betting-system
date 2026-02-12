@@ -1,6 +1,6 @@
 /**
- * HomeScreen — Unified feed showing top picks across all modes.
- * Aggregates: prop edges, DFS highlights, fantasy alerts, game slate.
+ * HomeScreen V2 — Unified feed with gradient text header, enhanced cards,
+ * sparklines in Prop Edges, ConfidenceGauge in DFS, green/red fantasy alerts.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -21,6 +21,9 @@ import PlayerCard from '../components/player/PlayerCard';
 import PlayerIntelligenceCard from '../components/player/PlayerIntelligenceCard';
 import GameSlateCard from '../components/game/GameSlateCard';
 import PlayerSearchBar from '../components/search/PlayerSearchBar';
+import ConfidenceGauge from '../components/charts/ConfidenceGauge';
+import GlassCard from '../components/common/GlassCard';
+import AnimatedCard from '../components/animated/AnimatedCard';
 
 interface FeedSection {
   title: string;
@@ -63,12 +66,6 @@ export default function HomeScreen({ navigation }: any) {
     setSelectedPlayerId(player.id);
   };
 
-  const getConfColor = (conf: number) => {
-    if (conf >= 65) return theme.colors.success;
-    if (conf >= 55) return theme.colors.primary;
-    return theme.colors.textSecondary;
-  };
-
   if (loading) {
     return (
       <View style={styles.center}>
@@ -82,12 +79,12 @@ export default function HomeScreen({ navigation }: any) {
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
       >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Discover</Text>
-          <Text style={styles.headerSub}>Week {currentWeek} · All Modes</Text>
+          <Text style={styles.headerSub}>Week {currentWeek} {'\u00B7'} All Modes</Text>
         </View>
 
         {/* Universal Search */}
@@ -98,7 +95,7 @@ export default function HomeScreen({ navigation }: any) {
           />
         </View>
 
-        {/* Player Intel Card (when player selected from search) */}
+        {/* Player Intel Card */}
         {selectedPlayerId && (
           <View style={styles.section}>
             <PlayerIntelligenceCard
@@ -118,40 +115,36 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.sectionTitle}>{feed.prop_edges.title}</Text>
                 <Text style={styles.sectionSub}>{feed.prop_edges.subtitle}</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => {
-                  setMode('props');
-                }}
-              >
+              <TouchableOpacity onPress={() => setMode('props')}>
                 <Text style={styles.seeAll}>See All</Text>
               </TouchableOpacity>
             </View>
             {feed.prop_edges.items.map((item: any, i: number) => (
-              <TouchableOpacity
-                key={i}
-                activeOpacity={0.7}
-                onPress={() => setSelectedPlayerId(item.player_id)}
-              >
-                <PlayerCard
-                  player={{
-                    name: item.player_name,
-                    team: item.team,
-                    position: item.position,
-                    headshot_url: item.headshot_url,
-                  }}
-                  subtitle={`${item.stat_type} · ${item.direction} ${item.implied_line ?? ''}`}
-                  rightContent={
-                    <View style={styles.edgeRight}>
-                      <Text style={[styles.edgeConf, { color: getConfColor(item.confidence) }]}>
-                        {Math.round(item.confidence)}
-                      </Text>
-                      <View style={styles.edgeBadge}>
-                        <Text style={styles.edgeText}>+{item.edge?.toFixed(0)} edge</Text>
+              <AnimatedCard key={i} index={i}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setSelectedPlayerId(item.player_id)}
+                >
+                  <PlayerCard
+                    player={{
+                      name: item.player_name,
+                      team: item.team,
+                      position: item.position,
+                      headshot_url: item.headshot_url,
+                    }}
+                    subtitle={`${item.stat_type} ${'\u00B7'} ${item.direction} ${item.implied_line ?? ''}`}
+                    confidence={item.confidence}
+                    rightContent={
+                      <View style={styles.edgeRight}>
+                        <ConfidenceGauge score={item.confidence} size="sm" showLabel={false} />
+                        <View style={styles.edgeBadge}>
+                          <Text style={styles.edgeText}>+{item.edge?.toFixed(0)} edge</Text>
+                        </View>
                       </View>
-                    </View>
-                  }
-                />
-              </TouchableOpacity>
+                    }
+                  />
+                </TouchableOpacity>
+              </AnimatedCard>
             ))}
           </View>
         )}
@@ -164,11 +157,7 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.sectionTitle}>{feed.dfs_picks.title}</Text>
                 <Text style={styles.sectionSub}>{feed.dfs_picks.subtitle}</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => {
-                  setMode('dfs');
-                }}
-              >
+              <TouchableOpacity onPress={() => setMode('dfs')}>
                 <Text style={styles.seeAll}>Go to DFS</Text>
               </TouchableOpacity>
             </View>
@@ -185,10 +174,10 @@ export default function HomeScreen({ navigation }: any) {
                   onPress={() => setSelectedPlayerId(item.player_id)}
                 >
                   <Text style={styles.dfsName} numberOfLines={1}>{item.player_name}</Text>
-                  <Text style={styles.dfsMeta}>{item.team} · {item.position}</Text>
-                  <Text style={[styles.dfsConf, { color: getConfColor(item.confidence) }]}>
-                    {Math.round(item.confidence)}
-                  </Text>
+                  <Text style={styles.dfsMeta}>{item.team} {'\u00B7'} {item.position}</Text>
+                  <View style={styles.dfsGauge}>
+                    <ConfidenceGauge score={item.confidence} size="sm" showLabel={false} />
+                  </View>
                   <Text style={styles.dfsDir}>{item.direction}</Text>
                 </TouchableOpacity>
               ))}
@@ -204,39 +193,31 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.sectionTitle}>{feed.fantasy_alerts.title}</Text>
                 <Text style={styles.sectionSub}>{feed.fantasy_alerts.subtitle}</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => {
-                  setMode('fantasy');
-                }}
-              >
+              <TouchableOpacity onPress={() => setMode('fantasy')}>
                 <Text style={styles.seeAll}>Fantasy</Text>
               </TouchableOpacity>
             </View>
-            {feed.fantasy_alerts.items.map((item: any, i: number) => (
-              <View key={i} style={styles.alertRow}>
+            {feed.fantasy_alerts.items.map((item: any, i: number) => {
+              const isStart = item.alert_type === 'start';
+              return (
                 <View
-                  style={[
-                    styles.alertIcon,
-                    {
-                      backgroundColor:
-                        item.alert_type === 'start'
-                          ? theme.colors.success + '20'
-                          : theme.colors.danger + '20',
-                    },
-                  ]}
+                  key={i}
+                  style={[styles.alertRow, { borderLeftColor: isStart ? theme.colors.success : theme.colors.danger }]}
                 >
-                  <Ionicons
-                    name={item.alert_type === 'start' ? 'arrow-up' : 'arrow-down'}
-                    size={14}
-                    color={item.alert_type === 'start' ? theme.colors.success : theme.colors.danger}
-                  />
+                  <View style={[styles.alertIcon, { backgroundColor: isStart ? theme.colors.successMuted : theme.colors.dangerMuted }]}>
+                    <Ionicons
+                      name={isStart ? 'arrow-up' : 'arrow-down'}
+                      size={14}
+                      color={isStart ? theme.colors.success : theme.colors.danger}
+                    />
+                  </View>
+                  <View style={styles.alertInfo}>
+                    <Text style={styles.alertPlayer}>{item.player_name}</Text>
+                    <Text style={styles.alertMsg}>{item.message}</Text>
+                  </View>
                 </View>
-                <View style={styles.alertInfo}>
-                  <Text style={styles.alertPlayer}>{item.player_name}</Text>
-                  <Text style={styles.alertMsg}>{item.message}</Text>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
 
@@ -283,6 +264,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...theme.typography.h1,
+    color: theme.colors.primary,
   },
   headerSub: {
     fontSize: 14,
@@ -320,14 +302,10 @@ const styles = StyleSheet.create({
   // Prop edges
   edgeRight: {
     alignItems: 'center',
-    gap: 2,
-  },
-  edgeConf: {
-    fontSize: 18,
-    fontWeight: '800',
+    gap: 4,
   },
   edgeBadge: {
-    backgroundColor: theme.colors.success + '20',
+    backgroundColor: theme.colors.successMuted,
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 1,
@@ -343,7 +321,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   dfsChip: {
-    backgroundColor: theme.colors.glassLow,
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: theme.borderRadius.m,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
@@ -362,10 +340,8 @@ const styles = StyleSheet.create({
     color: theme.colors.textTertiary,
     marginTop: 2,
   },
-  dfsConf: {
-    fontSize: 22,
-    fontWeight: '800',
-    marginTop: 6,
+  dfsGauge: {
+    marginVertical: 6,
   },
   dfsDir: {
     fontSize: 9,
@@ -376,10 +352,11 @@ const styles = StyleSheet.create({
   alertRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.glassLow,
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: theme.borderRadius.s,
     borderWidth: 1,
     borderColor: theme.colors.glassBorder,
+    borderLeftWidth: 3,
     padding: 10,
     marginBottom: 6,
     gap: 10,

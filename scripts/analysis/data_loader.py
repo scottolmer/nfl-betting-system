@@ -162,6 +162,7 @@ def transform_betting_lines_to_props(betting_lines_df, week, player_roster_map: 
             'player_rush_attempts': 'Rush Attempts', 'player_reception_yds': 'Rec Yds',
             'player_receiving_yds': 'Rec Yds', 'player_receptions': 'Receptions',
              'player_rush_reception_yds': 'Rush+Rec Yds',
+             'player_pass_attempts': 'Pass Attempts',
         }
         name_col = 'description' if 'description' in betting_lines_df.columns else 'player_name'
         if name_col not in betting_lines_df.columns:
@@ -338,6 +339,23 @@ class NFLDataLoader:
         # Load roster data on init (Try DB first, then File)
         self.player_roster_map = self._load_roster_data_smart()
 
+    def _fix_missing_header(self, df: pd.DataFrame, file_type: str) -> pd.DataFrame:
+        """Fix missing headers for specific file types by applying known schemas"""
+        if file_type == 'passing_base' and 'Player' not in df.columns:
+            # Schema collected from valid Week 13 file
+            schema = ['Rk', 'Player', 'Tm', 'Pos', 'G', 'SNP', 'SNP%', 'ATT/G', 'DB', 
+                      'ATT', 'COM', 'COM%', 'YDS', 'YPA', 'TD', 'INT', 'FD', '300Yd', 
+                      'RTG', 'EPA', 'EPA/DB', 'DYAR', 'DVOA', 'FPTS', 'PPG']
+            
+            # Handle column count mismatch if necessary (e.g. truncated files)
+            if len(df.columns) == len(schema):
+                logger.info(f"Fixed missing header for {file_type} (applied schema)")
+                df.columns = schema
+            else:
+                 logger.warning(f"Could not fix {file_type} header: Column count mismatch. Got {len(df.columns)}, expected {len(schema)}")
+                 
+        return df
+
     def _load_from_db(self, week: int, file_type: str) -> Optional[str]:
         """Try to load file content from database"""
         session = SessionLocal()
@@ -486,13 +504,15 @@ class NFLDataLoader:
         # --- Load Historical Stats ---
         context['historical_stats'] = {}
         loaded_hist_weeks = 0
-        for hist_week in range(max(1, week-3), week):
+        for hist_week in range(max(1, week-5), week):
              week_key = f"wk{hist_week}"; context['historical_stats'][week_key] = {}; has_data = False
              for st in ['receiving_base','receiving_usage','rushing_base','rushing_usage','passing_base','receiving_alignment']:
                  try:
                      fpath = self.data_dir / f"wk{hist_week}_{st}.csv"
                      if fpath.exists(): 
-                         context['historical_stats'][week_key][st] = pd.read_csv(fpath, skiprows=1)
+                         df = pd.read_csv(fpath, skiprows=1)
+                         df = self._fix_missing_header(df, st)
+                         context['historical_stats'][week_key][st] = df
                          context['loaded_files'].append(f"Historical Stats: {fpath.name}")
                          has_data = True
                  except Exception as e: logger.debug(f"Hist stats wk{hist_week} {st}: {e}")

@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { PropAnalysis, SavedParlayLeg } from '../../types';
 import InfoTooltip from '../common/InfoTooltip';
+import { theme } from '../../constants/theme';
 
 interface PropSelectionStepProps {
   availableProps: PropAnalysis[];
@@ -116,7 +117,7 @@ export default function PropSelectionStep({
                     onChangeText={setAdjustedLine}
                     keyboardType="decimal-pad"
                     placeholder="Enter new line"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={theme.colors.textTertiary}
                     autoFocus
                   />
                 </View>
@@ -266,7 +267,7 @@ export default function PropSelectionStep({
       <ScrollView style={styles.propsList}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator color="#3B82F6" size="large" />
+            <ActivityIndicator color={theme.colors.primary} size="large" />
             <Text style={styles.loadingText}>Loading props...</Text>
           </View>
         ) : availableProps.length === 0 ? (
@@ -299,7 +300,7 @@ export default function PropSelectionStep({
                             style={[
                               styles.propCushion,
                               {
-                                color: prop.cushion > 0 ? '#22C55E' : '#EF4444',
+                                color: prop.cushion > 0 ? theme.colors.success : theme.colors.danger,
                               },
                             ]}
                           >
@@ -330,16 +331,16 @@ export default function PropSelectionStep({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   filtersBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   filterToggle: {
     flexDirection: 'row',
@@ -348,17 +349,17 @@ const styles = StyleSheet.create({
   filterToggleText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#3B82F6',
+    color: theme.colors.primary,
   },
   propsCount: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   filtersPanel: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   filterSection: {
     marginBottom: 16,
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   confidenceButtons: {
@@ -380,21 +381,21 @@ const styles = StyleSheet.create({
   },
   confButton: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
     borderRadius: 8,
     padding: 10,
     alignItems: 'center',
   },
   confButtonActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   confButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   confButtonTextActive: {
     color: '#FFFFFF',
@@ -404,44 +405,44 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   positionChip: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
   positionChipSelected: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   positionChipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   positionChipTextSelected: {
     color: '#FFFFFF',
   },
   selectedSection: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   selectedTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   selectedLegChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: theme.colors.primaryMuted,
     borderWidth: 1,
-    borderColor: '#3B82F6',
+    borderColor: theme.colors.primary,
     borderRadius: 8,
     padding: 8,
     marginRight: 8,
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: 'bold',
@@ -465,18 +466,18 @@ const styles = StyleSheet.create({
   selectedLegPlayer: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   selectedLegStat: {
     fontSize: 11,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   removeButton: {
     padding: 4,
   },
   removeButtonText: {
     fontSize: 16,
-    color: '#EF4444',
+    color: theme.colors.danger,
   },
   propsList: {
     flex: 1,
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   emptyContainer: {
     padding: 40,
@@ -496,22 +497,22 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   propCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: theme.colors.glassBorder,
     borderRadius: 8,
     padding: 12,
     marginHorizontal: 16,
     marginVertical: 6,
   },
   propCardSelected: {
-    borderColor: '#3B82F6',
+    borderColor: theme.colors.primary,
     borderWidth: 2,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: theme.colors.primaryMuted,
   },
   propCardContent: {
     flexDirection: 'row',
@@ -524,17 +525,17 @@ const styles = StyleSheet.create({
   propPlayer: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   propDetails: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 2,
   },
   propProjection: {
     fontSize: 12,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   propCushion: {
     fontWeight: '600',
@@ -546,11 +547,11 @@ const styles = StyleSheet.create({
   propConfidence: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#3B82F6',
+    color: theme.colors.primary,
   },
   checkmark: {
     fontSize: 16,
-    color: '#22C55E',
+    color: theme.colors.success,
     marginTop: 4,
   },
   modalOverlay: {
@@ -561,7 +562,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 16,
     padding: 24,
     width: '100%',
@@ -570,20 +571,20 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 8,
     textAlign: 'center',
   },
   modalSubtitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     marginBottom: 16,
     textAlign: 'center',
   },
   modalInfo: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   modalInputContainer: {
@@ -592,24 +593,24 @@ const styles = StyleSheet.create({
   modalLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   modalInput: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
     borderRadius: 8,
     padding: 12,
     fontSize: 18,
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     textAlign: 'center',
     fontWeight: 'bold',
   },
   modalHint: {
     fontSize: 12,
-    color: '#6B7280',
-    backgroundColor: '#F3F4F6',
+    color: theme.colors.textSecondary,
+    backgroundColor: theme.colors.backgroundElevated,
     padding: 12,
     borderRadius: 8,
     marginBottom: 20,
@@ -626,15 +627,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalButtonCancel: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   modalButtonConfirm: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
   },
   modalButtonCancelText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   modalButtonConfirmText: {
     fontSize: 16,

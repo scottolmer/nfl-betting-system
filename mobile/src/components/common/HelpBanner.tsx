@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { bannerPreferences } from '../../services/userPreferences';
+import { theme } from '../../constants/theme';
 
 interface HelpBannerProps {
   bannerId: string;
@@ -85,9 +86,9 @@ export default function HelpBanner({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: theme.colors.primaryMuted,
     borderLeftWidth: 4,
-    borderLeftColor: '#3B82F6',
+    borderLeftColor: theme.colors.primary,
     borderRadius: 8,
     padding: 16,
     marginHorizontal: 16,
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     flex: 1,
   },
   itemsList: {
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   },
   item: {
     fontSize: 14,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 20,
   },
   actions: {
@@ -129,11 +130,11 @@ const styles = StyleSheet.create({
   },
   dismissText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     fontWeight: '600',
   },
   gotItButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 6,

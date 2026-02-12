@@ -14,6 +14,7 @@ import { SavedParlay } from '../types';
 import CreateParlayScreen from './CreateParlayScreen';
 import InfoTooltip from '../components/common/InfoTooltip';
 import EmptyState from '../components/common/EmptyState';
+import { theme } from '../constants/theme';
 
 export default function BuildScreen() {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -118,12 +119,12 @@ export default function BuildScreen() {
 
   const getStatusColor = (status: SavedParlay['status']): string => {
     switch (status) {
-      case 'draft': return '#6B7280';
-      case 'placed': return '#3B82F6';
-      case 'won': return '#22C55E';
-      case 'lost': return '#EF4444';
-      case 'pending': return '#F59E0B';
-      default: return '#6B7280';
+      case 'draft': return theme.colors.textSecondary;
+      case 'placed': return theme.colors.primary;
+      case 'won': return theme.colors.success;
+      case 'lost': return theme.colors.danger;
+      case 'pending': return theme.colors.warning;
+      default: return theme.colors.textSecondary;
     }
   };
 
@@ -140,10 +141,10 @@ export default function BuildScreen() {
 
   const getRiskColor = (risk: string): string => {
     switch (risk) {
-      case 'LOW': return '#22C55E';
-      case 'MEDIUM': return '#F59E0B';
-      case 'HIGH': return '#EF4444';
-      default: return '#6B7280';
+      case 'LOW': return theme.colors.success;
+      case 'MEDIUM': return theme.colors.warning;
+      case 'HIGH': return theme.colors.danger;
+      default: return theme.colors.textSecondary;
     }
   };
 
@@ -255,7 +256,7 @@ export default function BuildScreen() {
               {remainingSlots > 0 && ` • ${remainingSlots} slots remaining`}
             </Text>
           </View>
-          <InfoTooltip tooltipKey="myParlays" iconSize={20} iconColor="#9CA3AF" />
+          <InfoTooltip tooltipKey="myParlays" iconSize={20} iconColor={theme.colors.textTertiary} />
         </View>
       </View>
 
@@ -314,10 +315,10 @@ export default function BuildScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.backgroundCard,
     paddingTop: 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -330,18 +331,18 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   scrollContent: {
     padding: 16,
   },
   createButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
@@ -353,15 +354,15 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   createButtonDisabled: {
-    backgroundColor: '#9CA3AF',
+    backgroundColor: theme.colors.textTertiary,
   },
   createButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.backgroundCard,
     fontSize: 18,
     fontWeight: 'bold',
   },
   createButtonSubtext: {
-    color: '#FFFFFF',
+    color: theme.colors.backgroundCard,
     fontSize: 12,
     marginTop: 4,
     opacity: 0.8,
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   parlayCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     marginBottom: 12,
     shadowColor: '#000',
@@ -393,12 +394,12 @@ const styles = StyleSheet.create({
   parlayTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   parlaySubtitle: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   parlayBadges: {
     gap: 6,
@@ -414,29 +415,29 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   badgeText: {
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     fontSize: 11,
     fontWeight: 'bold',
   },
   parlayDetails: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#F9FAFB',
+    borderTopColor: theme.colors.glassBorder,
+    backgroundColor: theme.colors.backgroundElevated,
   },
   legsHeader: {
     padding: 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   legsHeaderText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     textTransform: 'uppercase',
   },
   legContainer: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   legHeader: {
     flexDirection: 'row',
@@ -446,8 +447,8 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#3B82F6',
-    color: '#FFFFFF',
+    backgroundColor: theme.colors.primary,
+    color: theme.colors.backgroundCard,
     textAlign: 'center',
     lineHeight: 24,
     fontSize: 14,
@@ -460,17 +461,17 @@ const styles = StyleSheet.create({
   legPlayer: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   legDetails: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   legConfidence: {
     fontSize: 12,
-    color: '#3B82F6',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   actionsContainer: {
@@ -480,52 +481,52 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
   },
   primaryButton: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   dangerButton: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#EF4444',
+    backgroundColor: theme.colors.backgroundCard,
+    borderColor: theme.colors.danger,
   },
   actionButtonText: {
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     fontSize: 13,
     fontWeight: '600',
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.backgroundCard,
     fontSize: 13,
     fontWeight: '600',
   },
   dangerButtonText: {
-    color: '#EF4444',
+    color: theme.colors.danger,
     fontSize: 13,
     fontWeight: '600',
   },
   infoBox: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: theme.colors.primaryMuted,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: theme.colors.glassBorderActive,
   },
   infoTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 22,
   },
 });

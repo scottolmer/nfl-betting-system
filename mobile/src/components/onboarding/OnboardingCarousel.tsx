@@ -1,6 +1,6 @@
 /**
  * Onboarding Carousel
- * 3-screen swipeable tutorial shown on first app launch
+ * 3-screen swipeable tutorial shown on first app launch — dark theme
  */
 
 import React, { useState, useRef } from 'react';
@@ -14,6 +14,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { theme } from '../../constants/theme';
 import { ONBOARDING_CONTENT } from '../../constants/tooltips';
 import { onboardingPreferences } from '../../services/userPreferences';
 
@@ -127,7 +128,9 @@ function WelcomeScreen() {
   return (
     <View style={styles.screen}>
       <View style={styles.iconContainer}>
-        <Text style={styles.largeIcon}>🏈</Text>
+        <View style={styles.iconCircle}>
+          <Text style={styles.iconText}>P6</Text>
+        </View>
       </View>
 
       <Text style={styles.title}>{title}</Text>
@@ -135,9 +138,9 @@ function WelcomeScreen() {
       <Text style={styles.description}>{description}</Text>
 
       <View style={styles.featureList}>
-        <FeatureItem icon="🤖" text="9 specialized AI agents" />
-        <FeatureItem icon="📊" text="Advanced analytics & projections" />
-        <FeatureItem icon="🎯" text="Optimized for DraftKings Pick 6" />
+        <FeatureItem label="AI" text="6 specialized AI agents" />
+        <FeatureItem label="DATA" text="Advanced analytics & projections" />
+        <FeatureItem label="DK" text="Optimized for DraftKings Pick 6" />
       </View>
     </View>
   );
@@ -153,7 +156,9 @@ function HowItWorksScreen() {
       <View style={styles.optionsList}>
         {options.map((option, index) => (
           <View key={index} style={styles.optionCard}>
-            <Text style={styles.optionIcon}>{option.icon}</Text>
+            <View style={styles.optionIconCircle}>
+              <Text style={styles.optionIconText}>{index + 1}</Text>
+            </View>
             <View style={styles.optionContent}>
               <Text style={styles.optionTitle}>{option.title}</Text>
               <Text style={styles.optionDescription}>{option.description}</Text>
@@ -174,9 +179,8 @@ function ConfidenceScreen() {
 
       <View style={styles.tiersList}>
         {tiers.map((tier, index) => (
-          <View key={index} style={styles.tierCard}>
+          <View key={index} style={[styles.tierCard, { borderLeftColor: tier.color }]}>
             <View style={styles.tierHeader}>
-              <Text style={styles.tierEmoji}>{tier.emoji}</Text>
               <View style={styles.tierInfo}>
                 <Text style={[styles.tierRange, { color: tier.color }]}>
                   {tier.range}%
@@ -194,10 +198,12 @@ function ConfidenceScreen() {
   );
 }
 
-function FeatureItem({ icon, text }: { icon: string; text: string }) {
+function FeatureItem({ label, text }: { label: string; text: string }) {
   return (
     <View style={styles.featureItem}>
-      <Text style={styles.featureIcon}>{icon}</Text>
+      <View style={styles.featureLabelBox}>
+        <Text style={styles.featureLabelText}>{label}</Text>
+      </View>
       <Text style={styles.featureText}>{text}</Text>
     </View>
   );
@@ -206,7 +212,7 @@ function FeatureItem({ icon, text }: { icon: string; text: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.background,
   },
   screenContainer: {
     width: SCREEN_WIDTH,
@@ -220,26 +226,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
-  largeIcon: {
-    fontSize: 80,
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.colors.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+  },
+  iconText: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: theme.colors.primary,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    color: '#3B82F6',
+    color: theme.colors.primary,
     textAlign: 'center',
     fontWeight: '600',
     marginBottom: 16,
   },
   description: {
     fontSize: 16,
-    color: '#D1D5DB',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
@@ -250,17 +268,28 @@ const styles = StyleSheet.create({
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#374151',
+    backgroundColor: theme.colors.backgroundCard,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.m,
   },
-  featureIcon: {
-    fontSize: 24,
+  featureLabelBox: {
+    backgroundColor: theme.colors.primaryMuted,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
     marginRight: 12,
+  },
+  featureLabelText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: theme.colors.primary,
+    letterSpacing: 0.5,
   },
   featureText: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     fontWeight: '500',
   },
   optionsList: {
@@ -269,27 +298,39 @@ const styles = StyleSheet.create({
   },
   optionCard: {
     flexDirection: 'row',
-    backgroundColor: '#374151',
+    backgroundColor: theme.colors.backgroundCard,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 20,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.m,
     alignItems: 'flex-start',
   },
-  optionIcon: {
-    fontSize: 32,
+  optionIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.colors.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 16,
+  },
+  optionIconText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: theme.colors.primary,
   },
   optionContent: {
     flex: 1,
   },
   optionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   optionDescription: {
     fontSize: 14,
-    color: '#D1D5DB',
+    color: theme.colors.textSecondary,
     lineHeight: 20,
   },
   tiersList: {
@@ -297,40 +338,38 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   tierCard: {
-    backgroundColor: '#374151',
+    backgroundColor: theme.colors.backgroundCard,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
+    borderLeftWidth: 4,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.m,
   },
   tierHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-  tierEmoji: {
-    fontSize: 32,
-    marginRight: 12,
-  },
   tierInfo: {
     flex: 1,
   },
   tierRange: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   tierLabel: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     fontWeight: '600',
   },
   tierDescription: {
     fontSize: 14,
-    color: '#D1D5DB',
+    color: theme.colors.textSecondary,
     lineHeight: 20,
-    marginLeft: 44,
   },
   footer: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     textAlign: 'center',
     marginTop: 24,
     lineHeight: 20,
@@ -347,11 +386,11 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   dotActive: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     width: 24,
   },
   dotInactive: {
-    backgroundColor: '#4B5563',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   navigation: {
     flexDirection: 'row',
@@ -364,19 +403,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   skipText: {
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     fontSize: 16,
     fontWeight: '600',
   },
   nextButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 32,
-    borderRadius: 8,
+    borderRadius: theme.borderRadius.s,
   },
   nextText: {
-    color: '#FFFFFF',
+    color: '#000',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

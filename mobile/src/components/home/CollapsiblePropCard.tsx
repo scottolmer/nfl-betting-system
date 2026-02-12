@@ -1,10 +1,11 @@
 /**
  * Collapsible Prop Card
- * Prop card that starts collapsed, tap to expand for full details
+ * Prop card that starts collapsed, tap to expand — dark theme with glow
  */
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { theme } from '../../constants/theme';
 import { PropAnalysis } from '../../types';
 
 interface CollapsiblePropCardProps {
@@ -16,17 +17,9 @@ export default function CollapsiblePropCard({ prop, onPress }: CollapsiblePropCa
   const [expanded, setExpanded] = useState(false);
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return '#22C55E';
-    if (confidence >= 75) return '#F59E0B';
-    if (confidence >= 70) return '#3B82F6';
-    return '#6B7280';
-  };
-
-  const getConfidenceEmoji = (confidence: number): string => {
-    if (confidence >= 80) return '🔥';
-    if (confidence >= 75) return '⭐';
-    if (confidence >= 70) return '✅';
-    return '📊';
+    if (confidence >= 70) return theme.colors.primary;
+    if (confidence >= 60) return theme.colors.success;
+    return theme.colors.textSecondary;
   };
 
   const handlePress = () => {
@@ -37,18 +30,17 @@ export default function CollapsiblePropCard({ prop, onPress }: CollapsiblePropCa
     }
   };
 
+  const isHighConf = prop.confidence >= 70;
+
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, isHighConf && styles.cardGlow]}
       onPress={handlePress}
       activeOpacity={0.7}
     >
-      {/* Always Visible: Header */}
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.confidenceContainer}>
-          <Text style={styles.confidenceEmoji}>
-            {getConfidenceEmoji(prop.confidence)}
-          </Text>
           <Text
             style={[
               styles.confidenceScore,
@@ -66,17 +58,19 @@ export default function CollapsiblePropCard({ prop, onPress }: CollapsiblePropCa
           </Text>
         </View>
 
-        <Text style={styles.expandIcon}>{expanded ? '▲' : '▼'}</Text>
+        <Text style={styles.expandIcon}>{expanded ? '\u25B2' : '\u25BC'}</Text>
       </View>
 
-      {/* Always Visible: Prop Line */}
+      {/* Prop Line */}
       <View style={styles.propLine}>
         <Text style={styles.statType}>{prop.stat_type}</Text>
-        <Text style={styles.betType}>{prop.bet_type}</Text>
+        <Text style={[styles.betType, { color: prop.bet_type === 'OVER' ? theme.colors.success : theme.colors.danger }]}>
+          {prop.bet_type}
+        </Text>
         <Text style={styles.line}>{prop.line}</Text>
       </View>
 
-      {/* Collapsible: Additional Details */}
+      {/* Expanded Details */}
       {expanded && (
         <View style={styles.expandedContent}>
           {prop.projection && (
@@ -85,7 +79,7 @@ export default function CollapsiblePropCard({ prop, onPress }: CollapsiblePropCa
               <Text style={styles.detailValue}>
                 {prop.projection.toFixed(1)}
                 {prop.cushion && (
-                  <Text style={styles.cushion}>
+                  <Text style={[styles.cushion, { color: prop.cushion > 0 ? theme.colors.success : theme.colors.danger }]}>
                     {' '}({prop.cushion > 0 ? '+' : ''}{prop.cushion.toFixed(1)})
                   </Text>
                 )}
@@ -98,7 +92,7 @@ export default function CollapsiblePropCard({ prop, onPress }: CollapsiblePropCa
               <Text style={styles.reasonsLabel}>Top Reasons:</Text>
               {prop.top_reasons.slice(0, 3).map((reason, index) => (
                 <Text key={index} style={styles.reason}>
-                  • {reason}
+                  {'\u2022'} {reason}
                 </Text>
               ))}
             </View>
@@ -121,15 +115,17 @@ export default function CollapsiblePropCard({ prop, onPress }: CollapsiblePropCa
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...theme.shadows.card,
+  },
+  cardGlow: {
+    borderColor: theme.colors.glassBorderActive,
+    ...theme.shadows.glow,
   },
   header: {
     flexDirection: 'row',
@@ -141,30 +137,26 @@ const styles = StyleSheet.create({
     marginRight: 12,
     minWidth: 50,
   },
-  confidenceEmoji: {
-    fontSize: 20,
-    marginBottom: 2,
-  },
   confidenceScore: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '800',
   },
   playerInfo: {
     flex: 1,
   },
   playerName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   teamPosition: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   expandIcon: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     marginLeft: 8,
   },
   propLine: {
@@ -173,26 +165,25 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
   },
   statType: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   betType: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#3B82F6',
+    fontWeight: '700',
   },
   line: {
     fontSize: 15,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '800',
+    color: theme.colors.textPrimary,
   },
   tapHint: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     textAlign: 'center',
     marginTop: 8,
     fontStyle: 'italic',
@@ -208,16 +199,16 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     fontWeight: '600',
   },
   detailValue: {
     fontSize: 13,
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     fontWeight: '600',
   },
   cushion: {
-    color: '#22C55E',
+    fontWeight: '700',
   },
   reasonsSection: {
     marginTop: 8,
@@ -225,18 +216,18 @@ const styles = StyleSheet.create({
   reasonsLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 6,
   },
   reason: {
     fontSize: 12,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 18,
     marginBottom: 3,
   },
   agentCount: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     marginTop: 8,
     textAlign: 'center',
     fontStyle: 'italic',

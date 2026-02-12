@@ -8,6 +8,7 @@ import ParlaySetupStep from '../components/parlay-builder/ParlaySetupStep';
 import PropSelectionStep from '../components/parlay-builder/PropSelectionStep';
 import ReviewStep from '../components/parlay-builder/ReviewStep';
 import ParlayFloatingSummary from '../components/parlay-builder/ParlayFloatingSummary';
+import { theme } from '../constants/theme';
 
 interface CreateParlayScreenProps {
   onClose: () => void;
@@ -297,7 +298,7 @@ export default function CreateParlayScreen({ onClose, onSaved }: CreateParlayScr
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   stepContent: {
     flex: 1,

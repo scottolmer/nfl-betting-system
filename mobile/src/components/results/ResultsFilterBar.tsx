@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { theme } from '../../constants/theme';
 
 export interface ResultsFilters {
   week?: number;
@@ -149,9 +150,9 @@ export default function ResultsFilterBar({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: theme.colors.glassBorder,
     paddingVertical: 12,
   },
   section: {
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 8,
     textTransform: 'uppercase',
   },
@@ -172,18 +173,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   optionActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#2563EB',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   optionText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   optionTextActive: {
     color: '#FFFFFF',

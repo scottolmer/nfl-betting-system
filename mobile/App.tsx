@@ -7,6 +7,7 @@ import { useOnboarding } from './src/hooks/useOnboarding';
 import { analytics, AnalyticsEvent } from './src/utils/analytics';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ModeProvider } from './src/contexts/ModeContext';
+import { ParlayProvider } from './src/contexts/ParlayContext';
 
 export default function App() {
   const { isLoading, showOnboarding, completeOnboarding } = useOnboarding();
@@ -23,7 +24,7 @@ export default function App() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+        <ActivityIndicator size="large" color="#0AE2A3" />
       </View>
     );
   }
@@ -31,12 +32,14 @@ export default function App() {
   return (
     <AuthProvider>
       <ModeProvider>
-        {showOnboarding ? (
-          <OnboardingCarousel onComplete={handleOnboardingComplete} />
-        ) : (
-          <AppNavigator />
-        )}
-        <StatusBar style="light" />
+        <ParlayProvider>
+          {showOnboarding ? (
+            <OnboardingCarousel onComplete={handleOnboardingComplete} />
+          ) : (
+            <AppNavigator />
+          )}
+          <StatusBar style="light" />
+        </ParlayProvider>
       </ModeProvider>
     </AuthProvider>
   );
@@ -47,6 +50,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#000000',
   },
 });

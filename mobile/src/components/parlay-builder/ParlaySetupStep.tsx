@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Sportsbook } from '../../types';
 import InfoTooltip from '../common/InfoTooltip';
+import { theme } from '../../constants/theme';
 
 interface ParlaySetupStepProps {
   parlayName: string;
@@ -54,7 +55,7 @@ export default function ParlaySetupStep({
           placeholder="e.g., Sunday Afternoon Slate"
           value={parlayName}
           onChangeText={onParlayNameChange}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={theme.colors.textTertiary}
           autoFocus
         />
         <Text style={styles.exampleText}>
@@ -119,7 +120,7 @@ export default function ParlaySetupStep({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   content: {
     padding: 16,
@@ -135,26 +136,26 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   helpText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     marginBottom: 12,
     lineHeight: 20,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
     borderRadius: 8,
     padding: 14,
     fontSize: 16,
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   exampleText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     marginTop: 8,
     fontStyle: 'italic',
   },
@@ -162,16 +163,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   sportsbookCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: theme.colors.glassBorder,
     borderRadius: 12,
     padding: 16,
     position: 'relative',
   },
   sportsbookCardSelected: {
-    borderColor: '#3B82F6',
-    backgroundColor: '#EFF6FF',
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primaryMuted,
   },
   recommendedBadge: {
     position: 'absolute',
@@ -179,8 +180,8 @@ const styles = StyleSheet.create({
     right: 8,
     fontSize: 9,
     fontWeight: 'bold',
-    color: '#F59E0B',
-    backgroundColor: '#FEF3C7',
+    color: theme.colors.gold,
+    backgroundColor: theme.colors.warningMuted,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -188,10 +189,10 @@ const styles = StyleSheet.create({
   sportsbookText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   sportsbookTextSelected: {
-    color: '#3B82F6',
+    color: theme.colors.primary,
   },
   checkmarkContainer: {
     position: 'absolute',
@@ -200,7 +201,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -211,9 +212,9 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: theme.colors.primaryMuted,
     borderLeftWidth: 4,
-    borderLeftColor: '#3B82F6',
+    borderLeftColor: theme.colors.primary,
     borderRadius: 8,
     padding: 16,
     marginTop: 8,
@@ -228,12 +229,12 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   infoText: {
     fontSize: 13,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     lineHeight: 18,
   },
 });

@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { theme } from '../../constants/theme';
 
 export type FilterOption = 'all' | '2-leg' | '3-leg' | '4+';
 
@@ -90,25 +91,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: theme.colors.glassBorder,
     gap: 6,
   },
   filterButtonActive: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   filterText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   filterTextActive: {
     color: '#FFFFFF',
   },
   countBadge: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 10,
@@ -116,14 +117,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   countBadgeActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
   },
   countText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   countTextActive: {
-    color: '#3B82F6',
+    color: theme.colors.primary,
   },
 });

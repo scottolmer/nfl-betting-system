@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import HelpSection from '../components/more/HelpSection';
 import TutorialModal from '../components/modals/TutorialModal';
 import { onboardingPreferences } from '../services/userPreferences';
+import { theme } from '../constants/theme';
 
 export default function MoreScreen() {
   const [showTutorial, setShowTutorial] = useState(false);
@@ -112,10 +113,10 @@ export default function MoreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.backgroundCard,
     padding: 20,
     paddingTop: 60,
     paddingBottom: 20,
@@ -123,12 +124,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   content: {
     padding: 20,
@@ -140,12 +141,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 12,
     paddingHorizontal: 16,
   },
   infoCardsContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     marginHorizontal: 16,
     overflow: 'hidden',
@@ -161,19 +162,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: theme.colors.glassBorder,
   },
   infoLabel: {
     fontSize: 16,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   infoValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   menuItemsContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     marginHorizontal: 16,
     overflow: 'hidden',
@@ -189,18 +190,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: theme.colors.glassBorder,
   },
   menuItemText: {
     fontSize: 16,
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   menuItemArrow: {
     fontSize: 24,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   aboutCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     fontSize: 15,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     lineHeight: 22,
   },
   footer: {
@@ -221,6 +222,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
 });

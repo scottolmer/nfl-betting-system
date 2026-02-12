@@ -169,6 +169,55 @@ class ApiService {
   }
 
   /**
+   * Get historical stat values for a player (game-by-game)
+   */
+  async getPlayerHistory(params: {
+    player_name: string;
+    stat_type: string;
+    week: number;
+    line?: number;
+  }): Promise<{
+    values: number[];
+    average: number | null;
+    total_games: number;
+    line?: number;
+    over_count?: number;
+    under_count?: number;
+    hit_rate_pct?: number;
+    message?: string;
+  }> {
+    try {
+      const response = await this.client.get('/api/props/player-history', {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching player history:', error);
+      return { values: [], average: null, total_games: 0 };
+    }
+  }
+
+
+  /**
+   * Get raw betting odds for a player/stat
+   */
+  async getOdds(params: {
+    week: number;
+    player_name: string;
+    stat_type: string;
+  }): Promise<import('../types').RawBookOdds[]> {
+    try {
+      const response = await this.client.get('/api/props/odds', {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching odds:', error);
+      return [];
+    }
+  }
+
+  /**
    * Check API health
    */
   async checkHealth(): Promise<{ status: string; service: string; version: string }> {

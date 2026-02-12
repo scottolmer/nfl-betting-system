@@ -1,10 +1,11 @@
 /**
  * Results Analytics Card
- * Shows calibration analysis and performance by confidence tier
+ * Shows calibration analysis and performance by confidence tier — dark theme
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../../constants/theme';
 
 interface ConfidenceTier {
   tier: string;
@@ -22,9 +23,9 @@ interface ResultsAnalyticsCardProps {
 export default function ResultsAnalyticsCard({ confidenceTiers }: ResultsAnalyticsCardProps) {
   const getCalibrationColor = (predicted: number, actual: number): string => {
     const error = Math.abs(predicted - actual);
-    if (error < 5) return '#10B981'; // Green - well calibrated
-    if (error < 10) return '#F59E0B'; // Yellow - okay calibration
-    return '#EF4444'; // Red - poor calibration
+    if (error < 5) return theme.colors.success;
+    if (error < 10) return theme.colors.warning;
+    return theme.colors.danger;
   };
 
   const getCalibrationLabel = (predicted: number, actual: number): string => {
@@ -34,7 +35,6 @@ export default function ResultsAnalyticsCard({ confidenceTiers }: ResultsAnalyti
     return `${diff.toFixed(0)}pp`;
   };
 
-  // Get average of min/max for predicted confidence
   const getPredictedConfidence = (tier: ConfidenceTier): number => {
     return (tier.min_confidence + tier.max_confidence) / 2;
   };
@@ -107,16 +107,14 @@ export default function ResultsAnalyticsCard({ confidenceTiers }: ResultsAnalyti
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    ...theme.shadows.card,
   },
   header: {
     marginBottom: 16,
@@ -124,12 +122,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   emptyState: {
     paddingVertical: 24,
@@ -137,14 +135,14 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
   },
   tiers: {
     gap: 12,
   },
   tierRow: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
+    backgroundColor: theme.colors.backgroundElevated,
+    borderRadius: theme.borderRadius.s,
     padding: 12,
     marginBottom: 8,
   },
@@ -154,12 +152,12 @@ const styles = StyleSheet.create({
   tierLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   tierCount: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   tierStats: {
     flexDirection: 'row',
@@ -176,12 +174,12 @@ const styles = StyleSheet.create({
   },
   comparisonLabel: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   comparisonValue: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   calibrationBadge: {
     paddingHorizontal: 12,
@@ -199,11 +197,11 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.glassBorder,
   },
   explainerText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: theme.colors.textTertiary,
     lineHeight: 18,
   },
 });

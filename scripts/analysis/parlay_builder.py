@@ -1,6 +1,6 @@
 """
-Parlay Builder - Builds up to 10 optimal parlays (3x 2/3/4 leg + 1x 5 leg) WITH PLAYER DIVERSITY
-FIXED: Maintains recently_used_players throughout all parlays to force exploration of full player pool
+Parlay Builder - Builds up to 11 optimal parlays (3x 2-leg, 3x 3-leg, 2x 4-leg, 2x 5-leg, 1x 6-leg)
+WITH PLAYER DIVERSITY - Maintains recently_used_players throughout all parlays
 """
 
 from typing import List, Dict, Set, Tuple, Optional
@@ -38,7 +38,7 @@ class ParlayBuilder:
         print(f"\n[PARLAY BUILDER] Building parlays from {len(eligible_props)} props (confidence {min_confidence}+)")
         print(f"   Prioritizing PLAYER diversity...")
         print(f"   Each player can appear in up to 3 parlays...")
-        print(f"   Target: 10 parlays (3x 2-leg, 3x 3-leg, 3x 4-leg, 1x 5-leg)\n")
+        print(f"   Target: 11 parlays (3x 2-leg, 3x 3-leg, 2x 4-leg, 2x 5-leg, 1x 6-leg)\n")
 
         used_prop_ids: Set[Tuple] = set()
         player_usage_count: Dict[str, int] = defaultdict(int)
@@ -49,6 +49,7 @@ class ParlayBuilder:
             '3-leg': [],
             '4-leg': [],
             '5-leg': [],
+            '6-leg': [],
         }
 
         print("  [INFO] Building up to three 2-leg parlays...")
@@ -57,22 +58,26 @@ class ParlayBuilder:
         print("\n  [INFO] Building up to three 3-leg parlays...")
         parlays['3-leg'] = self.build_n_leg_parlays(3, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        print("\n  [INFO] Building up to three 4-leg parlays...")
-        parlays['4-leg'] = self.build_n_leg_parlays(4, 3, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
+        print("\n  [INFO] Building up to two 4-leg parlays...")
+        parlays['4-leg'] = self.build_n_leg_parlays(4, 2, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
-        print("\n  [INFO] Building up to one 5-leg parlay...")
-        parlays['5-leg'] = self.build_n_leg_parlays(5, 1, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
+        print("\n  [INFO] Building up to two 5-leg parlays...")
+        parlays['5-leg'] = self.build_n_leg_parlays(5, 2, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
+
+        print("\n  [INFO] Building up to one 6-leg parlay...")
+        parlays['6-leg'] = self.build_n_leg_parlays(6, 1, eligible_props, used_prop_ids, player_usage_count, all_used_players, max_player_uses=3)
 
         total_2 = len(parlays['2-leg'])
         total_3 = len(parlays['3-leg'])
         total_4 = len(parlays['4-leg'])
         total_5 = len(parlays['5-leg'])
-        total_all = total_2 + total_3 + total_4 + total_5
+        total_6 = len(parlays['6-leg'])
+        total_all = total_2 + total_3 + total_4 + total_5 + total_6
         
-        logger.info(f"Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg parlays (Total: {total_all})")
+        logger.info(f"Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg, {total_6} 6-leg parlays (Total: {total_all})")
 
-        print(f"\n[SUCCESS] Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg parlays")
-        print(f"   [INFO] Total parlays: {total_all}/10")
+        print(f"\n[SUCCESS] Built {total_2} 2-leg, {total_3} 3-leg, {total_4} 4-leg, {total_5} 5-leg, {total_6} 6-leg parlays")
+        print(f"   [INFO] Total parlays: {total_all}/11")
         print(f"   [INFO] Unique players used: {len(player_usage_count)}")
 
         return parlays
@@ -167,7 +172,7 @@ class ParlayBuilder:
         output = ["="*60, "🎯 ACTIONABLE PARLAY RECOMMENDATIONS", "="*60, ""]
         output.append(f"[INFO] Betting Lines Source: {betting_source}\n")
         total_units = 0
-        parlay_counter = {'2': 0, '3': 0, '4': 0, '5': 0}
+        parlay_counter = {'2': 0, '3': 0, '4': 0, '5': 0, '6': 0}
 
         def format_single_parlay(parlay: Parlay, leg_count_str: str) -> List[str]:
             nonlocal total_units
@@ -222,7 +227,7 @@ class ParlayBuilder:
                 parlay_lines.append(f"    • {reason}")
             return parlay_lines
 
-        for leg_count, leg_str in [(2, '2'), (3, '3'), (4, '4'), (5, '5')]:
+        for leg_count, leg_str in [(2, '2'), (3, '3'), (4, '4'), (5, '5'), (6, '6')]:
             parlay_list = parlays.get(f'{leg_count}-leg', [])
             if not parlay_list:
                 continue

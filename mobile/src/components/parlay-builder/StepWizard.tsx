@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import ProgressStepper from './ProgressStepper';
+import { theme } from '../../constants/theme';
 
 interface StepWizardProps {
   currentStep: number;
@@ -104,13 +105,13 @@ export default function StepWizard({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: theme.colors.backgroundElevated,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1F2937',
+    backgroundColor: theme.colors.textPrimary,
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
@@ -139,9 +140,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
     paddingBottom: 32,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.glassBorder,
     gap: 12,
   },
   button: {
@@ -155,17 +156,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.colors.glassBorder,
   },
   backButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
   },
   nextButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: theme.colors.primary,
     flex: 1,
   },
   nextButtonText: {
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   saveButton: {
-    backgroundColor: '#22C55E',
+    backgroundColor: theme.colors.success,
   },
   saveButtonText: {
     fontSize: 16,

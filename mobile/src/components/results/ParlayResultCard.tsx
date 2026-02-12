@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SavedParlay } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../../constants/theme';
 
 interface ParlayResultCardProps {
   parlay: SavedParlay;
@@ -20,15 +21,15 @@ export default function ParlayResultCard({ parlay }: ParlayResultCardProps) {
   const isPending = parlay.status === 'pending';
 
   const getStatusColor = () => {
-    if (isWon) return '#10B981';
-    if (isLost) return '#EF4444';
-    return '#F59E0B';
+    if (isWon) return theme.colors.success;
+    if (isLost) return theme.colors.danger;
+    return theme.colors.warning;
   };
 
   const getStatusBgColor = () => {
-    if (isWon) return '#D1FAE5';
-    if (isLost) return '#FEE2E2';
-    return '#FEF3C7';
+    if (isWon) return theme.colors.successMuted;
+    if (isLost) return theme.colors.dangerMuted;
+    return theme.colors.warningMuted;
   };
 
   const getStatusText = () => {
@@ -40,13 +41,13 @@ export default function ParlayResultCard({ parlay }: ParlayResultCardProps) {
   const getRiskLevelColor = (riskLevel: string) => {
     switch (riskLevel) {
       case 'LOW':
-        return '#10B981';
+        return theme.colors.success;
       case 'MEDIUM':
-        return '#F59E0B';
+        return theme.colors.warning;
       case 'HIGH':
-        return '#EF4444';
+        return theme.colors.danger;
       default:
-        return '#6B7280';
+        return theme.colors.textSecondary;
     }
   };
 
@@ -73,7 +74,7 @@ export default function ParlayResultCard({ parlay }: ParlayResultCardProps) {
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={20}
-          color="#6B7280"
+          color={theme.colors.textSecondary}
         />
       </TouchableOpacity>
 
@@ -151,7 +152,7 @@ export default function ParlayResultCard({ parlay }: ParlayResultCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.backgroundCard,
     borderRadius: 12,
     marginHorizontal: 16,
     marginVertical: 8,
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
   parlayName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 4,
   },
   metadata: {
@@ -186,11 +187,11 @@ const styles = StyleSheet.create({
   },
   metadataText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   metadataDot: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     marginHorizontal: 6,
   },
   statusRow: {
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   legsHitBadge: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: theme.colors.backgroundElevated,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 12,
@@ -229,18 +230,18 @@ const styles = StyleSheet.create({
   legsHitText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   details: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: theme.colors.glassBorder,
     padding: 16,
     paddingTop: 12,
   },
   detailsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 12,
   },
   legRow: {
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: theme.colors.glassBorder,
   },
   legInfo: {
     flex: 1,
@@ -257,17 +258,17 @@ const styles = StyleSheet.create({
   playerName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   legDetails: {
     fontSize: 13,
-    color: '#4B5563',
+    color: theme.colors.textSecondary,
     marginBottom: 2,
   },
   teamText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   legStats: {
     alignItems: 'flex-end',
@@ -275,12 +276,12 @@ const styles = StyleSheet.create({
   confidenceText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   cushionText: {
     fontSize: 12,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   sportsbookRow: {
     flexDirection: 'row',
@@ -290,12 +291,12 @@ const styles = StyleSheet.create({
   },
   sportsbookLabel: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   sportsbookValue: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
   dateRow: {
     flexDirection: 'row',
@@ -304,11 +305,11 @@ const styles = StyleSheet.create({
   },
   dateLabel: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
   },
   dateValue: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
   },
 });

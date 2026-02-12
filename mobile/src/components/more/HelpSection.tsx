@@ -1,10 +1,11 @@
 /**
  * Help Section Component
- * Help & Learning resources for the More screen
+ * Help & Learning resources for the More screen — dark theme
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { theme } from '../../constants/theme';
 
 interface HelpSectionProps {
   onViewTutorial: () => void;
@@ -17,34 +18,26 @@ export default function HelpSection({
 }: HelpSectionProps) {
   const helpItems = [
     {
-      icon: '📖',
       title: 'View Tutorial',
       description: 'Revisit the onboarding guide',
       action: onViewTutorial,
     },
     {
-      icon: '❓',
       title: 'Understanding Confidence',
       description: 'Learn how AI scores are calculated',
-      tooltip: 'confidence',
     },
     {
-      icon: '🎯',
       title: 'How to Build Parlays',
       description: 'Tips for creating winning combinations',
-      tooltip: 'parlays',
     },
     {
-      icon: '🔢',
       title: 'Reading Projections',
       description: 'What projections and cushions mean',
-      tooltip: 'projection',
     },
   ];
 
   const settingsItems = [
     {
-      icon: '🔄',
       title: 'Reset Tutorial',
       description: 'See the onboarding guide again on next launch',
       action: onResetTutorial,
@@ -53,7 +46,6 @@ export default function HelpSection({
 
   return (
     <View style={styles.container}>
-      {/* Help & Learning Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Help & Learning</Text>
         <View style={styles.itemsContainer}>
@@ -63,20 +55,16 @@ export default function HelpSection({
               style={styles.item}
               onPress={item.action}
             >
-              <View style={styles.itemLeft}>
-                <Text style={styles.itemIcon}>{item.icon}</Text>
-                <View style={styles.itemContent}>
-                  <Text style={styles.itemTitle}>{item.title}</Text>
-                  <Text style={styles.itemDescription}>{item.description}</Text>
-                </View>
+              <View style={styles.itemContent}>
+                <Text style={styles.itemTitle}>{item.title}</Text>
+                <Text style={styles.itemDescription}>{item.description}</Text>
               </View>
-              <Text style={styles.itemArrow}>›</Text>
+              <Text style={styles.itemArrow}>{'\u203A'}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {/* Settings Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Tutorial Settings</Text>
         <View style={styles.itemsContainer}>
@@ -86,27 +74,23 @@ export default function HelpSection({
               style={styles.item}
               onPress={item.action}
             >
-              <View style={styles.itemLeft}>
-                <Text style={styles.itemIcon}>{item.icon}</Text>
-                <View style={styles.itemContent}>
-                  <Text style={styles.itemTitle}>{item.title}</Text>
-                  <Text style={styles.itemDescription}>{item.description}</Text>
-                </View>
+              <View style={styles.itemContent}>
+                <Text style={styles.itemTitle}>{item.title}</Text>
+                <Text style={styles.itemDescription}>{item.description}</Text>
               </View>
-              <Text style={styles.itemArrow}>›</Text>
+              <Text style={styles.itemArrow}>{'\u203A'}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {/* Quick Tips */}
       <View style={styles.tipsBox}>
-        <Text style={styles.tipsTitle}>💡 Quick Tips</Text>
+        <Text style={styles.tipsTitle}>Quick Tips</Text>
         <Text style={styles.tipsText}>
-          • Tap the [?] icon anywhere in the app for explanations{'\n'}
-          • 80+ confidence = Elite picks with high conviction{'\n'}
-          • Use 2-3 leg parlays for better hit rates{'\n'}
-          • Adjust lines to match your sportsbook's odds
+          {'\u2022'} Tap the [?] icon anywhere for explanations{'\n'}
+          {'\u2022'} 80+ confidence = Elite picks with high conviction{'\n'}
+          {'\u2022'} Use 2-3 leg parlays for better hit rates{'\n'}
+          {'\u2022'} Adjust lines to match your sportsbook's odds
         </Text>
       </View>
     </View>
@@ -122,21 +106,18 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
     marginBottom: 12,
     paddingHorizontal: 16,
   },
   itemsContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCard,
+    borderRadius: theme.borderRadius.m,
     marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.glassBorder,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
   item: {
     flexDirection: 'row',
@@ -144,16 +125,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  itemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  itemIcon: {
-    fontSize: 24,
-    marginRight: 12,
+    borderBottomColor: theme.colors.glassBorder,
   },
   itemContent: {
     flex: 1,
@@ -161,36 +133,36 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: theme.colors.textPrimary,
     marginBottom: 2,
   },
   itemDescription: {
     fontSize: 13,
-    color: '#6B7280',
+    color: theme.colors.textSecondary,
     lineHeight: 18,
   },
   itemArrow: {
     fontSize: 24,
-    color: '#9CA3AF',
+    color: theme.colors.textTertiary,
     marginLeft: 12,
   },
   tipsBox: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: theme.colors.warningMuted,
     borderLeftWidth: 4,
-    borderLeftColor: '#F59E0B',
-    borderRadius: 8,
+    borderLeftColor: theme.colors.warning,
+    borderRadius: theme.borderRadius.s,
     padding: 16,
     marginHorizontal: 16,
   },
   tipsTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#92400E',
+    color: theme.colors.warning,
     marginBottom: 8,
   },
   tipsText: {
     fontSize: 13,
-    color: '#78350F',
+    color: theme.colors.textSecondary,
     lineHeight: 20,
   },
 });

@@ -97,15 +97,15 @@ export default function MatchupHeatmapScreen({ route, navigation }: any) {
       {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#22C55E' }]} />
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.success }]} />
           <Text style={styles.legendLabel}>Favorable</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#EAB308' }]} />
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.warning }]} />
           <Text style={styles.legendLabel}>Neutral</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
+          <View style={[styles.legendDot, { backgroundColor: theme.colors.danger }]} />
           <Text style={styles.legendLabel}>Unfavorable</Text>
         </View>
       </View>
