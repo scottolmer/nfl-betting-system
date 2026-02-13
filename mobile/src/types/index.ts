@@ -29,6 +29,7 @@ export interface PropAnalysis {
   agent_breakdown: Record<string, { score: number; weight: number; direction: string; rationale?: string[] }>;
   bookmaker?: string;
   all_books?: Array<{ bookmaker: string; line: number; odds?: number }>;
+  commence_time?: string;  // ISO 8601 UTC game kickoff time
 }
 
 export interface ParlayLeg {
@@ -77,7 +78,7 @@ export interface LineAdjustmentResponse {
 }
 
 // Saved Parlay types for Parlay Builder
-export type ParlayStatus = 'draft' | 'placed' | 'won' | 'lost' | 'pending';
+export type ParlayStatus = 'draft' | 'placed' | 'won' | 'lost' | 'pending' | 'graded';
 
 export type Sportsbook =
   | 'DraftKings Pick 6'
@@ -113,6 +114,14 @@ export interface SavedParlay {
     won: boolean;
     legs_hit: number;
     legs_total: number;
+  };
+  grade?: {
+    letter: string;
+    adjusted_confidence: number;
+    recommendation: string;
+    analysis: string;
+    value_edge: number;
+    risk_factors: string[];
   };
 }
 
@@ -191,6 +200,7 @@ export interface BestPrices {
   best_under: { bookmaker: string; line: number; price: number } | null;
 }
 
+
 export interface LineMovementEntry {
   bookmaker: string;
   line: number;
@@ -205,4 +215,35 @@ export interface RawBookOdds {
   price: number;
   side: 'over' | 'under';
   timestamp: string;
+}
+
+// Parlay Grading Types
+export interface ParlayGradeRequest {
+  player_name: string;
+  team: string;
+  opponent: string;
+  stat_type: string;
+  bet_type: string;
+  line: number;
+  confidence: number;
+  position?: string;
+}
+
+export interface SwapSuggestion {
+  original_leg_index: number;
+  new_leg: ParlayGradeRequest;
+  reason: string;
+}
+
+export interface ParlayGradeResponse {
+  grade: string;
+  adjusted_confidence: number;
+  original_confidence: number;
+  recommendation: string;
+  analysis: string;
+  risk_factors: string[];
+  implied_probability: number;
+  true_probability: number;
+  value_edge: number;
+  suggestions: SwapSuggestion[];
 }

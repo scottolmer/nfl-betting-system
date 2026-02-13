@@ -43,14 +43,44 @@ export default function BetSlipScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
 
+
   const loadBets = useCallback(async () => {
-    if (!isAuthenticated) {
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
     try {
-      // Will call /api/bets/mine once auth is wired through
-      setBets([]);
+      // Load guest bets from storage
+      const { storageService } = require('../../services/storage');
+      const guestBets = await storageService.getGuestBets();
+
+      const mappedGuestBets: Bet[] = guestBets.map((gb: any) => ({
+        id: gb.id,
+        mode: 'guest',
+        platform: null,
+        week: gb.week || 18,
+        legs: gb.legs.map((l: any) => ({
+          player_name: l.player_name,
+          team: l.team,
+          stat_type: l.stat_type,
+          line: l.line,
+          direction: l.bet_type || 'OVER',
+          confidence: l.confidence
+        })),
+        status: gb.status || 'pending',
+        confidence: gb.combined_confidence,
+        created_at: gb.created_at
+      }));
+
+      // If authenticated, we would also fetch server bets here
+      // const serverBets = isAuthenticated ? await api.getBets() : [];
+
+      // Merge and sort
+      const allBets = [...mappedGuestBets];
+      allBets.sort((a, b) => {
+        const dA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dB - dA;
+      });
+
+      setBets(allBets);
     } catch (err) {
       console.error('Error loading bets:', err);
     } finally {
@@ -62,6 +92,9 @@ export default function BetSlipScreen({ navigation }: any) {
   useEffect(() => {
     loadBets();
   }, [loadBets]);
+
+  // Removed filteredBets logic block if it was here, but it's below.
+  // We need to keep filteredBets.
 
   const filteredBets = bets.filter((b) => {
     if (activeTab === 'all') return true;
@@ -105,21 +138,11 @@ export default function BetSlipScreen({ navigation }: any) {
       ))}
       {item.created_at && (
         <Text style={styles.timestamp}>
-          {new Date(item.created_at).toLocaleDateString()}
+          {new Date(item.created_at).toLocaleDateString()} {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       )}
     </View>
   );
-
-  if (!isAuthenticated) {
-    return (
-      <View style={styles.center}>
-        <Ionicons name="lock-closed-outline" size={48} color={theme.colors.textTertiary} />
-        <Text style={styles.authTitle}>Sign In Required</Text>
-        <Text style={styles.authText}>Log in to track your bets across devices.</Text>
-      </View>
-    );
-  }
 
   if (loading) {
     return (

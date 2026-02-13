@@ -1,10 +1,12 @@
-"""Parlay Service - Wraps existing ParlayBuilder for API use (100% code reuse)"""
-
 from scripts.analysis.parlay_builder import ParlayBuilder
-from scripts.analysis.models import Parlay, PropAnalysis
+from scripts.analysis.models import Parlay, PropAnalysis, PlayerProp
+from scripts.analysis.dependency_analyzer import DependencyAnalyzer
 from api.schemas.parlays import ParlayResponse, ParlayLegResponse
+from api.schemas.parlay_grading import ParlayGradeRequest, ParlayGradeResponse, ParlayLegRequest, SwapSuggestion
 from typing import List
 import logging
+import math
+from starlette.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,118 @@ class ParlayService:
     def __init__(self):
         """Initialize service with existing parlay builder"""
         self.builder = ParlayBuilder()
+        self.grader = DependencyAnalyzer()
         logger.info("✓ ParlayService initialized (reusing ParlayBuilder)")
+
+    async def grade_parlay(self, legs: List[ParlayLegRequest]) -> ParlayGradeResponse:
+        """
+        Grade a user-submitted parlay.
+        """
+        # 1. Convert requests to PropAnalysis objects
+        prop_analyses = []
+        for leg in legs:
+            # Create dummy PlayerProp
+            prop = PlayerProp(
+                player_name=leg.player_name,
+                team=leg.team,
+                opponent=leg.opponent,
+                stat_type=leg.stat_type,
+                line=leg.line,
+                position=leg.position or "UNKNOWN",
+                bet_type=leg.bet_type,
+                week=18
+            )
+            # Create dummy PropAnalysis
+            analysis = PropAnalysis(
+                prop=prop,
+                final_confidence=leg.confidence,
+                recommendation="REVIEW", # Required field
+                rationale=[], # Required field
+                agent_breakdown={}, # Required field
+                edge_explanation="" # Required field
+            )
+            # Override fields that might be missing in constructor if PropAnalysis has defaults?
+            # From view_file, PropAnalysis has: prop, final_confidence, recommendation, rationale, agent_breakdown, edge_explanation
+            # No defaults for them except created_at, top_contributing_agents, meta_agent_result.
+            
+            prop_analyses.append(analysis)
+
+        # 2. Construct Parlay object
+        # Calculate naive combined confidence (product)
+        if not prop_analyses:
+            return ParlayGradeResponse(
+                grade="F", adjusted_confidence=0, original_confidence=0,
+                recommendation="AVOID", analysis="Empty parlay", 
+                risk_factors=["No legs provided"], 
+                implied_probability=0, true_probability=0, value_edge=0
+            )
+
+        # Calculate Raw Joint Probability (Product of probabilities)
+        raw_prob = 1.0
+        for leg in legs:
+            raw_prob *= (leg.confidence / 100.0)
+        
+        parlay = Parlay(
+            legs=prop_analyses,
+            parlay_type=f"{len(legs)}-leg",
+            risk_level="UNKNOWN",
+            rationale="User submitted",
+        )
+
+        # 3. Analyze Dependencies
+        # Run blocking Gemini call in threadpool
+        analysis = await run_in_threadpool(self.grader.analyze_parlay_dependencies, parlay)
+        
+        adj_conf = analysis.get("adjusted_confidence", 0)
+        recommendation = analysis.get("recommendation", "REVIEW")
+        risk_flags = analysis.get("risk_flags", [])
+        if analysis.get("correlation_adjustment", {}).get("adjustment_value", 0) < 0:
+             risk_flags.append(f"Correlation Penalty: {analysis['correlation_adjustment']['adjustment_value']}%")
+
+        # 4. Grading Logic
+        if adj_conf >= 70:
+            grade = "A+"
+        elif adj_conf >= 60:
+            grade = "A"
+        elif adj_conf >= 50:
+            grade = "B"
+        elif adj_conf >= 40:
+            grade = "C"
+        elif adj_conf >= 30:
+            grade = "D"
+        else:
+            grade = "F"
+
+        # 5. Value Analysis
+        # Estimate Implied Probability based on leg count (assuming standard parlay payouts)
+        implied_prob = (0.5238) ** len(legs) * 100 
+        
+        # Our True Probability is the Adjusted Confidence
+        true_prob = adj_conf 
+        
+        value_edge = true_prob - implied_prob
+
+        analysis_text = (
+            f"This {len(legs)}-leg parlay has an adjusted win probability of {adj_conf:.1f}% "
+            f"(Grade: {grade}). We detected {len(risk_flags)} risk factors."
+        )
+        if value_edge > 5:
+            analysis_text += " Great value estimated against standard book odds."
+        elif value_edge < -5:
+            analysis_text += " Poor value estimated; book odds payout is likely too low for the risk."
+
+        return ParlayGradeResponse(
+            grade=grade,
+            adjusted_confidence=adj_conf,
+            original_confidence=raw_prob * 100,
+            recommendation=recommendation,
+            analysis=analysis_text,
+            risk_factors=risk_flags,
+            implied_probability=round(implied_prob, 1),
+            true_probability=round(true_prob, 1),
+            value_edge=round(value_edge, 1),
+            suggestions=[] # TODO: Implement Smart Swaps
+        )
 
     async def generate_prebuilt_parlays(
         self,
@@ -31,13 +144,6 @@ class ParlayService:
         Generate 6 pre-built parlays using EXISTING builder.
 
         NO CHANGES to ParlayBuilder - pure wrapper.
-
-        Args:
-            all_analyses: List of PropAnalysis objects from analyzer
-            min_confidence: Minimum confidence for props to include in parlays
-
-        Returns:
-            List of top 6 ParlayResponse objects sorted by confidence
         """
         logger.info(f"Generating parlays from {len(all_analyses)} props with min_confidence={min_confidence}")
 

@@ -3,7 +3,7 @@
  * combined confidence, and save/place the parlay.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,17 +11,22 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
 import { useParlay } from '../../contexts/ParlayContext';
-import { PropAnalysis } from '../../types';
+import { PropAnalysis, ParlayGradeResponse } from '../../types';
 import PlayerCard from '../../components/player/PlayerCard';
 import GlassCard from '../../components/common/GlassCard';
 import AnimatedCard from '../../components/animated/AnimatedCard';
+import { apiService } from '../../services/api';
+import ParlayGradeCard from '../../components/parlay/ParlayGradeCard';
 
 export default function ParlayReviewScreen({ navigation }: any) {
   const { picks, combinedConfidence, removePick, clearPicks } = useParlay();
+  const [grading, setGrading] = useState(false);
+  const [gradeResult, setGradeResult] = useState<ParlayGradeResponse | null>(null);
 
   // Detect correlation: same-team legs
   const teamCounts: Record<string, number> = {};
@@ -46,20 +51,73 @@ export default function ParlayReviewScreen({ navigation }: any) {
       ? Math.round(picks.reduce((sum, p) => sum + p.confidence, 0) / picks.length)
       : 0;
 
-  const handleSave = () => {
-    Alert.alert(
-      'Parlay Saved',
-      `${picks.length}-leg parlay saved to My Bets.`,
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            clearPicks();
-            navigation.goBack();
+  const handleGrade = async () => {
+    if (picks.length < 2) return;
+    try {
+      setGrading(true);
+      const result = await apiService.gradeParlay(picks);
+      setGradeResult(result);
+    } catch (error) {
+      Alert.alert('Grading Failed', 'Could not analyze parlay at this time.');
+    } finally {
+      setGrading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      // Create guest bet object
+      const newBet: any = {
+        id: Date.now().toString(),
+        name: `Parlay ${new Date().toLocaleDateString()}`,
+        week: 18,
+        legs: picks.map(p => ({
+          player_name: p.player_name,
+          team: p.team,
+          stat_type: p.stat_type,
+          line: p.line,
+          bet_type: p.bet_type,
+          confidence: p.confidence,
+          position: p.position,
+          opponent: p.opponent
+        })),
+        combined_confidence: gradeResult ? gradeResult.adjusted_confidence : combinedConfidence,
+        risk_level: riskLevel.toUpperCase(),
+        status: gradeResult ? 'graded' : 'pending',
+        created_at: new Date().toISOString(),
+        ...(gradeResult && {
+          grade: {
+            letter: gradeResult.grade,
+            adjusted_confidence: gradeResult.adjusted_confidence,
+            recommendation: gradeResult.recommendation,
+            analysis: gradeResult.analysis,
+            value_edge: gradeResult.value_edge,
+            risk_factors: gradeResult.risk_factors,
           },
-        },
-      ],
-    );
+        }),
+      };
+
+      // Import inline to avoid top-level fast refresh issues if file missing
+      const { storageService } = require('../../services/storage');
+      await storageService.saveGuestBet(newBet);
+
+      Alert.alert(
+        'Parlay Saved',
+        `${picks.length}-leg parlay saved to My Bets.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              clearPicks();
+              navigation.navigate('My Bets'); // Navigate to My Bets to show it
+            },
+          },
+        ],
+      );
+    } catch (error) {
+      console.error('Save failed', error);
+      Alert.alert('Error', 'Failed to save parlay.');
+    }
   };
 
   const renderLeg = ({ item, index }: { item: PropAnalysis; index: number }) => (
@@ -75,7 +133,10 @@ export default function ParlayReviewScreen({ navigation }: any) {
           confidence={item.confidence}
           rightContent={
             <TouchableOpacity
-              onPress={() => removePick(item)}
+              onPress={() => {
+                removePick(item);
+                setGradeResult(null); // Reset grade if removed
+              }}
               style={styles.removeBtn}
               activeOpacity={0.7}
             >
@@ -127,45 +188,72 @@ export default function ParlayReviewScreen({ navigation }: any) {
               </View>
             </GlassCard>
 
-            {/* Correlation warning */}
-            <GlassCard>
-              <View style={styles.corrHeader}>
-                <Text style={styles.corrTitle}>Correlation Risk</Text>
-                <Text style={[styles.corrBadge, { color: riskColor }]}>
-                  {riskLevel.toUpperCase()}
+            {/* AI Grading Section */}
+            {gradeResult ? (
+              <ParlayGradeCard gradeResult={gradeResult} />
+            ) : (
+              <View style={styles.gradePromptContainer}>
+                <TouchableOpacity
+                  style={[styles.gradeBtn, picks.length < 2 && styles.gradeBtnDisabled]}
+                  onPress={handleGrade}
+                  disabled={picks.length < 2 || grading}
+                >
+                  {grading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <>
+                      <Ionicons name="sparkles" size={18} color="#fff" />
+                      <Text style={styles.gradeBtnText}>Analyze with AI</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+                <Text style={styles.gradePromptText}>
+                  Get correlation analysis, value edge, and logic check.
                 </Text>
               </View>
+            )}
 
-              {/* Gauge bar */}
-              <View style={styles.gaugeTrack}>
-                <View
-                  style={[
-                    styles.gaugeFill,
-                    {
-                      width: riskLevel === 'high' ? '80%' : riskLevel === 'medium' ? '50%' : '20%',
-                      backgroundColor: riskColor,
-                    },
-                  ]}
-                />
-              </View>
-
-              {hasCorrelation ? (
-                <View style={styles.warnings}>
-                  {correlatedTeams.map(([team, count]) => (
-                    <View key={team} style={styles.warningRow}>
-                      <Ionicons name="warning" size={14} color={theme.colors.gold} />
-                      <Text style={styles.warningText}>
-                        {count} legs from {team} — correlated outcomes
-                      </Text>
-                    </View>
-                  ))}
+            {/* Correlation warning (only show if NOT graded, or keep as simple fallback) */}
+            {!gradeResult && (
+              <GlassCard>
+                <View style={styles.corrHeader}>
+                  <Text style={styles.corrTitle}>Correlation Risk</Text>
+                  <Text style={[styles.corrBadge, { color: riskColor }]}>
+                    {riskLevel.toUpperCase()}
+                  </Text>
                 </View>
-              ) : (
-                <Text style={styles.corrGood}>
-                  No same-team correlation detected
-                </Text>
-              )}
-            </GlassCard>
+
+                {/* Gauge bar */}
+                <View style={styles.gaugeTrack}>
+                  <View
+                    style={[
+                      styles.gaugeFill,
+                      {
+                        width: riskLevel === 'high' ? '80%' : riskLevel === 'medium' ? '50%' : '20%',
+                        backgroundColor: riskColor,
+                      },
+                    ]}
+                  />
+                </View>
+
+                {hasCorrelation ? (
+                  <View style={styles.warnings}>
+                    {correlatedTeams.map(([team, count]) => (
+                      <View key={team} style={styles.warningRow}>
+                        <Ionicons name="warning" size={14} color={theme.colors.gold} />
+                        <Text style={styles.warningText}>
+                          {count} legs from {team} — correlated outcomes
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={styles.corrGood}>
+                    No same-team correlation detected
+                  </Text>
+                )}
+              </GlassCard>
+            )}
 
             {/* Section label */}
             <Text style={styles.legsLabel}>PARLAY LEGS</Text>
@@ -241,6 +329,43 @@ const styles = StyleSheet.create({
     height: 28,
     backgroundColor: theme.colors.glassBorder,
   },
+  // Grading Button
+  gradePromptContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  gradeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(33, 150, 243, 0.2)', // Blue tint
+    borderRadius: theme.borderRadius.m,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 8,
+    width: '100%',
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  gradeBtnDisabled: {
+    opacity: 0.5,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  gradeBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+  },
+  gradePromptText: {
+    fontSize: 10,
+    color: theme.colors.textTertiary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
   // Correlation
   corrHeader: {
     flexDirection: 'row',
@@ -268,6 +393,7 @@ const styles = StyleSheet.create({
   },
   warnings: {
     gap: 6,
+    marginBottom: 12,
   },
   warningRow: {
     flexDirection: 'row',

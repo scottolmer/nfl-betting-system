@@ -180,6 +180,7 @@ class ApiService {
     line?: number;
   }): Promise<{
     values: number[];
+    week_labels?: string[];
     average: number | null;
     total_games: number;
     line?: number;
@@ -216,6 +217,57 @@ class ApiService {
     } catch (error) {
       console.error('Error fetching odds:', error);
       return [];
+    }
+  }
+
+  /**
+   * Get recent news for a player
+   */
+  async getPlayerNews(player_name: string, limit: number = 5): Promise<{
+    title: string;
+    url: string;
+    source: string;
+    published_at: string;
+  }[]> {
+    try {
+      const response = await this.client.get(`/api/props/news/${encodeURIComponent(player_name)}`, {
+        params: { limit },
+        timeout: 15000 // news fetches Google RSS server-side, needs headroom
+      });
+      return response.data.articles || [];
+    } catch (error) {
+      console.error('Error fetching player news:', error);
+      return [];
+    }
+  }
+
+
+  /**
+   * Grade a user-constructed parlay
+   */
+  async gradeParlay(legs: import('../types').ParlayLeg[]): Promise<import('../types').ParlayGradeResponse> {
+    try {
+      // Map frontend legs to backend request format if needed
+      // The frontend ParlayLeg is compatible with ParlayGradeRequest mostly, but check fields
+      const requestLegs = legs.map(leg => ({
+        player_name: leg.player_name,
+        team: leg.team,
+        opponent: leg.opponent,
+        stat_type: leg.stat_type,
+        bet_type: leg.bet_type,
+        line: leg.line,
+        confidence: leg.confidence,
+        position: 'UNKNOWN' // Frontend ParlayLeg might not have position, backend defaults to UNKNOWN
+      }));
+
+      const response = await this.client.post<import('../types').ParlayGradeResponse>(
+        '/api/parlays/grade',
+        requestLegs
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error grading parlay:', error);
+      throw error;
     }
   }
 

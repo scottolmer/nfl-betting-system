@@ -1,9 +1,10 @@
 /**
- * PropsHomeScreen V2 — Chart-rich cards, gradient text header, Hot Picks scroll,
- * pill search bar with cyan focus, filter chips with cyan active state.
+ * PropsHomeScreen — Day-based prop browsing.
+ * Shows one game day at a time with < > navigation.
+ * Auto-selects the current/next game day on load.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -69,8 +70,34 @@ function matchesTeamSearch(teamAbbr: string, query: string): boolean {
   return aliases ? aliases.some((a) => a.includes(query)) : false;
 }
 
+/** Parse "MM/DD/YYYY" or ISO 8601 into a Date (Hermes-safe) */
+function parseCommenceTime(commenceTime?: string): Date | null {
+  if (!commenceTime) return null;
+  const slashParts = commenceTime.split('/');
+  if (slashParts.length === 3) {
+    const [month, day, year] = slashParts.map(Number);
+    if (month && day && year) return new Date(year, month - 1, day);
+  }
+  const d = new Date(commenceTime);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** Returns a date key like "11/27/2025" for grouping */
+function getDateKey(commenceTime?: string): string {
+  const d = parseCommenceTime(commenceTime);
+  if (!d) return '';
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+}
+
+interface GameDay {
+  dateKey: string;
+  label: string;       // "Thu Nov 27"
+  date: Date;
+  count: number;
+}
+
 export default function PropsHomeScreen({ navigation }: any) {
-  const { togglePick, isPicked, picks } = useParlay();
+  const { togglePick, isPicked, picks, isDayLocked } = useParlay();
   const [allProps, setAllProps] = useState<PropAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -78,17 +105,22 @@ export default function PropsHomeScreen({ navigation }: any) {
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
-  const [currentWeek] = useState(13);
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
+  const [currentWeek] = useState(() => {
+    const seasonStart = new Date(2025, 8, 4);
+    const now = new Date();
+    const diffMs = now.getTime() - seasonStart.getTime();
+    const diffWeeks = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1;
+    return Math.max(1, Math.min(18, diffWeeks));
+  });
 
   const loadProps = useCallback(async () => {
     try {
       setError(null);
-      // Load preferred sportsbook for deduplication
       const preferredBook = await sportsbookPreferences.getPreferredSportsbook();
       const data = await apiService.getProps({
         week: currentWeek,
         min_confidence: 55,
-        limit: 200,
         preferred_book: preferredBook && preferredBook !== 'auto' ? preferredBook : undefined,
       });
       setAllProps(data);
@@ -101,6 +133,8 @@ export default function PropsHomeScreen({ navigation }: any) {
   }, [currentWeek]);
 
   useEffect(() => {
+    setActiveFilter('All');
+    setSearchQuery('');
     loadProps();
   }, [loadProps]);
 
@@ -109,8 +143,52 @@ export default function PropsHomeScreen({ navigation }: any) {
     loadProps();
   };
 
-  // Client-side filtering (instant)
+  // Derive unique game days sorted chronologically
+  const gameDays: GameDay[] = useMemo(() => {
+    const dayMap = new Map<string, GameDay>();
+    allProps.forEach((p) => {
+      if (p.commence_time) {
+        const d = parseCommenceTime(p.commence_time);
+        if (!d) return;
+        const dateKey = getDateKey(p.commence_time);
+        if (!dayMap.has(dateKey)) {
+          const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+          const monthDay = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          dayMap.set(dateKey, { dateKey, label: `${dayName} ${monthDay}`, date: d, count: 0 });
+        }
+        dayMap.get(dateKey)!.count++;
+      }
+    });
+    return Array.from(dayMap.values()).sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [allProps]);
+
+  // Auto-select current/next game day when data loads
+  useEffect(() => {
+    if (gameDays.length === 0) return;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // Find first day that is today or in the future
+    let bestIndex = gameDays.findIndex((d) => {
+      const gameDate = new Date(d.date);
+      gameDate.setHours(0, 0, 0, 0);
+      return gameDate >= today;
+    });
+    // All days in the past — show the last one
+    if (bestIndex === -1) bestIndex = gameDays.length - 1;
+    setActiveDayIndex(bestIndex);
+  }, [gameDays]);
+
+  const activeDay = gameDays[activeDayIndex] || null;
+  const canGoBack = activeDayIndex > 0;
+  const canGoForward = activeDayIndex < gameDays.length - 1;
+
+  // Filter to active day + stat type + search
   const filteredProps = allProps.filter((p) => {
+    // Day filter
+    if (activeDay) {
+      const propKey = getDateKey(p.commence_time);
+      if (propKey !== activeDay.dateKey) return false;
+    }
     // Stat type filter
     if (activeFilter !== 'All') {
       if (activeFilter === 'TDs') {
@@ -119,7 +197,7 @@ export default function PropsHomeScreen({ navigation }: any) {
         return false;
       }
     }
-    // Search filter (player name, team abbr, team name, city)
+    // Search filter
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       if (!p.player_name.toLowerCase().includes(q) && !matchesTeamSearch(p.team, q)) {
@@ -131,6 +209,7 @@ export default function PropsHomeScreen({ navigation }: any) {
 
   const renderPropItem = ({ item, index }: { item: PropAnalysis; index: number }) => {
     const selected = isPicked(item);
+    const dayMismatch = isDayLocked(item);
     return (
       <AnimatedCard index={index}>
         <PlayerCard
@@ -151,14 +230,24 @@ export default function PropsHomeScreen({ navigation }: any) {
             <View style={styles.rightActions}>
               <ConfidenceGauge score={item.confidence} size="sm" showLabel={false} />
               <TouchableOpacity
-                onPress={() => togglePick(item)}
-                style={[styles.addBtn, selected && styles.addBtnActive]}
-                activeOpacity={0.7}
+                onPress={() => { if (!dayMismatch) togglePick(item); }}
+                style={[
+                  styles.addBtn,
+                  selected && styles.addBtnActive,
+                  dayMismatch && styles.addBtnDimmed,
+                ]}
+                activeOpacity={dayMismatch ? 1 : 0.7}
               >
                 <Ionicons
                   name={selected ? 'checkmark' : 'add'}
                   size={16}
-                  color={selected ? '#000' : theme.colors.primary}
+                  color={
+                    dayMismatch
+                      ? theme.colors.textTertiary
+                      : selected
+                        ? '#000'
+                        : theme.colors.primary
+                  }
                 />
               </TouchableOpacity>
             </View>
@@ -182,8 +271,43 @@ export default function PropsHomeScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Props</Text>
-        <Text style={styles.headerSubtitle}>Week {currentWeek}</Text>
       </View>
+
+      {/* Day Navigator */}
+      {gameDays.length > 0 ? (
+        <View style={styles.dayNav}>
+          <TouchableOpacity
+            onPress={() => setActiveDayIndex((i) => Math.max(0, i - 1))}
+            style={styles.dayArrow}
+            disabled={!canGoBack}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={22}
+              color={canGoBack ? theme.colors.primary : theme.colors.textTertiary}
+            />
+          </TouchableOpacity>
+          <View style={styles.dayCenter}>
+            <Text style={styles.dayLabel}>{activeDay?.label}</Text>
+            <Text style={styles.dayCount}>{activeDay?.count} props</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => setActiveDayIndex((i) => Math.min(gameDays.length - 1, i + 1))}
+            style={styles.dayArrow}
+            disabled={!canGoForward}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={canGoForward ? theme.colors.primary : theme.colors.textTertiary}
+            />
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.dayNav}>
+          <Text style={styles.dayLabel}>No games this week</Text>
+        </View>
+      )}
 
       {/* Search */}
       <View style={styles.searchRow}>
@@ -243,9 +367,10 @@ export default function PropsHomeScreen({ navigation }: any) {
       )}
 
       {/* Result count */}
-      {!loading && allProps.length > 0 && (
+      {!loading && filteredProps.length > 0 && (
         <Text style={styles.resultCount}>
-          {filteredProps.length} of {allProps.length} props
+          {filteredProps.length} props
+          {activeFilter !== 'All' || searchQuery ? ` (filtered)` : ''}
         </Text>
       )}
 
@@ -253,14 +378,27 @@ export default function PropsHomeScreen({ navigation }: any) {
       <FlatList
         data={filteredProps}
         renderItem={renderPropItem}
-        keyExtractor={(item, i) => `${item.player_name}-${item.stat_type}-${i}`}
-        contentContainerStyle={[styles.listContent, picks.length > 0 && styles.listContentWithBar]}
+        keyExtractor={(item, i) => `${item.player_name}-${item.stat_type}-${item.bet_type}`}
+        contentContainerStyle={[
+          styles.listContent,
+          picks.length > 0 && styles.listContentWithBar,
+        ]}
         removeClippedSubviews={true}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
+        initialNumToRender={8}
+        windowSize={5}
+        maxToRenderPerBatch={8}
+        updateCellsBatchingPeriod={50}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyCenter}>
             <Text style={styles.emptyText}>
-              {searchQuery ? 'No matching props found' : 'No props available'}
+              {searchQuery ? 'No matching props found' : 'No props available for this day'}
             </Text>
           </View>
         }
@@ -286,17 +424,43 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 4,
   },
   headerTitle: {
     ...theme.typography.h1,
     color: theme.colors.primary,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
+  // Day navigator
+  dayNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  dayArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  dayLabel: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.textPrimary,
+  },
+  dayCount: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: theme.colors.textTertiary,
     marginTop: 2,
   },
+  // Search
   searchRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -333,10 +497,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  // Stat filters
   filterList: {
-    height: 50,
+    height: 54,
     flexGrow: 0,
-    marginBottom: 12,
+    marginBottom: 4,
   },
   filterContent: {
     paddingHorizontal: 16,
@@ -363,14 +528,13 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#000',
   },
-
   resultCount: {
     fontSize: 12,
     color: theme.colors.textTertiary,
     paddingHorizontal: 16,
     marginBottom: 8,
   },
-  // Right actions (confidence + add button)
+  // Right actions
   rightActions: {
     alignItems: 'center',
     gap: 6,
@@ -387,6 +551,10 @@ const styles = StyleSheet.create({
   addBtnActive: {
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
+  },
+  addBtnDimmed: {
+    borderColor: theme.colors.textTertiary,
+    opacity: 0.35,
   },
   // List
   listContent: {
